@@ -41,8 +41,13 @@ module Current =
 
 type Transformer = 
     | Transformer_Node of (Transformer seq) * name * capacity * current
-    | Transformer_Leaf of Transformer * name * (GridNode seq) option * (PHEV seq) option * capacity * current
+    | Transformer_Leaf of name * (GridNode seq) option * (PHEV seq) option * capacity * current
 and GridNode = 
     | GridNode of Transformer * name
 and PHEV = 
     | PHEV of Transformer option * name * capacity * current * battery
+
+    with 
+    member self.name = 
+        match self with
+        | PHEV(_,name,_,_,_) -> name

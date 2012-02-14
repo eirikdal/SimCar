@@ -7,9 +7,11 @@ open Models
 open Message
 open PHEV
 
+
 let read_file file = 
     seq {
-        use sr = new StreamReader(sprintf "F:\Dokumenter\NTNU\TDT4900\SimCar\SimCar\%s.txt" file)
+        use sr = new StreamReader(Directory.GetParent(Environment.CurrentDirectory).Parent.FullName + "/" + file)
+
         while not sr.EndOfStream do
             yield sr.ReadLine()
     }
@@ -29,12 +31,15 @@ let parse_trsf =
     Seq.map (fun (str : string) -> 
         match str.Split([|' '|], StringSplitOptions.RemoveEmptyEntries) with 
         | [|name;capacity;current|] -> 
-            Transformer_Node(None,
-                name,
+            Transformer_Leaf(
+                name, None, None,
                 Capacity.ofFloat (Double.Parse(capacity, Globalization.CultureInfo.InvariantCulture)),
                 Current.ofFloat (Double.Parse(current, Globalization.CultureInfo.InvariantCulture)))
-        | [|name;capacity;current;bla;bla|] ->
-            Transformer_Leaf()
+        | [|name;capacity;current;bla;bla2|] ->
+            Transformer_Leaf(
+                name, None, None,
+                Capacity.ofFloat (Double.Parse(capacity, Globalization.CultureInfo.InvariantCulture)),
+                Current.ofFloat (Double.Parse(current, Globalization.CultureInfo.InvariantCulture)))
         | _ -> raise <| System.IO.IOException("Error while reading PHEVs from file"))
 
 let list_of_phevs() = 
@@ -58,6 +63,7 @@ let main args =
                 | PHEV_Agent ->
                     return! loop brp (List.append [agent] phev_list) trf_list
                 | _ -> return! loop brp phev_list trf_list
+            | Hello(_from, _to) -> printfn "Hello %s" _from
             | _ -> ()
         }
         loop [] [] [])
@@ -69,8 +75,8 @@ let main args =
     phev_agents
         |> Seq.iter (fun phev -> sim_agent.Post(Register(phev, PHEV_Agent)))
     phev_agents
-        |> Seq.iter (fun phev -> phev.Post(Hello))
+        |> Seq.iter (fun phev -> phev.Post(Hello(phev.name,"")))
 
-    sim_agent.Post(Hello)
+//    sim_agent.Post(Hello)
     ignore(Console.ReadKey())
     0

@@ -10,7 +10,7 @@ let phev_agent phev = Agent.Start(fun agent ->
         let! msg = agent.Receive()
         
         match msg with 
-        | Hello ->
+        | Hello(_from, _to) ->
             printfn "Hello from %s" name
         | Reset ->
             return! loop phev
