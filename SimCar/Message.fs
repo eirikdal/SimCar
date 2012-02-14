@@ -3,5 +3,5 @@
 open Agent
 
 type Message = 
-    | Hello
+    | Hello of string * string
     | Register of Agent<Message> * Agent_Type

@@ -1,6 +1,8 @@
 ﻿// Learn more about F# at http://fsharp.net
 
 open Agent
+open System
+open System.IO
 open Models
 open Message
 open PHEV
@@ -20,6 +22,7 @@ let main args =
                 | PHEV_Agent ->
                     return! loop brp (List.append [agent] phev_list) trf_list
                 | _ -> return! loop brp phev_list trf_list
+            | Hello(_from, _to) -> printfn "Hello %s" _from
             | _ -> ()
         }
         loop [] [] [])
@@ -31,8 +34,7 @@ let main args =
     phev_agents
         |> Seq.iter (fun phev -> sim_agent.Post(Register(phev, PHEV_Agent)))
     phev_agents
-        |> Seq.iter (fun phev -> phev.Post(Hello))
+        |> Seq.iter (fun phev -> phev.Post(Hello(phev.name,"")))
 
-    sim_agent.Post(Hello)
     ignore(Console.ReadKey())
     0
