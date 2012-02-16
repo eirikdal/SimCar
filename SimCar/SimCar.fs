@@ -11,10 +11,12 @@ open FileManager
 
 [<EntryPoint>]
 let main args = 
-//    let phevs = list_of_phevs()
-    let comManager = new ComManager()
+    let postalService = new PostalService()
 
     let phev_agents = list_of_phevs()
-    Seq.iter (fun phev -> comManager.add_agent(phev_agent phev))
+
+    ignore(Seq.iter (fun phev -> postalService.add_agent(phev, PHEV_Agent)))
+
     ignore(Console.ReadKey())
+
     0

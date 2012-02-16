@@ -1,5 +1,7 @@
-﻿let D = Array.empty<float>
-let x = 1.0
+﻿let sine n = sin 1.0 * (float n)
+
+let D = Array.init (20) sine
+let x = Array.average D
 let alpha = 0.9
 
 let delta w' = alpha * (x - w')

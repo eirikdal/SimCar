@@ -5,15 +5,19 @@ open Agent
 open Models
 //open Node
 
+(* 
+    PHEV: This is the PHEV agent
+*)
 let phev_agent phev = Agent.Start(fun agent ->
     let rec loop (PHEV(_,name,_,_,_)) = async {
         let! msg = agent.Receive()
         
-        match msg with 
-        | Hello(_from, _to) ->
-            printfn "Hello from %s" name
-        | Reset ->
-            return! loop phev
+//        match msg with 
+//        | Reset ->
+//            return! loop phev
+        ()
     }
     
+    
+
     loop phev)
