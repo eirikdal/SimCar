@@ -4,7 +4,7 @@ open System
 open System.IO
 open Models
 
-let folder_of file = sprintf "%s%s.txt" (Environment.CurrentDirectory) file
+let folder_of file = sprintf "%s\\%s" (Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName) file
 
 let read_file file = 
     seq {

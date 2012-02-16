@@ -20,13 +20,7 @@ type PostalService() =
     let agent = Agent<Message>.Start(fun agent ->
         let rec loop brp (phev_list : Agent<Message> list) trf_list = async {
             let! msg = agent.Receive()
-
-//            let find_recipient agent agent_type = 
-//                match agent_type with
-//                | PHEV_Agent ->
-//                    phev_list |> Seq.find (fun ag -> agent = ag)
-//                | _ -> raise (Exception("Not yet implemented!"))
-
+            
             match msg with 
             | Register(from_agent, agent_type) ->
                 match agent_type with
@@ -51,8 +45,8 @@ type PostalService() =
         match msg with
         | _ -> raise (Exception("Not yet implemented"))
 
-    member self.add_agent(agent : Agent<Message>, agent_type) = 
-        agent.Post(Register(agent, agent_type))
+    member self.add_agent(from : Agent<Message>, agent_type) = 
+        agent.Post(Register(from, agent_type))
 
-    member self.remove_agent(agent : Agent<Message>, agent_type) = 
-        agent.Post(Deregister(agent, agent_type))
+    member self.remove_agent(from : Agent<Message>, agent_type) = 
+        agent.Post(Deregister(from, agent_type))

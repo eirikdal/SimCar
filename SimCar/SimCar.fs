@@ -15,7 +15,9 @@ let main args =
 
     let phev_agents = list_of_phevs()
 
-    ignore(Seq.iter (fun phev -> postalService.add_agent(phev, PHEV_Agent)))
+    phev_agents
+    |> Seq.map (fun phev -> phev_agent phev)
+    |> Seq.iter (fun phev -> postalService.add_agent(phev, PHEV_Agent)) 
 
     ignore(Console.ReadKey())
 
