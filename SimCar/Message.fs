@@ -1,7 +1,9 @@
 ﻿module Message
 
 open Agent
+open Models
 
 type Message = 
-    | Register of Agent<Message> * Agent_Type
-    | Deregister of Agent<Message> * Agent_Type
+    | Charge of Agent<Message> * intent
+    | Register of Agent<Message>
+    | Deregister of Agent<Message>

@@ -31,7 +31,7 @@ let scan(D) =
 //        S <- S + delta
 //        D.[idx] <- D.[idx] + delta
 //    let update w = delta w >> update
-    let disc idx = 1.0 ** (dist (float idx) (float i))
+    let disc idx = 0.95 ** (dist (float idx) (float i))
     let delta w' idx = (disc idx) * alpha * (x - w')
     let update idx = 
         let delta = (delta D.[idx] idx)

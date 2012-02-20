@@ -22,12 +22,16 @@ type PostalService() =
             let! msg = agent.Receive()
             
             match msg with 
-            | Register(from_agent, agent_type) ->
-                match agent_type with
-                | PHEV_Agent ->
-                    printfn "Agent registered with postal service"
-                    return! loop brp (List.append phev_list [from_agent]) trf_list
-                | _ -> raise (Exception("Not yet implemented"))
+            | Register(from_agent) ->
+                printfn "Agent registered with postal service"
+                return! loop brp 
+//                match agent_type with
+//                | PHEV_Agent ->
+//                    printfn "Agent registered with postal service"
+//                    return! loop brp (List.append phev_list [from_agent]) trf_list
+//                | Trf_Agent ->
+//                    printfn "Agent registered with postal service"
+//                | _ -> raise (Exception("Not yet implemented"))
             | Deregister(from_agent, agent_type) ->
                 match agent_type with
                 | PHEV_Agent ->
