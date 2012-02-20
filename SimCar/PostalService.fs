@@ -18,39 +18,33 @@ open Message
 *)
 type PostalService() = 
     let agent = Agent<Message>.Start(fun agent ->
-        let rec loop brp (phev_list : Agent<Message> list) trf_list = async {
+        let rec loop agents = async {
             let! msg = agent.Receive()
-            BLA BLA
+            
             match msg with 
             | Register(from_agent) ->
                 printfn "Agent registered with postal service"
-                return! loop brp 
-//                match agent_type with
-//                | PHEV_Agent ->
-//                    printfn "Agent registered with postal service"
-//                    return! loop brp (List.append phev_list [from_agent]) trf_list
-//                | Trf_Agent ->
-//                    printfn "Agent registered with postal service"
-//                | _ -> raise (Exception("Not yet implemented"))
-            | Deregister(from_agent, agent_type) ->
-                match agent_type with
-                | PHEV_Agent ->
-                    return! loop brp (List.filter (fun ag -> ag <> from_agent) phev_list) trf_list
-                | _ -> raise (Exception("Not yet implemented"))
-            | _ -> raise (Exception("Not yet implemented"))
+                return! loop <| List.append agents [from_agent]
+            | Deregister(from_agent) ->
+                printfn "Agent deregistered from postal service"
+                return! loop <| List.filter (fun ag -> ag <> from_agent) agents
+            | Broadcast(message) ->
+                agents |> List.iter (fun agent -> agent.Post(message))
+            | _ -> failwith "Not yet implemented"
+
+            return! loop agents
         }
-        loop [] [] [])
+        loop [])
 
     member self.send_all(msg) = 
-        match msg with 
-        | _ -> raise (Exception("Not yet implemented"))
+        agent.Post(Broadcast(msg))
 
-    member self.send(msg) = 
+    member self.send(from_agent, to_agent, msg) = 
         match msg with
-        | _ -> raise (Exception("Not yet implemented"))
+        | _ -> failwith "Not yet implemented"
 
-    member self.add_agent(from : Agent<Message>, agent_type) = 
-        agent.Post(Register(from, agent_type))
+    member self.add_agent(from : Agent<Message>) = 
+        agent.Post <| Register(from)
 
-    member self.remove_agent(from : Agent<Message>, agent_type) = 
-        agent.Post(Deregister(from, agent_type))
+    member self.remove_agent(from : Agent<Message>) = 
+        agent.Post <| Deregister(from)

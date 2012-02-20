@@ -26,6 +26,8 @@ type intent = float<kW*h>
 type capacity = float<kW*h>
 type current = float<kW*h>
 type battery = float<kW*h>
+type dayahead = float<kW*h>
+type realtime = float<kW*h>
 type name = string
 
 [<RequireQualifiedAccess; CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
@@ -55,12 +57,11 @@ module Current =
 
 type Transformer = 
     | Node of name * (Transformer seq) * capacity * current
-    | Leaf of name * (GridNode seq) option * (PHEV seq) option * capacity * current
-and GridNode = 
-    | GridNode of name * Transformer
+    | Leaf of name * (PowerNode seq) option * (PHEV seq) option * capacity * current
+and PowerNode = 
+    | PowerNode of name * Transformer * dayahead * realtime
 and PHEV = 
     | PHEV of name * Transformer option * capacity * current * battery
-
     with 
     member self.name = 
         match self with

@@ -10,21 +10,23 @@ open ComManager
 open FileManager
 open Transformer
 
+let rec run tick =
+    update models
+
+    run <| tick+1
+
 [<EntryPoint>]
 let main args = 
     let postalService = new PostalService()
 
-    let phev_agents = list_of_phevs()
-    let trf_agents = list_of_trfs()
-
-    phev_agents
+    list_of_phevs()
     |> Seq.map (fun phev -> phev_agent phev)
-    |> Seq.iter (fun phev -> postalService.add_agent(phev, PHEV_Agent))
+    |> Seq.iter (fun phev -> postalService.add_agent(phev))
 
-    trf_agents
-    |> Seq.map (fun trf -> trf_agent trf)
-    |> Seq.iter (fun trf -> postalService.add_agent(trf, Trf_Agent))
+    list_of_trfs()
+    |> Seq.map (fun trf -> trf_agent "test123" trf Seq.empty)
+    |> Seq.iter (fun trf -> postalService.add_agent(trf))
 
-    ignore(Console.ReadKey())
+    postalService.send_all(Hello)
 
-    0
+    run 0

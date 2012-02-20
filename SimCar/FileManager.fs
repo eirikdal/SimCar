@@ -2,6 +2,7 @@
 
 open System
 open System.IO
+open System.Globalization
 open Models
 
 let folder_of file = sprintf "%s\\%s" (Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName) file
@@ -19,10 +20,10 @@ let parse_phevs =
         | [|name;capacity;current;battery|] -> 
             PHEV(name,
                 None,
-                Capacity.ofFloat (Double.Parse(capacity, Globalization.CultureInfo.InvariantCulture)),
-                Current.ofFloat (Double.Parse(current, Globalization.CultureInfo.InvariantCulture)),
-                Battery.ofFloat (Double.Parse(battery, Globalization.CultureInfo.InvariantCulture)))
-        | _ -> raise <| System.IO.IOException("Error while reading PHEVs from file"))
+                Capacity.ofFloat <| Double.Parse(capacity, CultureInfo.InvariantCulture),
+                Current.ofFloat <| Double.Parse(current, CultureInfo.InvariantCulture),
+                Battery.ofFloat <| Double.Parse(battery, CultureInfo.InvariantCulture))
+        | _ -> raise <| IOException("Error while reading PHEVs from file"))
 
 let parse_trsf = 
     Seq.map (fun (str : string) -> 
@@ -31,21 +32,20 @@ let parse_trsf =
             Node(
                 name,
                 Seq.empty,
-                Capacity.ofFloat (Double.Parse(capacity, Globalization.CultureInfo.InvariantCulture)),
-                Current.ofFloat (Double.Parse(current, Globalization.CultureInfo.InvariantCulture)))
+                Capacity.ofFloat <| Double.Parse(capacity, CultureInfo.InvariantCulture),
+                Current.ofFloat <| Double.Parse(current, CultureInfo.InvariantCulture))
         | [|name;capacity;current|] ->
             Leaf(
                 name,
                 None,
                 None,
-                Capacity.ofFloat (Double.Parse(capacity, Globalization.CultureInfo.InvariantCulture)),
-                Current.ofFloat (Double.Parse(current, Globalization.CultureInfo.InvariantCulture)))
+                Capacity.ofFloat <| Double.Parse(capacity, CultureInfo.InvariantCulture),
+                Current.ofFloat <| Double.Parse(current, CultureInfo.InvariantCulture))
 
-        | _ -> raise <| System.IO.IOException("Error while reading Transformers from file"))
+        | _ -> raise <| IOException("Error while reading Transformers from file"))
 
 let list_of_phevs() = 
-    parse_phevs (read_file "phevs.txt")
-    //    Seq.iter (fun x -> ()) phevs
+    parse_phevs <| read_file "phevs.txt"
 
 let list_of_trfs() = 
-    parse_trsf (read_file "transformers.txt")
+    parse_trsf <| read_file "transformers.txt"

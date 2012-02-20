@@ -9,13 +9,15 @@ open Models
     PHEV: This is the PHEV agent
 *)
 let phev_agent phev = Agent.Start(fun agent ->
-    let rec loop (PHEV(_,name,_,_,_)) = async {
+    let rec loop (PHEV(name,_,_,_,_)) = async {
         let! msg = agent.Receive()
         
-//        match msg with 
-//        | Reset ->
-//            return! loop phev
-        ()
+        match msg with
+        | Hello -> 
+            printfn "Agent %s says 'Hello, World!'" name
+        | _ -> failwith "Not implemented yet"
+        
+        return! loop phev
     }
     
     
