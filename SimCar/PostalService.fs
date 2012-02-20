@@ -20,7 +20,7 @@ type PostalService() =
     let agent = Agent<Message>.Start(fun agent ->
         let rec loop brp (phev_list : Agent<Message> list) trf_list = async {
             let! msg = agent.Receive()
-            
+            BLA BLA
             match msg with 
             | Register(from_agent) ->
                 printfn "Agent registered with postal service"
