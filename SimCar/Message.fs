@@ -11,5 +11,5 @@ type Message =
     | Broadcast of Message
     | Hello
 and Type = 
-    | PHEV of PHEV
-    | Transformer of Transformer
+    | MSG_PHEV of PHEV
+    | MSG_Transformer of Transformer

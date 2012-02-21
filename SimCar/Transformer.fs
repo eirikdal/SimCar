@@ -30,8 +30,8 @@ let jobCompleted = new Event<Agent<Message> * string>()
 *)
 let syncContext = SynchronizationContext.Current
 
-type SamplingAgent() = 
-    member x.Start() = agent.Start()
+//type SamplingAgent() = 
+//    member x.Start() = agent.Start()
 let trf_agent name trf trf_list = Agent.Start(fun agent ->
     let rec loop name trf trf_list = async {
         let! msg = agent.Receive()
@@ -39,7 +39,7 @@ let trf_agent name trf trf_list = Agent.Start(fun agent ->
         match msg with
         | Assign(from_agent, assign_type) ->
             match assign_type with 
-            | Transformer(trf) -> 
+            | MSG_Transformer(trf) -> 
                 syncContext.RaiseEvent jobCompleted (agent, sprintf "Assigned transformer %s to agent %s" "test" "test")
                 return! loop name trf <| Seq.append trf_list [trf]
             | _ ->

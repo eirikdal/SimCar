@@ -23,6 +23,10 @@ let main args =
     |> Seq.map (fun phev -> phev_agent phev)
     |> Seq.iter (fun phev -> postalService.add_agent(phev))
 
+    Seq.initInfinite (fun x -> PHEV(sprintf "phev%d" x, None, Capacity.ofFloat 0.0, Current.ofFloat 0.0, Battery.ofFloat 0.0))
+    |> Seq.map (fun phev -> phev_agent phev)
+    |> Seq.iter (fun phev -> postalService.add_agent(phev))
+
     list_of_trfs()
     |> Seq.map (fun trf -> trf_agent "test123" trf Seq.empty)
     |> Seq.iter (fun trf -> postalService.add_agent(trf))
