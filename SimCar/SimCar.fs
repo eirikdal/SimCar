@@ -11,7 +11,7 @@ open FileManager
 open Transformer
 
 let rec run tick =
-    update models
+//    update models
 
     run <| tick+1
 
