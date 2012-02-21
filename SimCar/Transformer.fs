@@ -19,7 +19,7 @@ let trf_agent name trf trf_list = Agent.Start(fun agent ->
         match msg with
         | Assign(from_agent, assign_type) ->
             match assign_type with 
-            | MSG_Transformer(trf) -> 
+            | Transformer(trf) -> 
                 syncContext.RaiseEvent jobCompleted (agent, sprintf "Assigned transformer %s to agent %s" "test" "test")
                 return! loop name trf <| Seq.append trf_list [trf]
             | _ -> 
