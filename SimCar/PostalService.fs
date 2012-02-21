@@ -1,8 +1,12 @@
 ﻿module ComManager
 
 open System
+open System.Threading
+open SynchronizationContext
 open Agent
 open Message
+
+let syncContext = SynchronizationContext.CaptureCurrent()
 
 (* 
     PostalService: 
@@ -23,25 +27,28 @@ type PostalService() =
             
             match msg with 
             | Register(from_agent) ->
-                printfn "Agent registered with postal service"
+                syncContext.RaiseEvent jobCompleted (agent, "Agent registered with postal service")
                 return! loop <| List.append agents [from_agent]
             | Deregister(from_agent) ->
-                printfn "Agent deregistered from postal service"
+                syncContext.RaiseEvent jobCompleted (agent, "Agent deregistered from postal service")
                 return! loop <| List.filter (fun ag -> ag <> from_agent) agents
             | Broadcast(message) ->
                 agents |> List.iter (fun agent -> agent.Post(message))
-            | _ -> failwith "Not yet implemented"
+            | Completed(message) ->
+                printfn "%s" message
+            | _ -> syncContext.RaiseEvent error <| Exception("Not yet implemented")
 
             return! loop agents
         }
         loop [])
 
-    member self.send_all(msg) = 
+    member self.Post(msg) = agent.Post(msg)
+
+    member self.send_to_all(msg) = 
         agent.Post(Broadcast(msg))
 
-    member self.send(from_agent, to_agent, msg) = 
-        match msg with
-        | _ -> failwith "Not yet implemented"
+    member self.send_to(to_agent : Agent<Message>, msg) = 
+        to_agent.Post(msg)
 
     member self.add_agent(from : Agent<Message>) = 
         agent.Post <| Register(from)

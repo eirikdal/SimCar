@@ -54,15 +54,13 @@ module Current =
             raise <| System.ArgumentOutOfRangeException ("value")
         else
             LanguagePrimitives.FloatWithMeasure<kW*h> (float value)
-
-type Transformer = 
-    | Node of name * (Transformer seq) * capacity * current
-    | Leaf of name * (PowerNode seq) option * (PHEV seq) option * capacity * current
-and PowerNode = 
-    | PowerNode of name * Transformer * dayahead * realtime
-and PHEV = 
-    | PHEV of name * Transformer option * capacity * current * battery
+ 
+type Node = 
+    | Node of name * (Node seq) * capacity * current
+    | PowerNode of name * dayahead * realtime
+    | PHEV of name * capacity * current * battery
     with 
     member self.name = 
         match self with
-        | PHEV(name,_,_,_,_) -> name
+        | PHEV(name,_,_,_) -> name
+        

@@ -2,7 +2,9 @@
 
 open Agent
 open System
+open System.Threading
 open System.IO
+open SynchronizationContext
 open Models
 open Message
 open PHEV
@@ -19,9 +21,11 @@ let rec run tick =
 let main args = 
     let postalService = new PostalService()
 
-    list_of_phevs()
-    |> Seq.map (fun phev -> phev_agent phev)
-    |> Seq.iter (fun phev -> postalService.add_agent(phev))
+//    list_of_phevs()
+//    |> Seq.map (fun phev -> phev_agent phev)
+//    |> Seq.iter (fun phev -> postalService.add_agent(phev))
+
+    let test = list_of_trfs()
 
     Seq.initInfinite (fun x -> PHEV(sprintf "phev%d" x, None, Capacity.ofFloat 0.0, Current.ofFloat 0.0, Battery.ofFloat 0.0))
     |> Seq.map (fun phev -> phev_agent phev)
@@ -31,6 +35,8 @@ let main args =
     |> Seq.map (fun trf -> trf_agent "test123" trf Seq.empty)
     |> Seq.iter (fun trf -> postalService.add_agent(trf))
 
-    postalService.send_all(Hello)
+    jobCompleted.Publish.Add(fun (agent, str) -> postalService.Post(Completed(sprintf "%s" str)))
+
+    postalService.send_to_all(Hello)
 
     run 0
