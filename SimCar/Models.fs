@@ -1,5 +1,8 @@
 ﻿module Models
 
+open System
+open System.Globalization
+
 // scalar units
 [<Measure>] type k  
 [<Measure>] type M
@@ -56,7 +59,7 @@ module Current =
             LanguagePrimitives.FloatWithMeasure<kW*h> (float value)
  
 type Node = 
-    | Node of name * (Node seq) * capacity * current
+    | Transformer of name * (Node seq) * capacity * current
     | PowerNode of name * dayahead * realtime
     | PHEV of name * capacity * current * battery
     with 
@@ -64,3 +67,15 @@ type Node =
         match self with
         | PHEV(name,_,_,_) -> name
         
+// function that creates a transformer model, takes name, other connected nodes, capacity and current as parameters
+let create_node name nodes capacity current = 
+    Transformer(name, nodes, Capacity.ofFloat <| Double.Parse(capacity, CultureInfo.InvariantCulture), Current.ofFloat <| Double.Parse(current, CultureInfo.InvariantCulture))
+
+// function that creates a PHEV model, takes name, capacity, current and battery as parameters
+let create_phev name capacity current battery =
+    PHEV(name, Capacity.ofFloat <| Double.Parse(capacity, CultureInfo.InvariantCulture),
+        Current.ofFloat <| Double.Parse(current, CultureInfo.InvariantCulture),
+        Battery.ofFloat <| Double.Parse(battery, CultureInfo.InvariantCulture))
+
+let create_powernode name capacity current = 
+    PowerNode(name, Capacity.ofFloat 0.0, Capacity.ofFloat 0.0)

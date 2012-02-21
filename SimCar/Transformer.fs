@@ -1,5 +1,7 @@
 ﻿module Transformer
 
+#nowarn "25"
+
 open System
 open System.Threading
 open SynchronizationContext
@@ -12,18 +14,11 @@ open Models
 *)
 let syncContext = SynchronizationContext.CaptureCurrent()
 
-let trf_agent name trf trf_list = Agent.Start(fun agent ->
-    let rec loop name trf trf_list = async {
+let trf_agent trf = Agent.Start(fun agent ->
+    let rec loop (Transformer(name,nodes,capacity,current)) = async {
         let! msg = agent.Receive()
         
         match msg with
-        | Assign(from_agent, assign_type) ->
-            match assign_type with 
-            | MSG_Transformer(trf) -> 
-                syncContext.RaiseEvent jobCompleted (agent, sprintf "Assigned transformer %s to agent %s" "test" "test")
-                return! loop name trf <| Seq.append trf_list [trf]
-            | _ -> 
-                syncContext.RaiseEvent error <| Exception("Tried to assign non-transformer model to transformer agent. Note to self: Implement post-and-reply")
         | Hello ->
             syncContext.RaiseEvent jobCompleted (agent, sprintf "Agent %s says 'Hello, World!'" name)
         | _ -> 
@@ -31,7 +26,7 @@ let trf_agent name trf trf_list = Agent.Start(fun agent ->
 
         jobCompleted.Publish |> ignore
 
-        return! loop name trf trf_list
+        return! loop trf
     }
     
-    loop name trf trf_list)
+    loop trf)

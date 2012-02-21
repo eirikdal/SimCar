@@ -21,19 +21,27 @@ let rec run tick =
 let main args = 
     let postalService = new PostalService()
 
-//    list_of_phevs()
-//    |> Seq.map (fun phev -> phev_agent phev)
-//    |> Seq.iter (fun phev -> postalService.add_agent(phev))
+    let make_agent node = 
+        match node with
+        | Transformer(_,_,_,_) ->
+            trf_agent node
+        | PHEV(_,_,_,_) ->
+            phev_agent node
 
-    let test = list_of_trfs()
+    let rec traverseTree node : seq<Agent<Message>> = 
+        let agent = make_agent node
 
-    Seq.initInfinite (fun x -> PHEV(sprintf "phev%d" x, None, Capacity.ofFloat 0.0, Current.ofFloat 0.0, Battery.ofFloat 0.0))
-    |> Seq.map (fun phev -> phev_agent phev)
-    |> Seq.iter (fun phev -> postalService.add_agent(phev))
+        let agents = 
+            match node with 
+            | Transformer(_,nodes,_,_) ->
+                nodes |> Seq.fold (fun ac n -> Seq.append (traverseTree n) ac) Seq.empty
+            | _ -> Seq.empty
 
-    list_of_trfs()
-    |> Seq.map (fun trf -> trf_agent "test123" trf Seq.empty)
-    |> Seq.iter (fun trf -> postalService.add_agent(trf))
+        Seq.append [agent] agents
+    
+    powergrid_tree()
+    |> Seq.map (fun node -> traverseTree node)
+    |> Seq.iter (fun agents -> Seq.iter (fun agent -> postalService.add_agent(agent)) agents)
 
     jobCompleted.Publish.Add(fun (agent, str) -> postalService.Post(Completed(sprintf "%s" str)))
 
