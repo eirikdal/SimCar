@@ -33,11 +33,10 @@ let rec create_powergrid trf_seq nodes (rest : string list byref) =
         | [|"}"|] -> 
             rest <- t
             nodes
-//            create_powergrid t nodes (&rest)
         | _ -> raise <| IOException("Error while reading Transformers from file")
     | _ -> nodes
 
-let powergrid_tree() = 
+let powergrid = 
     let mutable rest = []
     let trfs = List.ofSeq (read_file "brp.txt")
     create_powergrid trfs [] (&rest)

@@ -38,10 +38,13 @@ let main args =
             | _ -> Seq.empty
 
         Seq.append [agent] agents
-    
-    powergrid_tree()
-    |> Seq.map (fun node -> traverseTree node)
-    |> Seq.iter (fun agents -> Seq.iter (fun agent -> postalService.add_agent(agent)) agents)
+
+    let make_agents = Seq.map (fun node -> traverseTree node)
+    let add_agents = Seq.iter (fun agents -> Seq.iter (fun agent -> postalService.add_agent(agent)) agents)
+
+    let spawn_agents = make_agents >> add_agents
+
+    spawn_agents <| powergrid
 
     jobCompleted.Publish.Add(fun (agent, str) -> postalService.Post(Completed(sprintf "%s" str)))
 
