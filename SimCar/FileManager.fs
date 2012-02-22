@@ -33,7 +33,6 @@ let rec create_powergrid trf_seq nodes (rest : string list byref) =
         | [|"}"|] -> 
             rest <- t
             nodes
-//            create_powergrid t nodes (&rest)
         | _ -> raise <| IOException("Error while reading Transformers from file")
     | _ -> nodes
 
