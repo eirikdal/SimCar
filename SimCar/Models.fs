@@ -1,5 +1,6 @@
 ﻿module Models
 
+open Agent
 open System
 open System.Globalization
 
@@ -29,8 +30,8 @@ type intent = float<kW*h>
 type capacity = float<kW*h>
 type current = float<kW*h>
 type battery = float<kW*h>
-type dayahead = float<kW*h>
-type realtime = float<kW*h>
+type dayahead = (int -> float<kW*h>)
+type realtime = (int -> float<kW*h>)
 type name = string
 
 [<RequireQualifiedAccess; CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
@@ -57,16 +58,20 @@ module Current =
             raise <| System.ArgumentOutOfRangeException ("value")
         else
             LanguagePrimitives.FloatWithMeasure<kW*h> (float value)
- 
-type Node = 
-    | Transformer of name * (Node seq) * capacity * current
+
+type Node<'T> = 
+    | Node of (Node<'T> seq) * 'T option
+    | Leaf of 'T option
+
+type Grid = 
+    | Transformer of name * (Grid seq) * capacity * current
     | PowerNode of name * dayahead * realtime
     | PHEV of name * capacity * current * battery
     with 
     member self.name = 
         match self with
         | PHEV(name,_,_,_) -> name
-        
+
 // function that creates a transformer model, takes name, other connected nodes, capacity and current as parameters
 let create_node name nodes capacity current = 
     Transformer(name, nodes, Capacity.ofFloat <| Double.Parse(capacity, CultureInfo.InvariantCulture), Current.ofFloat <| Double.Parse(current, CultureInfo.InvariantCulture))
@@ -77,5 +82,8 @@ let create_phev name capacity current battery =
         Current.ofFloat <| Double.Parse(current, CultureInfo.InvariantCulture),
         Battery.ofFloat <| Double.Parse(battery, CultureInfo.InvariantCulture))
 
+let gen = (Seq.initInfinite (fun x -> Capacity.ofFloat 1.0))
+let take n = gen |> Seq.nth n
+
 let create_powernode name capacity current = 
-    PowerNode(name, Capacity.ofFloat 0.0, Capacity.ofFloat 0.0)
+    PowerNode(name, take, take)

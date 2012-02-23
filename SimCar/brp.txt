@@ -10,5 +10,6 @@
   }
   trf node9 18.0 100.0
   phev Toyota 10.0 10.0 10.0
+  pnode Bla 1000.0 100.0
 }
 trf node20 1.0 1.0

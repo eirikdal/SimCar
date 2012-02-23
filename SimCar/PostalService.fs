@@ -6,7 +6,7 @@ open SynchronizationContext
 open Agent
 open Message
 
-let syncContext = SynchronizationContext.CaptureCurrent()
+//let syncContext = SynchronizationContext.CaptureCurrent()
 
 (* 
     PostalService: 
@@ -21,13 +21,13 @@ let syncContext = SynchronizationContext.CaptureCurrent()
         Same as self.add_agent, except removes the agent from the list
 *)
 type PostalService() = 
-    let agent = Agent<Message>.Start(fun agent ->
+    let agent = Agent<unit Message>.Start(fun agent ->
         let rec loop agents = async {
             let! msg = agent.Receive()
             
             match msg with 
             | Register(from_agent) ->
-                syncContext.RaiseEvent jobCompleted (agent, "Agent registered with postal service")
+                syncContext.RaiseEvent jobCompleted<unit> (agent, "Agent registered with postal service")
                 return! loop <| List.append agents [from_agent]
             | Deregister(from_agent) ->
                 syncContext.RaiseEvent jobCompleted (agent, "Agent deregistered from postal service")
@@ -36,7 +36,10 @@ type PostalService() =
                 agents |> List.iter (fun agent -> agent.Post(message))
             | Completed(message) ->
                 printfn "%s" message
-            | _ -> syncContext.RaiseEvent error <| Exception("Not yet implemented")
+            | Error(message) ->
+                printfn "Error: %s" message
+            | _ ->
+                syncContext.RaiseEvent error <| Exception("Not yet implemented")
 
             return! loop agents
         }
@@ -47,11 +50,14 @@ type PostalService() =
     member self.send_to_all(msg) = 
         agent.Post(Broadcast(msg))
 
-    member self.send_to(to_agent : Agent<Message>, msg) = 
+    member self.send_to(to_agent : Agent<unit Message>, msg) = 
         to_agent.Post(msg)
 
-    member self.add_agent(from : Agent<Message>) = 
+    member self.add_agent(from : Agent<unit Message>) = 
         agent.Post <| Register(from)
 
-    member self.remove_agent(from : Agent<Message>) = 
+    member self.remove_agent(from : Agent<unit Message>) = 
         agent.Post <| Deregister(from)
+//
+//    member self.to_model(agent : Agent<Message>)= 
+//        agent.PostAndReply(fun replyChannel -> Model(replyChannel))

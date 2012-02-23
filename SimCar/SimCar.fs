@@ -11,6 +11,7 @@ open PHEV
 open ComManager
 open FileManager
 open Transformer
+open Tree
 
 let rec run tick =
 //    update models
@@ -21,33 +22,34 @@ let rec run tick =
 let main args = 
     let postalService = new PostalService()
 
-    let make_agent node = 
-        match node with
-        | Transformer(_,_,_,_) ->
-            trf_agent node
-        | PHEV(_,_,_,_) ->
-            phev_agent node
+    let test str = 
+        postalService.Post(Completed(sprintf "%s" str))
+    // add what to do (as lambdas) with jobCompleted and error events
+    jobCompleted.Publish.Add(fun (agent, str) -> test str)
+    error.Publish.Add(fun e -> postalService.Post(Error(sprintf "%s" e.Message)))
 
-    let rec traverseTree node : seq<Agent<Message>> = 
-        let agent = make_agent node
+    // make agent tree from model tree (powergrid : Grid list, make_agents : Node<Agent> seq)
+    let make_agents = Seq.map (fun n -> to_agents n) powergrid
 
-        let agents = 
-            match node with 
-            | Transformer(_,nodes,_,_) ->
-                nodes |> Seq.fold (fun ac n -> Seq.append (traverseTree n) ac) Seq.empty
-            | _ -> Seq.empty
+    // add agents to postalservice
+    Seq.iter (fun n -> iterTree n postalService.add_agent) make_agents
 
-        Seq.append [agent] agents
+    // send RequestModel message to agents
+    let responses = Seq.map (fun n -> mapAgents n RequestModel) make_agents
 
-    let make_agents = Seq.map (fun node -> traverseTree node)
-    let add_agents = Seq.iter (fun agents -> Seq.iter (fun agent -> postalService.add_agent(agent)) agents)
-
-    let spawn_agents = make_agents >> add_agents
-
-    spawn_agents <| powergrid
-
-    jobCompleted.Publish.Add(fun (agent, str) -> postalService.Post(Completed(sprintf "%s" str)))
+    let print_grid message =
+        match message with 
+        | Model(gridnode) -> 
+            match gridnode with 
+            | Transformer(name,_,_,_) ->
+                postalService.Post(Completed(sprintf "Received node %s" name))
+            | PHEV(name,_,_,_) ->
+                postalService.Post(Completed(sprintf "Received node %s" name))
+            | PowerNode(name,_,_) ->
+                postalService.Post(Completed(sprintf "Received node %s" name))
 
     postalService.send_to_all(Hello)
+    
+    Seq.iter (fun n -> iterTree n print_grid) responses
 
     run 0

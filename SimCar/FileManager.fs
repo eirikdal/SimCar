@@ -27,8 +27,8 @@ let rec create_powergrid trf_seq nodes (rest : string list byref) =
         | [|"phev";name;capacity;current;battery|] -> 
             let node = create_phev name capacity current battery
             create_powergrid t (List.append nodes [node]) (&rest)
-        | [|"pnode";name;capacity;current|] ->
-            let node = create_powernode name capacity current
+        | [|"pnode";name;dayahead;realtime|] ->
+            let node = create_powernode name dayahead realtime
             create_powergrid t (List.append nodes [node]) (&rest)
         | [|"}"|] -> 
             rest <- t

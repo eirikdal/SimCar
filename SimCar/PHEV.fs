@@ -10,7 +10,7 @@ open Agent
 open Models
 //open Node
 
-let syncContext = SynchronizationContext.CaptureCurrent()
+//let syncContext = SynchronizationContext.CaptureCurrent()
 
 (* 
     PHEV: This is the PHEV agent
@@ -22,6 +22,10 @@ let phev_agent phev = Agent.Start(fun agent ->
         match msg with
         | Hello -> 
             syncContext.RaiseEvent jobCompleted (agent, sprintf "Agent %s says 'Hello, World!'" name)
+        | ReplyTo(replyToMsg, reply) ->
+            match replyToMsg with
+            | RequestModel ->
+                reply.Reply(Model(phev))
         | _ -> 
             syncContext.RaiseEvent error <| Exception("Not implemented yet")
         
