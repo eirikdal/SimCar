@@ -39,4 +39,5 @@ let rec create_powergrid trf_seq nodes (rest : string list byref) =
 let powergrid = 
     let mutable rest = []
     let trfs = List.ofSeq (read_file "brp.txt")
-    create_powergrid trfs [] (&rest)
+    
+    BRP("brp", create_powergrid trfs [] (&rest))

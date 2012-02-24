@@ -64,6 +64,7 @@ type Node<'T> =
     | Leaf of 'T option
 
 type Grid = 
+    | BRP of name * (Grid seq)
     | Transformer of name * (Grid seq) * capacity * current
     | PowerNode of name * dayahead * realtime
     | PHEV of name * capacity * current * battery

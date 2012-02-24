@@ -11,13 +11,12 @@ open PHEV
 open ComManager
 open FileManager
 open Transformer
-open Tree
 
 let rec run tick agents =
 //    update models
     agents 
-    |> Seq.map (fun node -> mapAgents node RequestModel)
-    |> Seq.collect (fun node -> collectTree node) 
+    |> Seq.map (fun node -> Tree.send node RequestModel)
+    |> Seq.collect (fun node -> Tree.collect node) 
     |> List.ofSeq
     |> ignore
 
@@ -34,13 +33,13 @@ let main args =
     error.Publish.Add(fun e -> postalService.Post(Error(sprintf "%s" e.Message)))
 
     // make agent tree from model tree (powergrid : Grid list, make_agents : Node<Agent> seq)
-    let agents = Seq.map (fun n -> to_agents n) powergrid
+    let agents = Seq.map (fun n -> Tree.to_agents n) powergrid
 
     // add agents to postalservice
-    Seq.iter (fun n -> iterTree n postalService.add_agent) agents
+    Seq.iter (fun n -> Tree.iter n postalService.add_agent) agents
 
     // send RequestModel message to agents
-    let responses = Seq.map (fun n -> mapAgents n RequestModel) agents
+    let responses = Seq.map (fun n -> Tree.send n RequestModel) agents
 
     let print_grid message =
         match message with 
@@ -55,6 +54,6 @@ let main args =
 
     postalService.send_to_all(Hello)
     
-    Seq.iter (fun n -> iterTree n print_grid) responses
+    Seq.iter (fun n -> Tree.iter n print_grid) responses
 
     run 0 agents
