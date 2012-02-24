@@ -44,7 +44,7 @@ let rec iterTree node iterf =
         ()
 
 // traverse a tree of models, creating a mirrored tree of agents as we go along
-let rec mapAgents (node : Node<Agent<unit Message>>) msg = 
+let rec mapAgents (node : Node<Agent<_ Message>>) msg = 
     try 
         match node with
         | Node(nodes, Some(leaf)) ->
@@ -73,3 +73,18 @@ let rec mapTree node mapf =
         Node(Seq.map (fun n -> mapTree n mapf) nodes, None)
     | Leaf(None) ->
         Leaf(None)
+
+
+let rec collectTree (node : Node<'a Message>) = 
+    seq<'a Message> {
+        match node with 
+        | Node(nodes, Some(msg)) -> 
+            yield! [msg]
+            for n in nodes do yield! collectTree n
+        | Node(nodes, none) ->
+            for n in nodes do yield! collectTree n
+        | Leaf(Some(msg)) ->
+            yield! [msg]
+        | Leaf(None) ->
+            ()
+    }

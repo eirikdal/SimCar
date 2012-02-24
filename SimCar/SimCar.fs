@@ -13,10 +13,15 @@ open FileManager
 open Transformer
 open Tree
 
-let rec run tick =
+let rec run tick agents =
 //    update models
+    agents 
+    |> Seq.map (fun node -> mapAgents node RequestModel)
+    |> Seq.collect (fun node -> collectTree node) 
+    |> List.ofSeq
+    |> ignore
 
-    run <| tick+1
+    run (tick+1) agents
 
 [<EntryPoint>]
 let main args = 
@@ -25,17 +30,17 @@ let main args =
     let test str = 
         postalService.Post(Completed(sprintf "%s" str))
     // add what to do (as lambdas) with jobCompleted and error events
-    jobCompleted.Publish.Add(fun (agent, str) -> test str)
+    jobCompleted<unit>.Publish.Add(fun (agent, str) -> test str)
     error.Publish.Add(fun e -> postalService.Post(Error(sprintf "%s" e.Message)))
 
     // make agent tree from model tree (powergrid : Grid list, make_agents : Node<Agent> seq)
-    let make_agents = Seq.map (fun n -> to_agents n) powergrid
+    let agents = Seq.map (fun n -> to_agents n) powergrid
 
     // add agents to postalservice
-    Seq.iter (fun n -> iterTree n postalService.add_agent) make_agents
+    Seq.iter (fun n -> iterTree n postalService.add_agent) agents
 
     // send RequestModel message to agents
-    let responses = Seq.map (fun n -> mapAgents n RequestModel) make_agents
+    let responses = Seq.map (fun n -> mapAgents n RequestModel) agents
 
     let print_grid message =
         match message with 
@@ -52,4 +57,4 @@ let main args =
     
     Seq.iter (fun n -> iterTree n print_grid) responses
 
-    run 0
+    run 0 agents

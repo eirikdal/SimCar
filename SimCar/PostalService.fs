@@ -21,13 +21,13 @@ open Message
         Same as self.add_agent, except removes the agent from the list
 *)
 type PostalService() = 
-    let agent = Agent<unit Message>.Start(fun agent ->
+    let agent = Agent<'T Message>.Start(fun agent ->
         let rec loop agents = async {
             let! msg = agent.Receive()
             
             match msg with 
             | Register(from_agent) ->
-                syncContext.RaiseEvent jobCompleted<unit> (agent, "Agent registered with postal service")
+                syncContext.RaiseEvent jobCompleted (agent, "Agent registered with postal service")
                 return! loop <| List.append agents [from_agent]
             | Deregister(from_agent) ->
                 syncContext.RaiseEvent jobCompleted (agent, "Agent deregistered from postal service")
@@ -53,10 +53,10 @@ type PostalService() =
     member self.send_to(to_agent : Agent<unit Message>, msg) = 
         to_agent.Post(msg)
 
-    member self.add_agent(from : Agent<unit Message>) = 
+    member self.add_agent(from : Agent<'T Message>) = 
         agent.Post <| Register(from)
 
-    member self.remove_agent(from : Agent<unit Message>) = 
+    member self.remove_agent(from : Agent<'T Message>) = 
         agent.Post <| Deregister(from)
 //
 //    member self.to_model(agent : Agent<Message>)= 

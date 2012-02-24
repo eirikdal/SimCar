@@ -20,7 +20,7 @@ let trf_agent trf = Agent.Start(fun agent ->
         
         match msg with
         | Hello ->
-            syncContext.RaiseEvent jobCompleted (agent, sprintf "Agent %s says 'Hello, World!'" name)
+            syncContext.RaiseEvent jobCompleted<_> (agent, sprintf "Agent %s says 'Hello, World!'" name)
         | ReplyTo(replyToMsg, reply) ->
             match replyToMsg with
             | RequestModel ->
