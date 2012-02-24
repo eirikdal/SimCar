@@ -12,48 +12,57 @@ open ComManager
 open FileManager
 open Transformer
 
-let rec run tick agents =
-//    update models
-    agents 
-    |> Seq.map (fun node -> Tree.send node RequestModel)
-    |> Seq.collect (fun node -> Tree.collect node) 
-    |> List.ofSeq
-    |> ignore
+let postalService = new PostalService()
 
+let print_grid message =
+    match message with 
+    | Model(gridnode) -> 
+        postalService.Post(Completed(sprintf "Received node %s" gridnode.name))
+        Model(gridnode)
+
+let op (Model(grid)) = 
+    match grid with 
+    | Transformer(_,_,capacity,current) ->
+        current
+    | PHEV(_,capacity,current,battery) ->
+        current
+    | BRP(_,_,dayahead) ->
+        Current.ofFloat 0.0
+    | PowerNode(_,_,realtime) ->
+        realtime 0
+
+let rec run tick agents =
+    let sum_of_currents = 
+        agents 
+        |> Tree.send RequestModel
+        |> Tree.foldf op 0.0<kW*h>
+
+    printfn "Tick %d - Sum of currents: %f\n" tick (Current.toFloat sum_of_currents)
+    
     run (tick+1) agents
 
 [<EntryPoint>]
 let main args = 
-    let postalService = new PostalService()
-
-    let test str = 
-        postalService.Post(Completed(sprintf "%s" str))
     // add what to do (as lambdas) with jobCompleted and error events
-    jobCompleted<unit>.Publish.Add(fun (agent, str) -> test str)
+    jobCompleted<unit>.Publish.Add(fun (agent, str) -> postalService.Post(Completed(sprintf "%s" str)))
     error.Publish.Add(fun e -> postalService.Post(Error(sprintf "%s" e.Message)))
+    progress.Publish.Add(fun str -> printf "%s" str)
 
     // make agent tree from model tree (powergrid : Grid list, make_agents : Node<Agent> seq)
-    let agents = Seq.map (fun n -> Tree.to_agents n) powergrid
+    let agents = Tree.to_agents powergrid
 
     // add agents to postalservice
-    Seq.iter (fun n -> Tree.iter n postalService.add_agent) agents
+    Tree.iter postalService.add_agent agents
 
     // send RequestModel message to agents
-    let responses = Seq.map (fun n -> Tree.send n RequestModel) agents
-
-    let print_grid message =
-        match message with 
-        | Model(gridnode) -> 
-            match gridnode with 
-            | Transformer(name,_,_,_) ->
-                postalService.Post(Completed(sprintf "Received node %s" name))
-            | PHEV(name,_,_,_) ->
-                postalService.Post(Completed(sprintf "Received node %s" name))
-            | PowerNode(name,_,_) ->
-                postalService.Post(Completed(sprintf "Received node %s" name))
+    let responses = Tree.send RequestModel agents
 
     postalService.send_to_all(Hello)
     
-    Seq.iter (fun n -> Tree.iter n print_grid) responses
-
+//    Tree.iter print_grid responses
+    printf "Running 10000 iterations"
     run 0 agents
+    printfn "Finished 10000 iterations"
+    Console.ReadKey() |> ignore
+
+    0

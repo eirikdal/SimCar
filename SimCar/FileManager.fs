@@ -40,4 +40,4 @@ let powergrid =
     let mutable rest = []
     let trfs = List.ofSeq (read_file "brp.txt")
     
-    BRP("brp", create_powergrid trfs [] (&rest))
+    create_brp "brp" (create_powergrid trfs [] (&rest)) Models.take
