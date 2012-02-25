@@ -22,14 +22,14 @@ let print_grid message =
 
 let op (Model(grid)) = 
     match grid with 
-    | Transformer(_,_,capacity,current) ->
-        current
-    | PHEV(_,capacity,current,battery) ->
-        current
-    | BRP(_,_,dayahead) ->
+    | Transformer(trf_args,_) ->
+        trf_args.current
+    | PHEV(phev_args) ->
+        phev_args.current
+    | BRP(brp_args,_) ->
         Current.ofFloat 0.0
-    | PowerNode(_,_,realtime) ->
-        realtime 0
+    | PowerNode(pnode_args) ->
+        pnode_args.realtime 0
 
 let rec run tick agents =
     let sum_of_currents = 

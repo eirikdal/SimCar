@@ -14,25 +14,25 @@ open BRP
 // make the right kind of agent for a given node
 let make_agent node = 
     match node with
-    | Transformer(_,_,_,_) ->
+    | Transformer(_,_) ->
         trf_agent node
-    | PHEV(_,_,_,_) ->
+    | PHEV(_) ->
         phev_agent node
-    | PowerNode(_,_,_) ->
+    | PowerNode(_) ->
         pnode_agent node
-    | BRP(_,_,_) ->
+    | BRP(_,_) ->
         brp_agent node
 
 // traverse a tree of models, creating a mirrored tree of agents as we go along
 let rec to_agents node = 
     match node with
-    | Transformer(_,nodes,_,_) ->
+    | Transformer(_,nodes) ->
         Node(Seq.map (fun n -> to_agents n) nodes, Some <| make_agent node)
-    | PowerNode(_,_,_) ->
+    | PowerNode(_) ->
         Leaf(Some <| make_agent node)
-    | PHEV(_,_,_,_) ->
+    | PHEV(_) ->
         Leaf(Some <| make_agent node)
-    | BRP(_,nodes,_) ->
+    | BRP(_,nodes) ->
         Node(Seq.map (fun n -> to_agents n) nodes, Some <| make_agent node)
 
 // traverse a tree of nodes, applying function iterf to each node

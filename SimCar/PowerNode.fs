@@ -7,12 +7,12 @@ open System
 open Models
 
 let pnode_agent pnode = Agent.Start(fun agent ->
-    let rec loop (PowerNode(name,_,_)) = async {
+    let rec loop (PowerNode(pnode_args)) = async {
         let! msg = agent.Receive()
 
         match msg with
         | Hello -> 
-            syncContext.RaiseEvent jobCompleted<_> (agent, sprintf "Agent %s says 'Hello, World!'" name)
+            syncContext.RaiseEvent jobCompleted<_> (agent, sprintf "Agent %s says 'Hello, World!'" pnode_args.name)
         | ReplyTo(replyToMsg, reply) ->
             match replyToMsg with
             | RequestModel ->
