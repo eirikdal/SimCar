@@ -39,14 +39,14 @@ let rec run tick agents =
         |> Tree.map (fun (ag, msg) -> msg)
         |> Tree.foldf op 0.0<kW*h>
 
-    printfn "Tick %d - Sum of currents: %f\n" tick (Current.toFloat sum_of_currents)
+    //printfn "Tick %d - Sum of currents: %f\n" tick (Current.toFloat sum_of_currents)
     
     run (tick+1) agents
 
 [<EntryPoint>]
 let main args = 
     // add what to do (as lambdas) with jobCompleted and error events
-    jobCompleted<unit>.Publish.Add(fun (agent, str) -> postalService.Post(Completed(sprintf "%s" str)))
+    jobCompleted<Message<string>>.Publish.Add(fun (agent, str) -> postalService.Post(Completed(sprintf "%s" str)))
     error.Publish.Add(fun e -> postalService.Post(Error(sprintf "%s" e.Message)))
     progress.Publish.Add(fun str -> printf "%s" str)
 
@@ -62,9 +62,9 @@ let main args =
     postalService.send_to_all(Hello)
     
 //    Tree.iter print_grid responses
-    printf "Running 10000 iterations"
+    do printf "Running 10000 iterations\n"
     run 0 agents
-    printfn "Finished 10000 iterations"
+    do printfn "Finished 10000 iterations\n"
     Console.ReadKey() |> ignore
 
     0

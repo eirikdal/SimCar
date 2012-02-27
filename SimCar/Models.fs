@@ -61,7 +61,7 @@ module Current =
             LanguagePrimitives.FloatWithMeasure<kW*h> (float value)
 
 type DistributionType = 
-    | NormalDist
+    | Normal
     | LogNormal
 
 type Distribution = 
@@ -72,7 +72,7 @@ type Distribution =
 
 type Profile = 
     | DistProfile of string * Distribution list
-    | FloatProfile of string * int list
+    | FloatProfile of string * float seq
 
 type Node<'T> = 
     | Node of (Node<'T> seq) * 'T option
@@ -153,7 +153,7 @@ let create_brp name nodes dayahead =
 let create_distribution str_type mean sigma duration =
     let dist_type = 
         match str_type with
-        | "gauss" -> NormalDist
+        | "gauss" -> Normal
         | "lognormal" -> LogNormal
         | _ -> raise <| Exception("Undefined distribution")
 

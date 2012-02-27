@@ -27,13 +27,13 @@ let make_agent node =
 let rec to_agents node = 
     match node with
     | Transformer(_,nodes) ->
-        Node(Seq.map (fun n -> to_agents n) nodes, Some <| make_agent node)
+        Node(Seq.map (fun n -> to_agents n) nodes |> Seq.cache, Some <| make_agent node)
     | PowerNode(_) ->
         Leaf(Some <| make_agent node)
     | PHEV(_) ->
         Leaf(Some <| make_agent node)
     | BRP(_,nodes) ->
-        Node(Seq.map (fun n -> to_agents n) nodes, Some <| make_agent node)
+        Node(Seq.map (fun n -> to_agents n) nodes |> Seq.cache, Some <| make_agent node)
 
 // traverse a tree of nodes, applying function iterf to each node
 let rec iter iterf node = 

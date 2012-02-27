@@ -1,9 +1,9 @@
 ﻿module FileManager
 
+open Models
 open System
 open System.IO
 open System.Globalization
-open Models
 open System.Text.RegularExpressions
 
 let folder_of file = sprintf "%s\\%s" (Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName) file
@@ -33,9 +33,9 @@ let (|ParseRegex|_|) regex str =
 
 let parse_dist str = 
     match str with 
-    | ParseRegex "mean=(\d){1,2}:(\d){1,2}" [Float h; Float m] ->
-        h + m
-    | ParseRegex "std=(\d)+" [Float std] ->
+    | ParseRegex "mean=([0-9]+){1,2}:([0-9]+){1,2}" [Float h; Float m] ->
+        h*4.0*15.0 + m
+    | ParseRegex "std=([0-9]+)" [Float std] ->
         std
     | ParseRegex "duration=(\d)+" [Float duration] ->
         duration
@@ -101,4 +101,4 @@ let powergrid =
     let mutable rest = []
     let stream = List.ofSeq (read_file "brp.txt")
     
-    create_brp "brp" (parse_powergrid stream [] (&rest)) Models.take
+    create_brp "brp" (parse_powergrid stream [] (&rest)) take
