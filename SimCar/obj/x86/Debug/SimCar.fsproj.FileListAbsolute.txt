@@ -20,3 +20,13 @@ C:\SimCar\SimCar\bin\Debug\FSharp.PowerPack.Metadata.xml
 C:\SimCar\SimCar\bin\Debug\FSharp.PowerPack.Parallel.Seq.xml
 C:\SimCar\SimCar\bin\Debug\MSDN.FSharpChart.dll
 C:\SimCar\SimCar\bin\Debug\MSDN.FSharpChart.pdb
+C:\master\SimCar\SimCar\bin\Debug\SimCar.XML
+C:\master\SimCar\SimCar\obj\x86\Debug\SimCar.fsprojResolveAssemblyReference.cache
+C:\master\SimCar\SimCar\obj\x86\Debug\SimCar.exe
+C:\master\SimCar\SimCar\obj\x86\Debug\SimCar.pdb
+C:\master\SimCar\SimCar\bin\Debug\SimCar.exe.config
+C:\master\SimCar\SimCar\bin\Debug\SimCar.exe
+C:\master\SimCar\SimCar\bin\Debug\SimCar.pdb
+C:\master\SimCar\SimCar\bin\Debug\FSharp.Core.dll
+C:\master\SimCar\SimCar\bin\Debug\FSharp.Core.xml
+C:\master\SimCar\SimCar\bin\Debug\en\FSharp.Core.resources.dll
