@@ -59,7 +59,7 @@ let rec parse_profiles stream profiles (rest : string list byref) =
     | h::t ->
         match h.Split([|' '|], StringSplitOptions.RemoveEmptyEntries) with
         | [|profile;"{"|] ->
-            let profile = Profile(profile, parse_profile t [] (&rest))
+            let profile = DistProfile(profile, parse_profile t [] (&rest))
             parse_profiles rest (List.append [profile] profiles) (&rest)
         | _ -> 
             rest <- t
@@ -72,6 +72,9 @@ let profiles : Profile list =
 
     parse_profiles stream [] (&rest)
 
+// 
+// Parsing the powergrid, transformers, power nodes and PHEVs.
+//
 let rec parse_powergrid stream nodes (rest : string list byref) =
     match (stream : string list) with 
     | h::t ->

@@ -12,6 +12,9 @@ open Models
 
 //let syncContext = SynchronizationContext.CaptureCurrent()
 
+let calc name profile : Profile = 
+    
+    FloatProfile(name, [])
 (* 
     PHEV: This is the PHEV agent
 *)
@@ -28,8 +31,13 @@ let phev_agent phev = Agent.Start(fun agent ->
                 reply.Reply(Model(phev))
         | Update(tick) ->
             match phev_args.profile with 
-            | Profile(_,dist_list) ->
+            | FloatProfile(name,dist_list) ->
+                let p = calc name dist_list
                 
+                let phevArguments = { phev_args with profile=p}
+
+                return! loop <| PHEV(phevArguments)
+            | DistProfile(_,dist_list) ->
                 ()
             ()
         | _ -> 

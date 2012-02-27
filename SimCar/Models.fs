@@ -71,7 +71,8 @@ type Distribution =
     duration : int }
 
 type Profile = 
-    | Profile of string * Distribution list
+    | DistProfile of string * Distribution list
+    | FloatProfile of string * int list
 
 type Node<'T> = 
     | Node of (Node<'T> seq) * 'T option
@@ -129,7 +130,7 @@ let create_node name nodes capacity current =
 let create_phev name capacity current battery profile (profiles : Profile seq) =
     let phev_arg = 
         { name=name;
-        profile=Seq.find (fun (Profile(prof_name, dist)) -> prof_name = profile) profiles;
+        profile=Seq.find (fun (DistProfile(prof_name, dist)) -> prof_name = profile) profiles;
         capacity=Capacity.ofFloat <| Double.Parse(capacity, CultureInfo.InvariantCulture);
         current=Current.ofFloat <| Double.Parse(current, CultureInfo.InvariantCulture);
         battery=Battery.ofFloat <| Double.Parse(battery, CultureInfo.InvariantCulture); }
