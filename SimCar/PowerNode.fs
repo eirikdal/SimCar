@@ -17,6 +17,8 @@ let pnode_agent pnode = Agent.Start(fun agent ->
             match replyToMsg with
             | RequestModel ->
                 reply.Reply(Model(pnode))
+        | Update(tick) ->
+            ()
         | _ -> 
             syncContext.RaiseEvent error <| Exception("Not implemented yet")
 

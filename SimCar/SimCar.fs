@@ -33,8 +33,10 @@ let op (Model(grid)) =
 
 let rec run tick agents =
     let sum_of_currents = 
-        agents 
-        |> Tree.send RequestModel
+        agents
+        |> Tree.send (Update(tick))
+        |> Tree.send_and_reply RequestModel
+        |> Tree.map (fun (ag, msg) -> msg)
         |> Tree.foldf op 0.0<kW*h>
 
     printfn "Tick %d - Sum of currents: %f\n" tick (Current.toFloat sum_of_currents)

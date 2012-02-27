@@ -26,6 +26,12 @@ let phev_agent phev = Agent.Start(fun agent ->
             match replyToMsg with
             | RequestModel ->
                 reply.Reply(Model(phev))
+        | Update(tick) ->
+            match phev_args.profile with 
+            | Profile(_,dist_list) ->
+                
+                ()
+            ()
         | _ -> 
             syncContext.RaiseEvent error <| Exception("Not implemented yet")
         

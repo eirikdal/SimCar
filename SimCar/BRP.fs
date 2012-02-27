@@ -18,6 +18,8 @@ let brp_agent brp = Agent.Start(fun agent ->
             match replyToMsg with
             | RequestModel ->
                 reply.Reply(Model(brp))
+        | Update(tick) -> 
+            ()
         | _ -> 
             syncContext.RaiseEvent error <| Exception("Not implemented yet")
 

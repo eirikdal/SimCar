@@ -25,6 +25,8 @@ let trf_agent trf = Agent.Start(fun agent ->
             match replyToMsg with
             | RequestModel ->
                 reply.Reply(Model(trf))
+        | Update(tick) ->
+            ()
         | _ -> 
             syncContext.RaiseEvent error <| Exception("Not yet implemented")
 
