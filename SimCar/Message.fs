@@ -5,7 +5,7 @@ open Agent
 open Models
 
 type 'a Message = 
-    | Charge of Agent<'a Message> * intent
+    | Charge of Agent<'a Message> * energy
     | Completed of string
     | Assign of Agent<'a Message> * Grid
     | Register of Agent<'a Message>
@@ -16,4 +16,5 @@ type 'a Message =
     | RequestModel
     | Model of Grid
     | Error of string
+    | Update of int
     | Reply of 'a

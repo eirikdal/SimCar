@@ -21,5 +21,5 @@ let jobCompleted<'a> = new Event<Agent<'a Message> * string>()
 //let allCompleted  = new Event<'T[]>()
 let error         = new Event<System.Exception>()
 let canceled      = new Event<System.OperationCanceledException>()
-
+let progress      = new Event<string>()
 let syncContext = SynchronizationContext.CaptureCurrent()
