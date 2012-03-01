@@ -5,35 +5,7 @@ open Message
 open System
 open System.Globalization
 open SynchronizationContext
-open PHEV
-open Transformer
-open PowerNode
 open Models
-open BRP
-
-// make the right kind of agent for a given node
-let make_agent node = 
-    match node with
-    | Transformer(_,_,_,_) ->
-        trf_agent node
-    | PHEV(_,_,_,_) ->
-        phev_agent node
-    | PowerNode(_,_,_) ->
-        pnode_agent node
-    | BRP(_,_,_) ->
-        brp_agent node
-
-// traverse a tree of models, creating a mirrored tree of agents as we go along
-let rec to_agents node = 
-    match node with
-    | Transformer(_,nodes,_,_) ->
-        Node(Seq.map (fun n -> to_agents n) nodes, Some <| make_agent node)
-    | PowerNode(_,_,_) ->
-        Leaf(Some <| make_agent node)
-    | PHEV(_,_,_,_) ->
-        Leaf(Some <| make_agent node)
-    | BRP(_,nodes,_) ->
-        Node(Seq.map (fun n -> to_agents n) nodes, Some <| make_agent node)
 
 // traverse a tree of nodes, applying function iterf to each node
 let rec iter iterf node = 
@@ -49,22 +21,36 @@ let rec iter iterf node =
         ()
 
 // traverse a tree of models, creating a mirrored tree of agents as we go along
-let rec send msg (node : Node<Agent<_ Message>>) = 
+let rec send_and_reply msg (node : Node<Agent<_ Message>>) = 
     try 
         match node with
         | Node(nodes, Some(leaf)) ->
             let res = leaf.PostAndReply((fun replyChannel -> ReplyTo(msg, replyChannel)), 1000)
-            Node(Seq.map (fun n -> send msg n) nodes, Some res)
+            Node(Seq.map (fun n -> send_and_reply msg n) nodes, Some (leaf, res))
         | Node(nodes, None) -> 
-            Node(Seq.map (fun n -> send msg n) nodes, None)
+            Node(Seq.map (fun n -> send_and_reply msg n) nodes, None)
         | Leaf(Some(leaf)) ->
             let res = leaf.PostAndReply((fun replyChannel -> ReplyTo(msg, replyChannel)), 1000)
-            Leaf(Some <| res)
+            Leaf(Some <| (leaf, res))
         | Leaf(None) ->
             Leaf(None)
     with 
     | :? TimeoutException -> 
         syncContext.RaiseEvent error <| Exception(sprintf "Agent timed out")
+        Leaf(None)
+
+// traverse a tree of models, creating a mirrored tree of agents as we go along
+let rec send msg (node : Node<Agent<_ Message>>) = 
+    match node with
+    | Node(nodes, Some(leaf)) ->
+        let res = leaf.Post(msg)
+        Node(Seq.map (fun n -> send msg n) nodes, Some <| leaf)
+    | Node(nodes, None) -> 
+        Node(Seq.map (fun n -> send msg n) nodes, None)
+    | Leaf(Some(leaf)) ->
+        let res = leaf.Post(msg)
+        Leaf(Some <| leaf)
+    | Leaf(None) ->
         Leaf(None)
 
 let rec map mapf node = 
