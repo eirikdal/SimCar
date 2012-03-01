@@ -2,7 +2,9 @@
 
 open Agent
 open System
+open System.Threading
 open System.IO
+open SynchronizationContext
 open Models
 open Message
 open PHEV
@@ -10,21 +12,57 @@ open ComManager
 open FileManager
 open Transformer
 
+let postalService = new PostalService()
+
+let print_grid message =
+    match message with 
+    | Model(gridnode) -> 
+        postalService.Post(Completed(sprintf "Received node %s" gridnode.name))
+        Model(gridnode)
+
+let op (Model(grid)) = 
+    match grid with 
+    | Transformer(_,_,capacity,current) ->
+        current
+    | PHEV(_,capacity,current,battery) ->
+        current
+    | BRP(_,_,dayahead) ->
+        Current.ofFloat 0.0
+    | PowerNode(_,_,realtime) ->
+        realtime 0
+
+let rec run tick agents =
+    let sum_of_currents = 
+        agents 
+        |> Tree.send RequestModel
+        |> Tree.foldf op 0.0<kW*h>
+
+    printfn "Tick %d - Sum of currents: %f\n" tick (Current.toFloat sum_of_currents)
+    
+    run (tick+1) agents
+
 [<EntryPoint>]
 let main args = 
-    let postalService = new PostalService()
+    // add what to do (as lambdas) with jobCompleted and error events
+    jobCompleted<unit>.Publish.Add(fun (agent, str) -> postalService.Post(Completed(sprintf "%s" str)))
+    error.Publish.Add(fun e -> postalService.Post(Error(sprintf "%s" e.Message)))
+    progress.Publish.Add(fun str -> printf "%s" str)
 
-    let phev_agents = list_of_phevs()
-    let trf_agents = list_of_trfs()
+    // make agent tree from model tree (powergrid : Grid list, make_agents : Node<Agent> seq)
+    let agents = Tree.to_agents powergrid
 
-    phev_agents
-    |> Seq.map (fun phev -> phev_agent phev)
-    |> Seq.iter (fun phev -> postalService.add_agent(phev, PHEV_Agent))
+    // add agents to postalservice
+    Tree.iter postalService.add_agent agents
 
-    trf_agents
-    |> Seq.map (fun trf -> trf_agent trf)
-    |> Seq.iter (fun trf -> postalService.add_agent(trf, Trf_Agent))
+    // send RequestModel message to agents
+    let responses = Tree.send RequestModel agents
 
-    ignore(Console.ReadKey())
+    postalService.send_to_all(Hello)
+    
+//    Tree.iter print_grid responses
+    printf "Running 10000 iterations"
+    run 0 agents
+    printfn "Finished 10000 iterations"
+    Console.ReadKey() |> ignore
 
     0

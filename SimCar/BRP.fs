@@ -1,37 +1,27 @@
-﻿module PHEV
+﻿module BRP
 
-#nowarn "25"
-
+open Agent
+open Message
+open Models
 open System
 open System.Threading
 open SynchronizationContext
-open Message
-open Agent
-open Models
-//open Node
 
-//let syncContext = SynchronizationContext.CaptureCurrent()
-
-(* 
-    PHEV: This is the PHEV agent
-*)
-let phev_agent phev = Agent.Start(fun agent ->
-    let rec loop (PHEV(name,capacity,current,battery)) = async {
+let brp_agent brp = Agent.Start(fun agent ->
+    let rec loop (BRP(name,nodes,dayahead)) = async {
         let! msg = agent.Receive()
-        
+
         match msg with
         | Hello -> 
             syncContext.RaiseEvent jobCompleted<_> (agent, sprintf "Agent %s says 'Hello, World!'" name)
         | ReplyTo(replyToMsg, reply) ->
             match replyToMsg with
             | RequestModel ->
-                reply.Reply(Model(phev))
+                reply.Reply(Model(brp))
         | _ -> 
             syncContext.RaiseEvent error <| Exception("Not implemented yet")
-        
-        return! loop phev
-    }
-    
-    
 
-    loop phev)
+        return! loop brp
+    }
+
+    loop brp)

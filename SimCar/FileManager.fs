@@ -2,6 +2,7 @@
 
 open System
 open System.IO
+open System.Globalization
 open Models
 
 let folder_of file = sprintf "%s\\%s" (Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName) file
@@ -13,39 +14,30 @@ let read_file file =
             yield sr.ReadLine()
     }
 
-let parse_phevs = 
-    Seq.map (fun (str : string) -> 
-        match str.Split([|' '|], StringSplitOptions.RemoveEmptyEntries) with 
-        | [|name;capacity;current;battery|] -> 
-            PHEV(name,
-                None,
-                Capacity.ofFloat (Double.Parse(capacity, Globalization.CultureInfo.InvariantCulture)),
-                Current.ofFloat (Double.Parse(current, Globalization.CultureInfo.InvariantCulture)),
-                Battery.ofFloat (Double.Parse(battery, Globalization.CultureInfo.InvariantCulture)))
-        | _ -> raise <| System.IO.IOException("Error while reading PHEVs from file"))
+let rec create_powergrid trf_seq nodes (rest : string list byref) =
+    match (trf_seq : string list) with 
+    | h::t ->
+        match h.Split([|' '|], StringSplitOptions.RemoveEmptyEntries) with
+        | [|"trf";name;capacity;current|] ->
+            let node = create_node name Seq.empty capacity current
+            create_powergrid t (List.append nodes [node]) (&rest)
+        | [|"trf";name;capacity;current;"{"|] -> 
+            let node = create_node name (create_powergrid t [] &rest) capacity current
+            create_powergrid rest (List.append nodes [node]) (&rest)
+        | [|"phev";name;capacity;current;battery|] -> 
+            let node = create_phev name capacity current battery
+            create_powergrid t (List.append nodes [node]) (&rest)
+        | [|"pnode";name;dayahead;realtime|] ->
+            let node = create_powernode name dayahead realtime
+            create_powergrid t (List.append nodes [node]) (&rest)
+        | [|"}"|] -> 
+            rest <- t
+            nodes
+        | _ -> raise <| IOException("Error while reading Transformers from file")
+    | _ -> nodes
 
-let parse_trsf = 
-    Seq.map (fun (str : string) -> 
-        match str.Split([|' '|], StringSplitOptions.RemoveEmptyEntries) with 
-        | [|name;nodes;capacity;current|] -> 
-            Node(
-                name,
-                Seq.empty,
-                Capacity.ofFloat (Double.Parse(capacity, Globalization.CultureInfo.InvariantCulture)),
-                Current.ofFloat (Double.Parse(current, Globalization.CultureInfo.InvariantCulture)))
-        | [|name;capacity;current|] ->
-            Leaf(
-                name,
-                None,
-                None,
-                Capacity.ofFloat (Double.Parse(capacity, Globalization.CultureInfo.InvariantCulture)),
-                Current.ofFloat (Double.Parse(current, Globalization.CultureInfo.InvariantCulture)))
-
-        | _ -> raise <| System.IO.IOException("Error while reading Transformers from file"))
-
-let list_of_phevs() = 
-    parse_phevs (read_file "phevs.txt")
-    //    Seq.iter (fun x -> ()) phevs
-
-let list_of_trfs() = 
-    parse_trsf (read_file "transformers.txt")
+let powergrid = 
+    let mutable rest = []
+    let trfs = List.ofSeq (read_file "brp.txt")
+    
+    create_brp "brp" (create_powergrid trfs [] (&rest)) Models.take
