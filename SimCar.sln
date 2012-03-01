@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "SimCar", "SimCar\SimCar.fsproj", "{5B792483-5C16-4C17-9AF5-3D846DAA0054}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5B792483-5C16-4C17-9AF5-3D846DAA0054}.Debug|x86.ActiveCfg = Debug|x86
+		{5B792483-5C16-4C17-9AF5-3D846DAA0054}.Debug|x86.Build.0 = Debug|x86
+		{5B792483-5C16-4C17-9AF5-3D846DAA0054}.Release|x86.ActiveCfg = Release|x86
+		{5B792483-5C16-4C17-9AF5-3D846DAA0054}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
