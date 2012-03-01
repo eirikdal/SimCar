@@ -16,4 +16,5 @@ type 'a Message =
     | RequestModel
     | Model of Grid
     | Error of string
+    | Update of int
     | Reply of 'a
