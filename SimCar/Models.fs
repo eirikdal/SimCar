@@ -15,21 +15,21 @@ open System.Globalization
 [<Measure>] type s
 // units of power
 [<Measure>] type W
-[<Measure>] type kW
-[<Measure>] type MW
-[<Measure>] type Wh
-[<Measure>] type kWh
-[<Measure>] type MWh
+[<Measure>] type kW = k*W
+[<Measure>] type MW = M*W
+[<Measure>] type Wh = W*h
+[<Measure>] type kWh = kW*h
+[<Measure>] type MWh = MW*h
 
 // incorrect use:
-// let v = 1.0<kW*h> + 1.0<W*h>
-// let v = 1.0<kW*h> + 1.0
+//let v = 1.0<kWh> + 1.0<Wh>
+//let v = 1.0<kWh> + 1.0
 // correct use: 
-// let v = 1.0<kW*h> + 1.0<kW*h>
-// let v = 1.0<kW*h> * 1.0<k>
+//let v = 1.0<kWh> + 1.0<kWh>
+//let v = 1.0<kWh> * 1.0<k>
 
 type power = float<kW>
-type energy = float<kW*h>
+type energy = float<kWh>
 type dayahead = (int -> energy)
 type realtime = (int -> energy)
 type capacity = energy
@@ -44,7 +44,7 @@ module Capacity =
         if value < 0.0 then
             raise <| System.ArgumentOutOfRangeException ("value")
         else
-            LanguagePrimitives.FloatWithMeasure<kW*h> (float value)
+            LanguagePrimitives.FloatWithMeasure<kWh> (float value)
 
 module Battery = 
     let inline toFloat (value : energy) = float value
@@ -52,7 +52,7 @@ module Battery =
         if value < 0.0 then
             raise <| System.ArgumentOutOfRangeException ("value")
         else
-            LanguagePrimitives.FloatWithMeasure<kW*h> (float value)
+            LanguagePrimitives.FloatWithMeasure<kWh> (float value)
 
 module Current = 
     let inline toFloat (value : energy) = float value
@@ -60,7 +60,7 @@ module Current =
         if value > 10000000.0 || value < -10000000.0 then
             raise <| System.ArgumentOutOfRangeException ("value")
         else
-            LanguagePrimitives.FloatWithMeasure<kW*h> (float value)
+            LanguagePrimitives.FloatWithMeasure<kWh> (float value)
 
 type DistributionType = 
     | Normal

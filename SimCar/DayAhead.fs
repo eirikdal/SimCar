@@ -6,17 +6,19 @@ open Models
 let dist x x' = abs(x - x')
 
 let sine n = sin (2.0 * Math.PI * (float n))
-let mutable S = 0.0<kW*h>
+let mutable S = 0.0<kWh>
 
-let scan(D : float<kW*h>[]) = 
-    S <- 0.0<kW*h>
+let scan(_D : float<kWh>[]) = 
+    let D = Array.copy _D
+
+    S <- 0.0<kWh>
     let x = Array.average D
     let w = Array.max D
     let alpha = 0.2
     let i = Array.findIndex (fun w' -> w = w') D
 
     let disc idx = 0.95 ** (dist (float idx) (float i))
-    let delta w' idx (target : float<kW*h>) = (disc idx) * alpha * (target - w')
+    let delta w' idx (target : float<kWh>) = (disc idx) * alpha * (target - w')
     let update idx target = 
         let d = (delta D.[idx] idx target)
         let S' = S + d
@@ -30,20 +32,18 @@ let scan(D : float<kW*h>[]) =
     
     let target = D.[i]
 
-    let rec _scan k =
-        let ik = i + k
-        let ik' = i - k 
-        
-        if ik < (i+nbhood) && ik < D.Length then
-            update ik target
-        if ik' >= (i-nbhood) && ik' > 0 then
-            update ik' target
+    let _scan nbhood =
+        for k in -nbhood .. nbhood do
+            let ik = i + k
+            let ik' = i - k
+            
+            if ik < D.Length then
+                update ik target
+            if ik' > 0 then
+                update ik' target
 
-        if S < 0.0<kW*h> then
-            _scan (k+1)
-
-    //swhile S < 0.0<kW*h> do
-    _scan 1
+    while S < 0.0<kWh> do
+        _scan (nbhood+1)
 
     let dS = S / (2.0*(float nbhood) + 1.0)
     for i in i - nbhood .. i + nbhood do
