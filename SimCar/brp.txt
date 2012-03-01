@@ -1,15 +1,18 @@
-﻿trf node1 10.0 100.0 {
-  trf node2 11.0 100.0 {
-    trf node3 12.0 100.0
+﻿trf node1 10000.0 0.0 {
+  trf node2 1000.0 0.0 {
+    pnode house house2
+    trf node3 100.0 0.0
   }
-  trf node4 13.0 100.0
-  trf node5 14.0 100.0
-  trf node6 15.0 100.0
-  trf node7 16.0 100.0 {
-    trf node8 17.0 100.0
+  trf node4 1000.0 0.0
+  trf node5 1000.0 0.0
+  pnode house house4
+  trf node6 1000.0 0.0
+  trf node7 1000.0 0.0 {
+    pnode house house3
+    trf node8 100.0 0.0
   }
-  trf node9 18.0 100.0
-  phev Toyota worker 10.0 10.0 10.0
-  pnode Bla 1000.0 100.0
+  trf node9 1000.0 0.0
+  phev Toyota worker 10.0 0.0 5.0
+  pnode house house1
 }
-trf node20 1.0 1.0
+trf node20 1.0 0.0

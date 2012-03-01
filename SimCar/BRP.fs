@@ -1,5 +1,7 @@
 ﻿module BRP
 
+#nowarn "25"
+
 open Agent
 open Message
 open Models

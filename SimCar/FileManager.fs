@@ -72,6 +72,37 @@ let profiles : Profile list =
 
     parse_profiles stream [] (&rest)
 
+let rec parse_powerprofile stream name (dist : float seq) (rest : string list byref) = 
+    match (stream : string list) with 
+    | h::t ->
+        match h.Split([|' ';';'|], StringSplitOptions.RemoveEmptyEntries) with
+        | [|q1;q2;q3;q4|] ->
+            let temp = Double.Parse(q1)::Double.Parse(q2)::Double.Parse(q3)::Double.Parse(q4)::[]
+            parse_powerprofile t name (Seq.append dist temp) (&rest)
+        | [|"}"|] -> 
+            rest <- t
+            dist
+        | _ -> raise <| Exception "Unexpected end of stream."
+    | _ -> raise <| Exception("Unexpected end of stream. Maybe missing closing '}'?")
+     
+let rec parse_powerprofiles stream profiles (rest : string list byref) =
+    match (stream : string list) with 
+    | h::t ->
+        match h.Split([|' '|], StringSplitOptions.RemoveEmptyEntries) with
+        | [|name;"{"|] ->
+            let profile = (name, parse_powerprofile t name Seq.empty (&rest) |> Seq.cache)
+            parse_powerprofiles rest (Seq.append [profile] profiles) (&rest)
+        | _ -> 
+            rest <- t
+            profiles
+    | _ -> profiles
+
+let powerprofiles : (string * float seq) seq = 
+    let mutable rest = []
+    let stream = List.ofSeq (read_file "powerprofiles.txt")
+
+    parse_powerprofiles stream Seq.empty (&rest)
+
 // 
 // Parsing the powergrid, transformers, power nodes and PHEVs.
 //
@@ -88,9 +119,14 @@ let rec parse_powergrid stream nodes (rest : string list byref) =
         | [|"phev";name;profile;capacity;current;battery|] -> 
             let node = create_phev name capacity current battery profile profiles
             parse_powergrid t (List.append nodes [node]) (&rest)
-        | [|"pnode";name;dayahead;realtime|] ->
-            let node = create_powernode name dayahead realtime
-            parse_powergrid t (List.append nodes [node]) (&rest)
+        | [|"pnode";name;realtime|] ->
+            let realtime = (Seq.tryFind (fun (n, s) -> n = name) powerprofiles)
+            match realtime with
+            | None -> raise <| IOException(sprintf "Could not find powernode with name %s in powerprofiles.txt" name)
+            | Some realtime ->
+                let nth n = Current.ofFloat ((snd realtime) |> Seq.nth n)
+                let node = create_powernode name nth
+                parse_powergrid t (List.append nodes [node]) (&rest)
         | [|"}"|] -> 
             rest <- t
             nodes

@@ -1,10 +1,40 @@
-﻿module ComManager
+﻿module PostalService
 
 open System
 open System.Threading
 open SynchronizationContext
 open Agent
 open Message
+open Models
+open PHEV
+open Transformer
+open PowerNode
+open BRP
+
+// make the right kind of agent for a given node
+let make_agent node = 
+    match node with
+    | Transformer(_,_) ->
+        trf_agent node
+    | PHEV(_) ->
+        phev_agent node
+    | PowerNode(_) ->
+        pnode_agent node
+    | BRP(_,_) ->
+        brp_agent node
+
+// traverse a tree of models, creating a mirrored tree of agents as we go along
+let rec to_agents node = 
+    match node with
+    | Transformer(_,nodes) ->
+        Node(Seq.map (fun n -> to_agents n) nodes |> Seq.cache, Some <| make_agent node)
+    | PowerNode(_) ->
+        Leaf(Some <| make_agent node)
+    | PHEV(_) ->
+        Leaf(Some <| make_agent node)
+    | BRP(_,nodes) ->
+        Node(Seq.map (fun n -> to_agents n) nodes |> Seq.cache, Some <| make_agent node)
+
 
 //let syncContext = SynchronizationContext.CaptureCurrent()
 
@@ -21,7 +51,7 @@ open Message
         Same as self.add_agent, except removes the agent from the list
 *)
 type PostalService() = 
-    let agent = Agent<'T Message>.Start(fun agent ->
+    let agent = Agent<string Message>.Start(fun agent ->
         let rec loop agents = async {
             let! msg = agent.Receive()
             

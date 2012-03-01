@@ -1,5 +1,7 @@
 ﻿module PowerNode
 
+#nowarn "25"
+
 open Agent
 open SynchronizationContext
 open Message

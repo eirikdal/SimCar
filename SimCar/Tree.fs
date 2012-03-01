@@ -5,35 +5,7 @@ open Message
 open System
 open System.Globalization
 open SynchronizationContext
-open PHEV
-open Transformer
-open PowerNode
 open Models
-open BRP
-
-// make the right kind of agent for a given node
-let make_agent node = 
-    match node with
-    | Transformer(_,_) ->
-        trf_agent node
-    | PHEV(_) ->
-        phev_agent node
-    | PowerNode(_) ->
-        pnode_agent node
-    | BRP(_,_) ->
-        brp_agent node
-
-// traverse a tree of models, creating a mirrored tree of agents as we go along
-let rec to_agents node = 
-    match node with
-    | Transformer(_,nodes) ->
-        Node(Seq.map (fun n -> to_agents n) nodes |> Seq.cache, Some <| make_agent node)
-    | PowerNode(_) ->
-        Leaf(Some <| make_agent node)
-    | PHEV(_) ->
-        Leaf(Some <| make_agent node)
-    | BRP(_,nodes) ->
-        Node(Seq.map (fun n -> to_agents n) nodes |> Seq.cache, Some <| make_agent node)
 
 // traverse a tree of nodes, applying function iterf to each node
 let rec iter iterf node = 

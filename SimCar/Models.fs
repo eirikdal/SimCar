@@ -1,5 +1,7 @@
 ﻿module Models
 
+#nowarn "25"
+
 open Agent
 open System
 open System.Globalization
@@ -96,7 +98,6 @@ type TrfArguments =
 
 type PnodeArguments = 
     { name : string;
-    dayahead : dayahead;
     realtime : realtime }
 
 type Grid = 
@@ -136,11 +137,10 @@ let create_phev name capacity current battery profile (profiles : Profile seq) =
         battery=Battery.ofFloat <| Double.Parse(battery, CultureInfo.InvariantCulture); }
     PHEV(phev_arg)
 
-let create_powernode name dayahead realtime = 
+let create_powernode name realtime = 
     let pnode_arg =
         { name=name;
-        dayahead=take;
-        realtime=take; }
+        realtime=realtime; }
     PowerNode(pnode_arg)
 
 let create_brp name nodes dayahead = 
