@@ -8,11 +8,10 @@ open SynchronizationContext
 open Message
 open Agent
 open Models
-//open Node
+
 (* 
     Transformer: This is the transformer agent
 *)
-//let syncContext = SynchronizationContext.CaptureCurrent()
 
 let trf_agent trf = Agent.Start(fun agent ->
     let rec loop (Transformer(trf_args,nodes)) = async {

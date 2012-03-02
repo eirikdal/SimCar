@@ -104,17 +104,17 @@ let main args =
     // unzip results into lists
     let (dayahead, realtime) = results |> List.ofSeq |> List.unzip
 
-    // fold over sequence of arrays, compute average
+    // fold over sequence of arrays, compute average, return functional composition of Seq.fold and Array.map
+    let zeroArray = (Array.zeroCreate<energy> ticks_in_day)
     let avg = 
-        Seq.fold (fun ac rt -> 
-            rt |> Array.map2 (fun ac1 ac2 -> ac1 + ac2) ac) (Array.zeroCreate<energy> ticks_in_day)
+        Seq.fold (fun ac rt -> rt |> Array.map2 (fun ac1 ac2 -> ac1 + ac2) ac) zeroArray
         >> Array.map (fun ac -> ac / (float num_iter))
 
     let avg_dayahead = avg dayahead
     let avg_realtime = avg realtime
 
-    let avg_area_of_realtime = Charting.FSharpChart.Area avg_realtime
-    let avg_area_of_dayahead = Charting.FSharpChart.Area avg_dayahead
+    let avg_area_of_realtime = Charting.FSharpChart.SplineArea avg_realtime
+    let avg_area_of_dayahead = Charting.FSharpChart.SplineArea avg_dayahead
 
     let syncContext = System.Threading.SynchronizationContext.Current
 
