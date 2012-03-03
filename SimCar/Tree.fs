@@ -65,27 +65,29 @@ let rec map mapf node =
     | Leaf(None) ->
         Leaf(None)
 
-let rec foldf op res node = 
+// fold left on a tree using preorder traversal
+let rec foldl op res node = 
     match node with
     | Node(nodes, Some(leaf)) ->
         let temp = op leaf
-        Seq.fold (fun (ac : energy) n -> ac + foldf op temp n) temp nodes
+        Seq.fold (fun (ac : energy) n -> ac + foldl op temp n) temp nodes
     | Leaf(Some(leaf)) ->
         op leaf
     | Node(nodes, None) ->
-        Seq.fold (fun (ac : energy) n -> ac + foldf op res n) res nodes
+        Seq.fold (fun (ac : energy) n -> ac + foldl op res n) res nodes
     | Leaf(None) ->
         res
 
-let rec foldfl op node : float<kWh> = 
+// fold right on a tree using inorder traversal
+let rec foldr op node : float<kWh> = 
     match node with 
     | Node(nodes, Some(leaf)) ->
-        let f = Seq.fold (fun ac f -> ac + f) 0.0<kWh> (seq { for n in nodes do yield foldfl op n })
+        let f = Seq.fold (fun ac f -> ac + f) 0.0<kWh> (seq { for n in nodes do yield foldr op n })
         op leaf f
     | Leaf(Some(leaf)) ->
         op leaf 0.0<kWh>
     | Node(nodes, None) -> 
-        Seq.fold (fun ac f -> ac + f) 0.0<kWh> (seq { for n in nodes do yield foldfl op n })
+        Seq.fold (fun ac f -> ac + f) 0.0<kWh> (seq { for n in nodes do yield foldr op n })
     | Leaf(None) -> 
         0.0<kWh>
         

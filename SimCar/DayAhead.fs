@@ -17,7 +17,7 @@ let scan(_D : float<kWh>[]) =
     let alpha = 0.15
     let i = Array.findIndex (fun w' -> w = w') D
 
-    let disc idx = 0.8 ** (dist (float idx) (float i))
+    let disc idx = 0.5 ** (dist (float idx) (float i))
     let delta w' idx (target : float<kWh>) = (disc idx) * alpha * (target - w')
     let update idx target = 
         let d = (delta D.[idx] idx target)

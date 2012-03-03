@@ -33,21 +33,8 @@ let print_grid message =
         postalService.Post(Completed(sprintf "Received node %s" gridnode.name))
         Model(gridnode)
 
-
-// for testing purposes
-let op tick (Model(grid)) = 
-    match grid with 
-    | Transformer(trf_args) ->
-        0.0<kWh>
-    | PHEV(phev_args) ->
-        phev_args.current
-    | BRP(brp_args) ->
-        0.0<kWh>
-    | PowerNode(pnode_args) ->
-        pnode_args.realtime (tick)
-
-// take a node in 
-let update ((ag:Agent<Message<_>>), Model(grid)) (ac : float<kWh>) : float<kWh> = 
+// the update-function, takes the current node and threaded accumulator as parameters
+let update (ag:Agent<Message<_>>, Model(grid)) (ac : float<kWh>) : float<kWh> = 
     match grid with 
     | Transformer(trf_args) ->
         let trf = Transformer({ trf_args with current=ac})
@@ -64,20 +51,23 @@ let update ((ag:Agent<Message<_>>), Model(grid)) (ac : float<kWh>) : float<kWh> 
         ag.Post(Model(grid))
         pnode_args.current
 
+let moving_average (array : float<kWh> array) = 
+    array |> Seq.ofArray |> Seq.windowed (10) |> Seq.map Array.average
+
 // main control flow of the simulator
 let run day agents =
     let run_sim tick = 
         agents
         |> Tree.send (Update(tick)) // inform agents that new tick has begun
         |> Tree.send_and_reply RequestModel // request model from agents
-        |> Tree.foldfl update // update transformers and brp with result of actions taken by phevs and powernodes
+        |> Tree.foldr update // right-fold over tree, applying the update function (inorder traversal)
 
     let realtime = Array.init(96) (fun i -> run_sim i)
         
-
     let dayahead = 
         realtime
-        |> scan
+        |> moving_average
+        |> Array.ofSeq
 
     let sum_realtime = 
         realtime 
@@ -124,21 +114,21 @@ let main args =
     let (dayahead, realtime) = results |> List.ofSeq |> List.unzip
 
     // fold over sequence of arrays, compute average, return functional composition of Seq.fold and Array.map
-    let zeroArray = (Array.zeroCreate<float<kWh>> ticks_in_day)
+    let zeroArray = (Array.zeroCreate<float<kWh>> 87)
     let avg = 
         Seq.fold (fun ac rt -> rt |> Array.map2 (fun ac1 ac2 -> ac1 + ac2) ac) zeroArray
         >> Array.map (fun ac -> ac / (float num_iter))
 
     let avg_dayahead = avg dayahead
-    let avg_realtime = avg realtime
+//    let avg_realtime = avg realtime
 
-    let avg_area_of_realtime = Charting.FSharpChart.SplineArea avg_realtime
+//    let avg_area_of_realtime = Charting.FSharpChart.SplineArea avg_realtime
     let avg_area_of_dayahead = Charting.FSharpChart.SplineArea avg_dayahead
 
     let syncContext = System.Threading.SynchronizationContext.Current
 
-    create_chart avg_area_of_realtime "Average realtime consumption"
-//    create_chart avg_area_of_dayahead "Dayahead profile"
+//    create_chart avg_area_of_realtime "Average realtime consumption"
+    create_chart avg_area_of_dayahead "Dayahead profile"
 
     Console.ReadKey() |> ignore
 

@@ -56,7 +56,7 @@ type PostalService() =
     let agent = Agent<string Message>.Start(fun agent ->
         let rec loop agents = async {
             let! msg = agent.Receive()
-            
+           
             match msg with 
             | Register(from_agent) ->
                 syncContext.RaiseEvent jobCompleted (agent, "Agent registered with postal service")
