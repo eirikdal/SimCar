@@ -77,6 +77,18 @@ let rec foldf op res node =
     | Leaf(None) ->
         res
 
+let rec foldfl op node : float<kWh> = 
+    match node with 
+    | Node(nodes, Some(leaf)) ->
+        let f = Seq.fold (fun ac f -> ac + f) 0.0<kWh> (seq { for n in nodes do yield foldfl op n })
+        op leaf f
+    | Leaf(Some(leaf)) ->
+        op leaf 0.0<kWh>
+    | Node(nodes, None) -> 
+        Seq.fold (fun ac f -> ac + f) 0.0<kWh> (seq { for n in nodes do yield foldfl op n })
+    | Leaf(None) -> 
+        0.0<kWh>
+        
 let rec collect (node : Node<'a Message>) = 
     seq<'a Message> {
         match node with 

@@ -37,58 +37,60 @@ let print_grid message =
 // for testing purposes
 let op tick (Model(grid)) = 
     match grid with 
-    | Transformer(trf_args,_) ->
+    | Transformer(trf_args) ->
         0.0<kWh>
     | PHEV(phev_args) ->
         phev_args.current
-    | BRP(brp_args,_) ->
+    | BRP(brp_args) ->
         0.0<kWh>
     | PowerNode(pnode_args) ->
         pnode_args.realtime (tick)
 
-// for testing purposes
-let update (Model(grid)) tick = 
+// take a node in 
+let update ((ag:Agent<Message<_>>), Model(grid)) (ac : float<kWh>) : float<kWh> = 
     match grid with 
-    | Transformer(trf_args,nodes) ->
-        Transformer({ trf_args with current=Tree.foldf (op tick) 0.0<kWh> (Node(nodes, None))}, nodes)
+    | Transformer(trf_args) ->
+        let trf = Transformer({ trf_args with current=ac})
+        ag.Post(Model(trf))
+        ac
     | PHEV(phev_args) ->
-        PHEV({ phev_args with current=0.0<kWh> })
-    | BRP(brp_args,nodes) ->
-        BRP({ brp_args with current=0.0<kWh> }, nodes)
+        ag.Post(Model(grid))
+        phev_args.current
+    | BRP(brp_args) ->
+        let brp = BRP({ brp_args with current=ac })
+        ag.Post(Model(brp))
+        ac
     | PowerNode(pnode_args) ->
-        PowerNode({ pnode_args with current=0.0<kWh> })
-
+        ag.Post(Model(grid))
+        pnode_args.current
 
 // main control flow of the simulator
 let run day agents =
     let run_sim tick = 
         agents
-        |> Tree.send (Update(tick))
-        |> Tree.send_and_reply RequestModel
-        |> Tree.map (fun (ag, msg) -> ag.Post(Model(update msg tick)); ag)
-
-    // |> Update model and send back
-    //|> Tree.foldf (op tick) 0.0<kW*h>
+        |> Tree.send (Update(tick)) // inform agents that new tick has begun
+        |> Tree.send_and_reply RequestModel // request model from agents
+        |> Tree.foldfl update // update transformers and brp with result of actions taken by phevs and powernodes
 
     let realtime = Array.init(96) (fun i -> run_sim i)
         
 
-//    let dayahead = 
-//        realtime
-//        |> scan
+    let dayahead = 
+        realtime
+        |> scan
 
-//    let sum_realtime = 
-//        realtime 
-//        |> Array.fold (fun ac rt -> ac + Current.toFloat rt) 0.0
-//
-//    let sum_dayahead = 
-//        dayahead
-//        |> Array.fold (fun ac d -> ac + Current.toFloat d) 0.0
+    let sum_realtime = 
+        realtime 
+        |> Array.fold (fun ac rt -> ac + rt) 0.0<kWh>
 
-//    printf "Sum realtime: %f\n" sum_realtime
-//    printf "Sum dayahead: %f\n" sum_dayahead
+    let sum_dayahead = 
+        dayahead
+        |> Array.fold (fun ac d -> ac + d) 0.0<kWh>
 
-    (Seq.empty, Seq.empty)
+    printf "Sum realtime: %f\n" <| Energy.toFloat sum_realtime
+    printf "Sum dayahead: %f\n" <| Energy.toFloat sum_dayahead
+
+    (dayahead, realtime)
 
 [<STAThread>]
 [<EntryPoint>]
@@ -122,20 +124,20 @@ let main args =
     let (dayahead, realtime) = results |> List.ofSeq |> List.unzip
 
     // fold over sequence of arrays, compute average, return functional composition of Seq.fold and Array.map
-    let zeroArray = (Array.zeroCreate<energy> ticks_in_day)
+    let zeroArray = (Array.zeroCreate<float<kWh>> ticks_in_day)
     let avg = 
         Seq.fold (fun ac rt -> rt |> Array.map2 (fun ac1 ac2 -> ac1 + ac2) ac) zeroArray
         >> Array.map (fun ac -> ac / (float num_iter))
 
-//    let avg_dayahead = avg dayahead
-//    let avg_realtime = avg realtime
-//
-//    let avg_area_of_realtime = Charting.FSharpChart.SplineArea avg_realtime
-//    let avg_area_of_dayahead = Charting.FSharpChart.SplineArea avg_dayahead
+    let avg_dayahead = avg dayahead
+    let avg_realtime = avg realtime
+
+    let avg_area_of_realtime = Charting.FSharpChart.SplineArea avg_realtime
+    let avg_area_of_dayahead = Charting.FSharpChart.SplineArea avg_dayahead
 
     let syncContext = System.Threading.SynchronizationContext.Current
 
-//    create_chart avg_area_of_realtime "Average realtime consumption"
+    create_chart avg_area_of_realtime "Average realtime consumption"
 //    create_chart avg_area_of_dayahead "Dayahead profile"
 
     Console.ReadKey() |> ignore

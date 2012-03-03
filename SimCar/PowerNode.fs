@@ -9,7 +9,7 @@ open System
 open Models
 
 let pnode_agent pnode = Agent.Start(fun agent ->
-    let rec loop (PowerNode(pnode_args)) = async {
+    let rec loop (PowerNode(pnode_args) as pnode) = async {
         let! msg = agent.Receive()
 
         match msg with
@@ -19,7 +19,9 @@ let pnode_agent pnode = Agent.Start(fun agent ->
             match replyToMsg with
             | RequestModel ->
                 reply.Reply(Model(pnode))
-        | Update(tick) -> ()
+        | Update(tick) -> 
+            let current = pnode_args.realtime tick
+            return! loop <| PowerNode({ pnode_args with current=current })
         | Model(pnode) -> return! loop pnode
         | _ -> 
             syncContext.RaiseEvent error <| Exception("Not implemented yet")

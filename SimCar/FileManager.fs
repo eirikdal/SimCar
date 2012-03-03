@@ -124,7 +124,7 @@ let rec parse_powergrid stream nodes (rest : string list byref) =
             match realtime with
             | None -> raise <| IOException(sprintf "Could not find powernode with name %s in powerprofiles.txt" name)
             | Some realtime ->
-                let nth n = Current.ofFloat ((snd realtime) |> Seq.cache |> Seq.nth n)
+                let nth n = Energy.ofFloat ((snd realtime) |> Seq.cache |> Seq.nth n)
                 let node = create_powernode name nth
                 parse_powergrid t (List.append nodes [node]) (&rest)
         | [|"}"|] -> 

@@ -103,17 +103,17 @@ type PnodeArguments =
     current : energy }
 
 type Grid = 
-    | BRP of BrpArguments * (Grid seq) 
-    | Transformer of TrfArguments * (Grid seq) 
+    | BRP of BrpArguments
+    | Transformer of TrfArguments
     | PowerNode of PnodeArguments
     | PHEV of PhevArguments
     with 
     member self.name = 
         match self with
         | PHEV(phev_arg) -> phev_arg.name
-        | Transformer(trf_arg, _) -> trf_arg.name
+        | Transformer(trf_arg) -> trf_arg.name
         | PowerNode(pnode_arg) -> pnode_arg.name
-        | BRP(brp_arg,_) -> brp_arg.name
+        | BRP(brp_arg) -> brp_arg.name
 
 // dummy functions for dayahead and realtime mode, for testing purposes
 let sine n = Energy.ofFloat <| sin (2.0 * Math.PI * (float n))
@@ -125,9 +125,9 @@ let create_node name nodes capacity current =
     let trf_arg = 
         { name=name;
         TrfArguments.capacity=Capacity.ofFloat <| Double.Parse(capacity, CultureInfo.InvariantCulture);
-        TrfArguments.current=Current.ofFloat <| Double.Parse(current, CultureInfo.InvariantCulture) }
+        TrfArguments.current=Energy.ofFloat <| Double.Parse(current, CultureInfo.InvariantCulture) }
 
-    Transformer(trf_arg, nodes)
+    Node(nodes, Some <| Transformer(trf_arg))
 
 // function that creates a PHEV model, takes name, capacity, current and battery as parameters
 let create_phev name capacity current battery profile (profiles : Profile seq) =
@@ -135,16 +135,16 @@ let create_phev name capacity current battery profile (profiles : Profile seq) =
         { name=name;
         profile=Seq.find (fun (DistProfile(prof_name, dist)) -> prof_name = profile) profiles;
         capacity=Capacity.ofFloat <| Double.Parse(capacity, CultureInfo.InvariantCulture);
-        current=Current.ofFloat <| Double.Parse(current, CultureInfo.InvariantCulture);
+        current=Energy.ofFloat <| Double.Parse(current, CultureInfo.InvariantCulture);
         battery=Battery.ofFloat <| Double.Parse(battery, CultureInfo.InvariantCulture); }
-    PHEV(phev_arg)
+    Node(Seq.empty, Some <| PHEV(phev_arg))
 
 let create_powernode name realtime = 
     let pnode_arg =
         { name=name;
         realtime=realtime;
         current=0.0<kWh>; }
-    PowerNode(pnode_arg)
+    Node(Seq.empty, Some <| PowerNode(pnode_arg))
 
 let create_brp name nodes dayahead = 
     let brp_arg : BrpArguments = 
@@ -152,7 +152,7 @@ let create_brp name nodes dayahead =
         dayahead=dayahead;
         current=0.0<kWh> }
 
-    BRP(brp_arg,nodes)
+    Node(nodes, Some <| BRP(brp_arg)) 
 
 let create_distribution str_type mean sigma duration =
     let dist_type = 

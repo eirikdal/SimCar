@@ -39,7 +39,6 @@ let scan(_D : float<kWh>[]) =
             update ik x
         if D.[ik'] > D.[ik+1] then 
             update ik' x
-
         if D.[ik+1] > D.[ik] || D.[ik'-1] > D.[ik] then 
             smooth (k+1)
 

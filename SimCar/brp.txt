@@ -1,18 +1,11 @@
 ﻿trf node1 10000.0 0.0 {
   trf node2 1000.0 0.0 {
     pnode house house2
-    trf node3 100.0 0.0
+    pnode house house4
   }
-  trf node4 1000.0 0.0
-  trf node5 1000.0 0.0
-  pnode house house4
-  trf node6 1000.0 0.0
   trf node7 1000.0 0.0 {
     pnode house house3
-    trf node8 100.0 0.0
   }
-  trf node9 1000.0 0.0
   phev Toyota worker 10.0 0.0 5.0
   pnode house house1
 }
-trf node20 1.0 0.0
