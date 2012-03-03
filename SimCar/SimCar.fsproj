@@ -49,8 +49,8 @@
     <Compile Include="BRP.fs" />
     <Compile Include="PostalService.fs" />
     <Compile Include="DayAhead.fs" />
-    <Content Include="brp.txt" />
     <Compile Include="SimCar.fs" />
+    <Content Include="brp.txt" />
     <Content Include="profiles.txt" />
     <Content Include="powerprofiles.txt" />
     <None Include="packages.config" />
