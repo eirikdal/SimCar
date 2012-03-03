@@ -51,6 +51,7 @@ let phev_agent _p = Agent<'a Message>.Start(fun agent ->
                 reply.Reply(Model(phev))
 
                 return! loop phev
+        | Model(phev) -> return! loop phev
         | Update(tick) ->
             match phev_args.profile with 
             | FloatProfile(name,dist_list) ->

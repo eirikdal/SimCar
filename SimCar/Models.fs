@@ -54,7 +54,7 @@ module Battery =
         else
             LanguagePrimitives.FloatWithMeasure<kWh> (float value)
 
-module Current = 
+module Energy = 
     let inline toFloat (value : energy) = float value
     let inline ofFloat (value : float) =
         if value > 10000000.0 || value < -10000000.0 then
@@ -82,23 +82,25 @@ type Node<'T> =
 
 type BrpArguments = 
     { name : string;
-    dayahead : dayahead }
+    dayahead : dayahead;
+    current : energy }
 
 type PhevArguments =
     { name : string;
     profile : Profile;
     capacity : capacity;
-    current : current;
+    current : energy;
     battery : battery }
 
 type TrfArguments = 
     { name : string; 
     capacity : capacity;
-    current : current }
+    current : energy }
 
 type PnodeArguments = 
     { name : string;
-    realtime : realtime }
+    realtime : realtime;
+    current : energy }
 
 type Grid = 
     | BRP of BrpArguments * (Grid seq) 
@@ -114,7 +116,7 @@ type Grid =
         | BRP(brp_arg,_) -> brp_arg.name
 
 // dummy functions for dayahead and realtime mode, for testing purposes
-let sine n = Current.ofFloat <| sin (2.0 * Math.PI * (float n))
+let sine n = Energy.ofFloat <| sin (2.0 * Math.PI * (float n))
 let gen = (Seq.initInfinite (fun x -> 1.0))
 let take n = sine <| Seq.nth n gen
 
@@ -140,13 +142,15 @@ let create_phev name capacity current battery profile (profiles : Profile seq) =
 let create_powernode name realtime = 
     let pnode_arg =
         { name=name;
-        realtime=realtime; }
+        realtime=realtime;
+        current=0.0<kWh>; }
     PowerNode(pnode_arg)
 
 let create_brp name nodes dayahead = 
     let brp_arg : BrpArguments = 
         { name=name;
-        dayahead=dayahead }
+        dayahead=dayahead;
+        current=0.0<kWh> }
 
     BRP(brp_arg,nodes)
 

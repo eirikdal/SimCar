@@ -24,6 +24,7 @@ let trf_agent trf = Agent.Start(fun agent ->
             match replyToMsg with
             | RequestModel ->
                 reply.Reply(Model(trf))
+        | Model(trf) -> return! loop trf
         | Update(tick) ->
             ()
         | _ -> 

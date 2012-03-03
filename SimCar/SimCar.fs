@@ -33,45 +33,62 @@ let print_grid message =
         postalService.Post(Completed(sprintf "Received node %s" gridnode.name))
         Model(gridnode)
 
+
 // for testing purposes
 let op tick (Model(grid)) = 
     match grid with 
     | Transformer(trf_args,_) ->
-        Current.ofFloat 0.0
+        0.0<kWh>
     | PHEV(phev_args) ->
         phev_args.current
     | BRP(brp_args,_) ->
-        Current.ofFloat 0.0
+        0.0<kWh>
     | PowerNode(pnode_args) ->
         pnode_args.realtime (tick)
 
+// for testing purposes
+let update (Model(grid)) tick = 
+    match grid with 
+    | Transformer(trf_args,nodes) ->
+        Transformer({ trf_args with current=Tree.foldf (op tick) 0.0<kWh> (Node(nodes, None))}, nodes)
+    | PHEV(phev_args) ->
+        PHEV({ phev_args with current=0.0<kWh> })
+    | BRP(brp_args,nodes) ->
+        BRP({ brp_args with current=0.0<kWh> }, nodes)
+    | PowerNode(pnode_args) ->
+        PowerNode({ pnode_args with current=0.0<kWh> })
+
+
 // main control flow of the simulator
 let run day agents =
-    let sum_of_realtime tick = 
+    let run_sim tick = 
         agents
         |> Tree.send (Update(tick))
         |> Tree.send_and_reply RequestModel
-        |> Tree.map (fun (ag, msg) -> msg)
-        |> Tree.foldf (op tick) 0.0<kW*h>
+        |> Tree.map (fun (ag, msg) -> ag.Post(Model(update msg tick)); ag)
 
-    let realtime = Array.init(96) (fun i -> sum_of_realtime i)
-  
-    let dayahead = 
-        realtime
-        |> scan
+    // |> Update model and send back
+    //|> Tree.foldf (op tick) 0.0<kW*h>
 
-    let sum_realtime = 
-        realtime 
-        |> Array.fold (fun ac rt -> ac + Current.toFloat rt) 0.0
+    let realtime = Array.init(96) (fun i -> run_sim i)
+        
 
-    let sum_dayahead = 
-        dayahead
-        |> Array.fold (fun ac d -> ac + Current.toFloat d) 0.0
+//    let dayahead = 
+//        realtime
+//        |> scan
 
-    printf "Sum realtime: %f\n" sum_realtime
-    printf "Sum dayahead: %f\n" sum_dayahead
+//    let sum_realtime = 
+//        realtime 
+//        |> Array.fold (fun ac rt -> ac + Current.toFloat rt) 0.0
+//
+//    let sum_dayahead = 
+//        dayahead
+//        |> Array.fold (fun ac d -> ac + Current.toFloat d) 0.0
 
-    (dayahead, realtime)
+//    printf "Sum realtime: %f\n" sum_realtime
+//    printf "Sum dayahead: %f\n" sum_dayahead
+
+    (Seq.empty, Seq.empty)
 
 [<STAThread>]
 [<EntryPoint>]
@@ -110,16 +127,16 @@ let main args =
         Seq.fold (fun ac rt -> rt |> Array.map2 (fun ac1 ac2 -> ac1 + ac2) ac) zeroArray
         >> Array.map (fun ac -> ac / (float num_iter))
 
-    let avg_dayahead = avg dayahead
-    let avg_realtime = avg realtime
-
-    let avg_area_of_realtime = Charting.FSharpChart.SplineArea avg_realtime
-    let avg_area_of_dayahead = Charting.FSharpChart.SplineArea avg_dayahead
+//    let avg_dayahead = avg dayahead
+//    let avg_realtime = avg realtime
+//
+//    let avg_area_of_realtime = Charting.FSharpChart.SplineArea avg_realtime
+//    let avg_area_of_dayahead = Charting.FSharpChart.SplineArea avg_dayahead
 
     let syncContext = System.Threading.SynchronizationContext.Current
 
 //    create_chart avg_area_of_realtime "Average realtime consumption"
-    create_chart avg_area_of_dayahead "Dayahead profile"
+//    create_chart avg_area_of_dayahead "Dayahead profile"
 
     Console.ReadKey() |> ignore
 
