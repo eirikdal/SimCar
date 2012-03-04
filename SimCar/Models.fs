@@ -90,7 +90,10 @@ type PhevArguments =
     profile : Profile;
     capacity : capacity;
     current : energy;
-    battery : battery }
+    battery : battery;
+    rate : energy;
+    left : int;
+    duration : int; }
 
 type TrfArguments = 
     { name : string; 
@@ -130,13 +133,16 @@ let create_node name nodes capacity current =
     Node(nodes, Some <| Transformer(trf_arg))
 
 // function that creates a PHEV model, takes name, capacity, current and battery as parameters
-let create_phev name capacity current battery profile (profiles : Profile seq) =
+let create_phev name capacity current battery rate profile (profiles : Profile seq) =
     let phev_arg = 
         { name=name;
         profile=Seq.find (fun (DistProfile(prof_name, dist)) -> prof_name = profile) profiles;
         capacity=Capacity.ofFloat <| Double.Parse(capacity, CultureInfo.InvariantCulture);
         current=Energy.ofFloat <| Double.Parse(current, CultureInfo.InvariantCulture);
-        battery=Battery.ofFloat <| Double.Parse(battery, CultureInfo.InvariantCulture); }
+        battery=Battery.ofFloat <| Double.Parse(battery, CultureInfo.InvariantCulture);
+        rate=Energy.ofFloat <| Double.Parse(rate, CultureInfo.InvariantCulture);
+        duration=(-1);
+        left=(-1) }
     Node(Seq.empty, Some <| PHEV(phev_arg))
 
 let create_powernode name realtime = 
