@@ -34,9 +34,9 @@ let (|ParseRegex|_|) regex str =
 let parse_dist str = 
     match str with 
     | ParseRegex "mean=([0-9]+){1,2}:([0-9]+){1,2}" [Float h; Float m] ->
-        h*4.0*15.0 + m
+        h*4.0 + (m / 15.0)
     | ParseRegex "std=([0-9]+)" [Float std] ->
-        std
+        (std / 15.0)
     | ParseRegex "duration=(\d)+" [Float duration] ->
         duration
     | _ -> raise <| Exception "Parsing failed"
@@ -77,7 +77,7 @@ let rec parse_powerprofile stream name (dist : float seq) (rest : string list by
     | h::t ->
         match h.Split([|' ';';'|], StringSplitOptions.RemoveEmptyEntries) with
         | [|q1;q2;q3;q4|] ->
-            let temp = Double.Parse(q1)::Double.Parse(q2)::Double.Parse(q3)::Double.Parse(q4)::[]
+            let temp = Double.Parse(q1, CultureInfo.InvariantCulture)::Double.Parse(q2, CultureInfo.InvariantCulture)::Double.Parse(q3, CultureInfo.InvariantCulture)::Double.Parse(q4, CultureInfo.InvariantCulture)::[]
             parse_powerprofile t name (Seq.append dist temp) (&rest)
         | [|"}"|] -> 
             rest <- t
@@ -109,15 +109,15 @@ let powerprofiles : (string * float seq) seq =
 let rec parse_powergrid stream nodes (rest : string list byref) =
     match (stream : string list) with 
     | h::t ->
-        match h.Split([|' '|], StringSplitOptions.RemoveEmptyEntries) with
+        match h.Split([|' ';'\t'|], StringSplitOptions.RemoveEmptyEntries) with
         | [|"trf";name;capacity;current|] ->
             let node = create_node name Seq.empty capacity current
             parse_powergrid t (List.append nodes [node]) (&rest)
         | [|"trf";name;capacity;current;"{"|] -> 
             let node = create_node name (parse_powergrid t [] &rest) capacity current
             parse_powergrid rest (List.append nodes [node]) (&rest)
-        | [|"phev";name;profile;capacity;current;battery|] -> 
-            let node = create_phev name capacity current battery profile profiles
+        | [|"phev";name;profile;capacity;current;battery;rate|] -> 
+            let node = create_phev name capacity current battery rate profile profiles
             parse_powergrid t (List.append nodes [node]) (&rest)
         | [|"pnode";name;realtime|] ->
             let realtime = (Seq.tryFind (fun (n, s) -> n = name) powerprofiles)

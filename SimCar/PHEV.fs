@@ -17,10 +17,10 @@ let sum time profile =
     match profile.dist_type with
     | Normal ->
         let n = new Normal(profile.mean, profile.sigma)
-        n.CumulativeDistribution(time*15.0) - n.CumulativeDistribution((time-1.0)*15.0)   
+        n.CumulativeDistribution(time) - n.CumulativeDistribution((time-1.0))   
     | LogNormal ->
         let n = new Cauchy(profile.mean, profile.sigma)
-        n.CumulativeDistribution(time*15.0) - n.CumulativeDistribution((time-1.0)*15.0)
+        n.CumulativeDistribution(time) - n.CumulativeDistribution((time-1.0))
 
 let sum_profile profiles time = 
     profiles
@@ -51,7 +51,8 @@ let phev_agent _p = Agent<'a Message>.Start(fun agent ->
                 reply.Reply(Model(phev))
 
                 return! loop phev
-        | Model(phev) -> return! loop phev
+        | Model(phev) ->
+            return! loop phev
         | Update(tick) ->
             match phev_args.profile with 
             | FloatProfile(name,dist_list) ->
@@ -59,10 +60,24 @@ let phev_agent _p = Agent<'a Message>.Start(fun agent ->
 
                 let f = (Seq.nth tick dist_list)
 
-                if r.NextDouble() < f then
-                    syncContext.RaiseEvent phevEvent <| sprintf "time %f, prob: %f" (float tick / 4.0) f
+                if phev_args.left < 0 then
+                    if r.NextDouble() < f then
+                        syncContext.RaiseEvent phevEvent <| sprintf "time %f, prob: %f" (float tick / 4.0) f
+                    
+                        return! loop <| PHEV({ phev_args with left=tick; duration=8 })
+                    else if phev_args.battery < phev_args.capacity then
+                        let phevArgs = { phev_args with current=phev_args.rate; battery=phev_args.battery+phev_args.current }
 
-                return! loop phev
+                        return! loop <| PHEV(phevArgs)
+                    else if phev_args.battery >= phev_args.capacity then
+                        let phevArgs = { phev_args with current=0.0<kWh> }
+                    
+                        return! loop <| PHEV(phevArgs)
+                else
+                    if tick = (phev_args.left + phev_args.duration) then
+                        return! loop <| PHEV({ phev_args with battery=(phev_args.battery - phev_args.rate);left=(-1);duration=(-1) })
+
+                    return! loop <| PHEV({ phev_args with battery=(phev_args.battery - phev_args.rate) })
             | DistProfile(name,dist_list) ->
                 let p = calc name dist_list
                 

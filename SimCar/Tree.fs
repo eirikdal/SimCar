@@ -26,7 +26,7 @@ let rec send_and_reply msg (node : Node<Agent<_ Message>>) =
         match node with
         | Node(nodes, Some(leaf)) ->
             let res = leaf.PostAndReply((fun replyChannel -> ReplyTo(msg, replyChannel)), 1000)
-            Node(Seq.map (fun n -> send_and_reply msg n) nodes, Some (leaf, res))
+            Node(Seq.map (fun n -> send_and_reply msg n) nodes |> Seq.cache, Some (leaf, res))
         | Node(nodes, None) -> 
             Node(Seq.map (fun n -> send_and_reply msg n) nodes, None)
         | Leaf(Some(leaf)) ->
@@ -44,9 +44,9 @@ let rec send msg (node : Node<Agent<_ Message>>) =
     match node with
     | Node(nodes, Some(leaf)) ->
         let res = leaf.Post(msg)
-        Node(Seq.map (fun n -> send msg n) nodes, Some <| leaf)
+        Node(Seq.map (fun n -> send msg n) nodes |> Seq.cache, Some <| leaf)
     | Node(nodes, None) -> 
-        Node(Seq.map (fun n -> send msg n) nodes, None)
+        Node(Seq.map (fun n -> send msg n) nodes |> Seq.cache, None)
     | Leaf(Some(leaf)) ->
         let res = leaf.Post(msg)
         Leaf(Some <| leaf)

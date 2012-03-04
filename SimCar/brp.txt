@@ -2,10 +2,15 @@
   trf node2 1000.0 0.0 {
     pnode house house2
     pnode house house4
+	phev Sokrates worker 10.0 0.0 5.0 1.0
+    phev Platon worker 10.0 0.0 5.0 1.0
   }
   trf node7 1000.0 0.0 {
     pnode house house3
   }
-  phev Toyota worker 10.0 0.0 5.0
+  phev Zeno worker 10.0 0.0 5.0 1.0
+  phev Arkimedes housewife 10.0 0.0 5.0 1.0
+  phev Descartes worker 10.0 0.0 5.0 1.0
+  phev Godel housewife 10.0 0.0 5.0 1.0
   pnode house house1
 }

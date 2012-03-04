@@ -56,6 +56,8 @@
     <None Include="packages.config" />
     <None Include="day-ahead-poc.fsx" />
     <None Include="day-ahead-poc2.fsx" />
+    <None Include="parse_realtime_data.fsx" />
+    <None Include="FSharpChart.fsx" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.PowerPack">
@@ -84,8 +86,7 @@
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
     <Reference Include="MSDN.FSharpChart">
-      <HintPath>..\packages\MSDN.FSharpChart.dll.0.60\lib\MSDN.FSharpChart.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\FSharpChart\F#\bin\MSDN.FSharpChart.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />

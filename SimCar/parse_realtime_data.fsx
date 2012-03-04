@@ -3,6 +3,8 @@ open System.IO
 open System.Globalization
 open System.Text.RegularExpressions
 
+#nowarn "25"
+
 let folder_of file = sprintf "%s\\data\\%s" (Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName) file
 let profile_file = sprintf "%s\\%s" (Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName) "powerprofiles.txt"
 
