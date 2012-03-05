@@ -8,6 +8,7 @@ open SynchronizationContext
 open Message
 open Agent
 open Models
+open PostalService
 open MathNet.Numerics.Distributions
 //open Node
 
@@ -36,8 +37,8 @@ let calc name (profiles : Distribution list) : Profile =
 (* 
  * PHEV: This is the PHEV agent
  *)
-let phev_agent _p = Agent<'a Message>.Start(fun agent ->
-    let rec loop (PHEV(phev_args) as phev) = async {
+let phev_agent _p name = Agent<'a Message>.Start(fun agent ->
+    let rec loop (PHEV({parent=parent} as phev_args) as phev) = async {
         let! msg = agent.Receive()
 
         match msg with
@@ -55,11 +56,15 @@ let phev_agent _p = Agent<'a Message>.Start(fun agent ->
             return! loop phev
         | Update(tick) ->
             match phev_args.profile with 
-            | FloatProfile(name,dist_list) ->
+            | FloatProfile(dist_name,dist_list) ->
                 // if PHEV is at home, see if it is time to leave, reduce duration and state of battery to account for travel time
                 if phev_args.left < 0 then
+                    // testing broadcast intention
+                    if phev_args.battery < phev_args.capacity then
+                        postalService.send(parent, Charge(name, Energy.ofFloat (float (phev_args.capacity - phev_args.battery))))
+//                    let test = Charge(name, Energy.ofFloat (float phev_args.left))
                     let r = (new System.Random()).NextDouble()
-
+//                    printfn "%s" parent
                     // try to find a distribution that matches the random number r
                     let dist = dist_list |> Seq.tryFind (fun ({dist=dist}) -> r < (Seq.nth tick dist))
                     
@@ -92,7 +97,7 @@ let phev_agent _p = Agent<'a Message>.Start(fun agent ->
 
                 return! loop <| PHEV(phevArguments)
         | _ -> 
-            syncContext.RaiseEvent error <| Exception("Not implemented yet")
+            syncContext.RaiseEvent error <| Exception("PHEV: Not implemented yet")
 
             return! loop phev
         

@@ -8,22 +8,24 @@ open FileManager
 open System
 open MSDN.FSharp.Charting
 open Models
+open Tree
 
 [<STAThread>]
 [<EntryPoint>]
 let main args =
 //    let chart1 = Array.zeroCreate<float<kWh>>(96) |> FSharpChart.Line
-//    do updateEvent.Publish.Add(fun array -> chart1.Series) 
     // add what to do (as lambdas) with jobCompleted and error events
-    jobCompleted<Message<string>>.Publish.Add(fun (agent, str) -> postalService.Post(Completed(sprintf "%s" str)))
+//    jobCompleted<Message<string>>.Publish.Add(fun (agent, str) -> postalService.Post(Completed(sprintf "%s" str)))
     error.Publish.Add(fun e -> postalService.Post(Error(sprintf "%s" e.Message)))
     progress.Publish.Add(fun str -> printf "%s" str)
     phevEvent.Publish.Add(fun phev -> printfn "%s" phev)
     // make agent tree from model tree (powergrid : Grid list, make_agents : Node<Agent> seq)
-    let agents = to_agents powergrid
+    let agents = 
+        to_agents powergrid
+        |> Tree.map postalService.add_agent
 
     // add agents to postalservice
-    Tree.iter postalService.add_agent agents
+    
 
     // send RequestModel message to agents
     let responses = Tree.send RequestModel agents
@@ -51,14 +53,17 @@ let main args =
     let realtime = FSharpChart.Combine [FSharpChart.Line avg_phevs 
                                         FSharpChart.Line avg_pnodes]
 
+    
 //    let chart2 = realtime |> FSharpChart.Create
-
-//    FSharpChart.Line avg_phevs |> FSharpChart.Create
-//    let syncContext = System.Threading.SynchronizationContext.Current
+    
+    let syncContext = System.Threading.SynchronizationContext.Current
+    
+//    FSharpChart.Line avg_phevs |> FSharpChart.WithCreate |> ignore
 
     create_chart realtime "Average realtime consumption"
+//    do updateEvent.Publish.Add(fun array -> ) 
 //    create_chart avg_area_of_dayahead "Dayahead profile"
 
-    do Console.ReadKey() |> ignore
+    System.Threading.Thread.Sleep(10000)
 
     0

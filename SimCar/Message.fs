@@ -5,11 +5,11 @@ open Agent
 open Models
 
 type 'a Message = 
-    | Charge of Agent<'a Message> * energy
+    | Charge of string * energy
     | Completed of string
     | Assign of Agent<'a Message> * Grid
-    | Register of Agent<'a Message>
-    | Deregister of Agent<'a Message>
+    | Register of string * Agent<'a Message>
+    | Deregister of string * Agent<'a Message>
     | Broadcast of 'a Message
     | Hello
     | ReplyTo of 'a Message * AsyncReplyChannel<'a Message>
