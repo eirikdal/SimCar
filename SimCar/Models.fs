@@ -70,11 +70,12 @@ type Distribution =
     { dist_type : DistributionType;
     mean : float;
     sigma : float;
-    duration : int }
+    duration : int;
+    dist : float seq }
 
 type Profile = 
     | DistProfile of string * Distribution list
-    | FloatProfile of string * float seq
+    | FloatProfile of string * Distribution list
 
 type Node<'T> = 
     | Node of (Node<'T> seq) * 'T option
@@ -170,4 +171,5 @@ let create_distribution str_type mean sigma duration =
     { dist_type=dist_type;
     mean=mean;
     sigma=sigma;
-    duration=duration }
+    duration=duration;
+    dist=Seq.empty }

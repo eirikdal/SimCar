@@ -26,13 +26,13 @@ let sum_profile profiles time =
     profiles
     |> Seq.fold (fun ac p -> ac + sum time p) 0.0 
 
-let calc name profiles : Profile = 
-    let profile = 
-        (fun i -> sum_profile profiles (float i))
-        |> Seq.initInfinite
-        |> Seq.cache
+// pre-calculate distributions
+let calc name (profiles : Distribution list) : Profile =         
+    let dist_list = 
+        profiles
+        |> List.map (fun p -> { p with dist=(fun i -> sum (float i) p) |> Seq.initInfinite |> Seq.cache })
         
-    FloatProfile(name, profile)
+    FloatProfile(name, dist_list)
 (* 
  * PHEV: This is the PHEV agent
  *)
@@ -56,29 +56,36 @@ let phev_agent _p = Agent<'a Message>.Start(fun agent ->
         | Update(tick) ->
             match phev_args.profile with 
             | FloatProfile(name,dist_list) ->
+                // if PHEV is at home, see if it is time to leave, reduce duration and state of battery to account for travel time
                 if phev_args.left < 0 then
-                    let r = new System.Random()
+                    let r = (new System.Random()).NextDouble()
 
-                    let f = (Seq.nth tick dist_list)
-
-                    if r.NextDouble() < f then
-                        syncContext.RaiseEvent phevEvent <| sprintf "time %f, prob: %f" (float tick / 4.0) f
+                    // try to find a distribution that matches the random number r
+                    let dist = dist_list |> Seq.tryFind (fun ({dist=dist}) -> r < (Seq.nth tick dist))
                     
-                        return! loop <| PHEV({ phev_args with left=tick; duration=8 })
-                    else if phev_args.battery < phev_args.capacity then
-                        let phevArgs = { phev_args with current=phev_args.rate; battery=phev_args.battery+phev_args.current }
+                    // if a distribution was found, let the PHEV leave with the corresponding duration of the distribution
+                    match dist with
+                    | Some d ->
+                        syncContext.RaiseEvent phevEvent <| sprintf "time %f, duration %d" (float tick / 4.0) d.duration
+                        
+                        return! loop <| PHEV({ phev_args with left=tick; duration=d.duration })
+                    | None ->
+                        // PHEV stayed home, charge battery if less than full
+                        if phev_args.battery < phev_args.capacity then
+                            let phevArgs = { phev_args with current=phev_args.rate; battery=phev_args.battery+phev_args.current }
 
-                        return! loop <| PHEV(phevArgs)
-                    else if phev_args.battery >= phev_args.capacity then
-                        let phevArgs = { phev_args with current=0.0<kWh> }
+                            return! loop <| PHEV(phevArgs)
+                        else if phev_args.battery >= phev_args.capacity then
+                            let phevArgs = { phev_args with current=0.0<kWh> }
                     
-                        return! loop <| PHEV(phevArgs)
+                            return! loop <| PHEV(phevArgs)
                 else
                     if tick = (phev_args.left + phev_args.duration) then
                         return! loop <| PHEV({ phev_args with battery=(phev_args.battery - phev_args.rate);left=(-1);duration=(-1) })
 
                     return! loop <| PHEV({ phev_args with battery=(phev_args.battery - phev_args.rate) })
             | DistProfile(name,dist_list) ->
+                // First time running the distribution profile, calculate and cache the distributions
                 let p = calc name dist_list
                 
                 let phevArguments = { phev_args with profile=p }
