@@ -1,6 +1,7 @@
 ﻿module SynchronizationContext
 
 open Agent
+open Models
 open Message
 open System.Threading
 
@@ -26,4 +27,5 @@ let phevEvent     = new Event<string>()
 let brpEvent      = new Event<string>()
 let trfEvent      = new Event<string>()
 let pnodeEvent    = new Event<string>()
+let updateEvent   = new Event<float<kWh>[]>()
 let syncContext = SynchronizationContext.CaptureCurrent()

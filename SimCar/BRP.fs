@@ -10,7 +10,7 @@ open System.Threading
 open SynchronizationContext
 
 let brp_agent brp = Agent.Start(fun agent ->
-    let rec loop (BRP(brp_args, nodes)) = async {
+    let rec loop (BRP(brp_args)) = async {
         let! msg = agent.Receive()
 
         match msg with
@@ -22,6 +22,7 @@ let brp_agent brp = Agent.Start(fun agent ->
                 reply.Reply(Model(brp))
         | Update(tick) -> 
             ()
+        | Model(brp) -> return! loop brp
         | _ -> 
             syncContext.RaiseEvent error <| Exception("Not implemented yet")
 

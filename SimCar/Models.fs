@@ -54,7 +54,7 @@ module Battery =
         else
             LanguagePrimitives.FloatWithMeasure<kWh> (float value)
 
-module Current = 
+module Energy = 
     let inline toFloat (value : energy) = float value
     let inline ofFloat (value : float) =
         if value > 10000000.0 || value < -10000000.0 then
@@ -82,39 +82,44 @@ type Node<'T> =
 
 type BrpArguments = 
     { name : string;
-    dayahead : dayahead }
+    dayahead : dayahead;
+    current : energy }
 
 type PhevArguments =
     { name : string;
     profile : Profile;
     capacity : capacity;
-    current : current;
-    battery : battery }
+    current : energy;
+    battery : battery;
+    rate : energy;
+    left : int;
+    duration : int; }
 
 type TrfArguments = 
     { name : string; 
     capacity : capacity;
-    current : current }
+    current : energy }
 
 type PnodeArguments = 
     { name : string;
-    realtime : realtime }
+    realtime : realtime;
+    current : energy }
 
 type Grid = 
-    | BRP of BrpArguments * (Grid seq) 
-    | Transformer of TrfArguments * (Grid seq) 
+    | BRP of BrpArguments
+    | Transformer of TrfArguments
     | PowerNode of PnodeArguments
     | PHEV of PhevArguments
     with 
     member self.name = 
         match self with
         | PHEV(phev_arg) -> phev_arg.name
-        | Transformer(trf_arg, _) -> trf_arg.name
+        | Transformer(trf_arg) -> trf_arg.name
         | PowerNode(pnode_arg) -> pnode_arg.name
-        | BRP(brp_arg,_) -> brp_arg.name
+        | BRP(brp_arg) -> brp_arg.name
 
 // dummy functions for dayahead and realtime mode, for testing purposes
-let sine n = Current.ofFloat <| sin (2.0 * Math.PI * (float n))
+let sine n = Energy.ofFloat <| sin (2.0 * Math.PI * (float n))
 let gen = (Seq.initInfinite (fun x -> 1.0))
 let take n = sine <| Seq.nth n gen
 
@@ -123,32 +128,37 @@ let create_node name nodes capacity current =
     let trf_arg = 
         { name=name;
         TrfArguments.capacity=Capacity.ofFloat <| Double.Parse(capacity, CultureInfo.InvariantCulture);
-        TrfArguments.current=Current.ofFloat <| Double.Parse(current, CultureInfo.InvariantCulture) }
+        TrfArguments.current=Energy.ofFloat <| Double.Parse(current, CultureInfo.InvariantCulture) }
 
-    Transformer(trf_arg, nodes)
+    Node(nodes, Some <| Transformer(trf_arg))
 
 // function that creates a PHEV model, takes name, capacity, current and battery as parameters
-let create_phev name capacity current battery profile (profiles : Profile seq) =
+let create_phev name capacity current battery rate profile (profiles : Profile seq) =
     let phev_arg = 
         { name=name;
         profile=Seq.find (fun (DistProfile(prof_name, dist)) -> prof_name = profile) profiles;
         capacity=Capacity.ofFloat <| Double.Parse(capacity, CultureInfo.InvariantCulture);
-        current=Current.ofFloat <| Double.Parse(current, CultureInfo.InvariantCulture);
-        battery=Battery.ofFloat <| Double.Parse(battery, CultureInfo.InvariantCulture); }
-    PHEV(phev_arg)
+        current=Energy.ofFloat <| Double.Parse(current, CultureInfo.InvariantCulture);
+        battery=Battery.ofFloat <| Double.Parse(battery, CultureInfo.InvariantCulture);
+        rate=Energy.ofFloat <| Double.Parse(rate, CultureInfo.InvariantCulture);
+        duration=(-1);
+        left=(-1) }
+    Node(Seq.empty, Some <| PHEV(phev_arg))
 
 let create_powernode name realtime = 
     let pnode_arg =
         { name=name;
-        realtime=realtime; }
-    PowerNode(pnode_arg)
+        realtime=realtime;
+        current=0.0<kWh>; }
+    Node(Seq.empty, Some <| PowerNode(pnode_arg))
 
 let create_brp name nodes dayahead = 
     let brp_arg : BrpArguments = 
         { name=name;
-        dayahead=dayahead }
+        dayahead=dayahead;
+        current=0.0<kWh> }
 
-    BRP(brp_arg,nodes)
+    Node(nodes, Some <| BRP(brp_arg)) 
 
 let create_distribution str_type mean sigma duration =
     let dist_type = 

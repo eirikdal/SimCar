@@ -1,1 +1,7 @@
 SimCar 0.0.1.0
+
+Dependencies:
+FSPowerPack.Community.2.1.1.1
+MathNet.Numerics.FSharp.2.1.2
+MathNet.Numerics.2.1.2
+MSDN.FSharpChart.dll.0.60

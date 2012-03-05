@@ -1,5 +1,7 @@
 ﻿module PostalService
 
+#nowarn "25"
+
 open System
 open System.Threading
 open SynchronizationContext
@@ -14,26 +16,26 @@ open BRP
 // make the right kind of agent for a given node
 let make_agent node = 
     match node with
-    | Transformer(_,_) ->
+    | Transformer(_) ->
         trf_agent node
     | PHEV(_) ->
         phev_agent node
     | PowerNode(_) ->
         pnode_agent node
-    | BRP(_,_) ->
+    | BRP(_) ->
         brp_agent node
 
 // traverse a tree of models, creating a mirrored tree of agents as we go along
 let rec to_agents node = 
     match node with
-    | Transformer(_,nodes) ->
-        Node(Seq.map (fun n -> to_agents n) nodes |> Seq.cache, Some <| make_agent node)
-    | PowerNode(_) ->
-        Leaf(Some <| make_agent node)
-    | PHEV(_) ->
-        Leaf(Some <| make_agent node)
-    | BRP(_,nodes) ->
-        Node(Seq.map (fun n -> to_agents n) nodes |> Seq.cache, Some <| make_agent node)
+    | Node(nodes, Some(Transformer(_) as trf)) ->
+        Node(Seq.map (fun n -> to_agents n) nodes |> Seq.cache, Some <| make_agent trf)
+    | Node(nodes, Some(PowerNode(_) as pnode)) ->
+        Leaf(Some <| make_agent pnode)
+    | Node(nodes, Some(PHEV(_) as phev)) ->
+        Leaf(Some <| make_agent phev)
+    | Node(nodes, Some(BRP(_) as brp)) ->
+        Node(Seq.map (fun n -> to_agents n) nodes |> Seq.cache, Some <| make_agent brp)
 
 
 //let syncContext = SynchronizationContext.CaptureCurrent()
@@ -54,7 +56,7 @@ type PostalService() =
     let agent = Agent<string Message>.Start(fun agent ->
         let rec loop agents = async {
             let! msg = agent.Receive()
-            
+           
             match msg with 
             | Register(from_agent) ->
                 syncContext.RaiseEvent jobCompleted (agent, "Agent registered with postal service")
