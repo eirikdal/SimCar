@@ -56,11 +56,11 @@ let phev_agent _p = Agent<'a Message>.Start(fun agent ->
         | Update(tick) ->
             match phev_args.profile with 
             | FloatProfile(name,dist_list) ->
-                let r = new System.Random()
-
-                let f = (Seq.nth tick dist_list)
-
                 if phev_args.left < 0 then
+                    let r = new System.Random()
+
+                    let f = (Seq.nth tick dist_list)
+
                     if r.NextDouble() < f then
                         syncContext.RaiseEvent phevEvent <| sprintf "time %f, prob: %f" (float tick / 4.0) f
                     

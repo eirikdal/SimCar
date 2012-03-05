@@ -23,6 +23,7 @@ open System.Windows.Forms.DataVisualization
 let postalService = new PostalService()
 
 // create chart from data
+// TODO: Change labelling of X-axis to reflect hours
 let create_chart data title = 
     let formsHost = new Forms.Integration.WindowsFormsHost(Child = new Charting.ChartControl(data))
     let graphWindow = new Window(Content = formsHost, Title = title)
