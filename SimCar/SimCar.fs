@@ -10,26 +10,40 @@ open SynchronizationContext
 open Models
 open Message
 open PHEV
+open BRP 
+open PowerNode
 open PostalService
 open FileManager
 open Transformer
 open MSDN.FSharp
 open MSDN.FSharp.Charting
 open System.Windows
-open System.Windows.Forms
-open System.Windows.Forms.DataVisualization
 
 #nowarn "25"
 
-let postalService = new PostalService()
+// make the right kind of agent for a given node
+let make_agent name node = 
+    match node with
+    | Transformer(_) ->
+        (name, trf_agent node)
+    | PHEV(_) ->
+        (name, phev_agent node name)
+    | PowerNode(_) ->
+        (name, pnode_agent node)
+    | BRP(_) ->
+        (name, brp_agent node)
 
-// create chart from data
-// TODO: Change labelling of X-axis to reflect hours
-let create_chart data title = 
-    let formsHost = new Forms.Integration.WindowsFormsHost(Child = new Charting.ChartControl(data))
-    let graphWindow = new Window(Content = formsHost, Title = title)
-    let wpfApp = new System.Windows.Application()
-    wpfApp.Run(graphWindow) |> ignore
+// traverse a tree of models, creating a mirrored tree of agents as we go along
+let rec to_agents node = 
+    match node with
+    | Node(nodes, Some(Transformer({name=name}) as trf)) ->
+        Node(Seq.map (fun n -> to_agents n) nodes |> Seq.cache, Some <| make_agent name trf)
+    | Node(nodes, Some(PowerNode({name=name}) as pnode)) ->
+        Leaf(Some <| make_agent name pnode)
+    | Node(nodes, Some(PHEV({name=name}) as phev)) ->
+        Leaf(Some <| make_agent name phev)
+    | Node(nodes, Some(BRP({name=name}) as brp)) ->
+        Node(Seq.map (fun n -> to_agents n) nodes |> Seq.cache, Some <| make_agent name brp)
 
 // for testing purposes
 let print_grid message =
@@ -39,7 +53,7 @@ let print_grid message =
         Model(gridnode)
 
 // the update-function, takes the current node and threaded accumulator as parameters
-let update (ag:Agent<Message<_>>, Model(grid)) (ac : float<kWh>) : float<kWh> = 
+let update (ag:Agent<_>, Model(grid)) (ac : float<kWh>) : float<kWh> = 
     match grid with 
     | Transformer(trf_args) ->
         let trf = Transformer({ trf_args with current=ac })
@@ -69,7 +83,7 @@ let fold_pnodes (_, Model(grid)) (ac : float<kWh>) =
     | _ -> ac
 
 let moving_average (array : float<kWh> array) = 
-    array |> Seq.ofArray |> Seq.windowed (5) |> Seq.map Array.average
+    array |> Seq.ofArray |> Seq.windowed (4) |> Seq.map Array.average
 
 // main control flow of the simulator
 let run day agents =
@@ -78,7 +92,7 @@ let run day agents =
         |> Tree.send (Update(tick)) // inform agents that new tick has begun
         |> Tree.send_and_reply RequestModel // request model from agents
 
-    let realtime = Array.init(96) (fun i -> run_sim i)
+    let realtime = Array.init(96) (fun i -> run_sim ((day*96) + i))
 
     let updated_realtime = 
         realtime
@@ -94,29 +108,43 @@ let run day agents =
         realtime
         |> Array.map (Tree.foldr fold_pnodes)
 
-    // calculate dayahead profile
-    let dayahead = 
+    dayahead_init.Trigger([|box updated_realtime; box System.EventArgs.Empty|])
+
+    let dayahead=
         updated_realtime
-//        |> scan
-        |> moving_average
-        |> Array.ofSeq
+        |> DayAhead.shave
 
-    // calculate total energy consumption
-    let sum_realtime = 
-        updated_realtime 
-        |> Array.fold (fun ac rt -> ac + rt) 0.0<kWh>
+//    let moving_dayahead = 
+//        updated_realtime
+//        |> moving_average
+//        |> Array.ofSeq
+        
+    let test = [|updated_realtime; pnodes; phevs|] |> Array.map (fun array -> array |> Array.map (fun f -> float f))
 
-    // calculate total dayahead consumption
-    let sum_phevs = 
-        phevs
-        |> Array.fold (fun ac d -> ac + d) 0.0<kWh>
+    progress.Trigger([|box test; box System.EventArgs.Empty|])
+    dayahead_progress.Trigger([|box dayahead; box System.EventArgs.Empty|])
+    // calculate dayahead profile
+//    let dayahead = 
+//        updated_realtime
+//        |> moving_average
+//        |> Array.ofSeq
 
-    let sum_pnodes = 
-        pnodes
-        |> Array.fold (fun ac d -> ac + d) 0.0<kWh>
+//    // calculate total energy consumption
+//    let sum_realtime = 
+//        updated_realtime 
+//        |> Array.fold (fun ac rt -> ac + rt) 0.0<kWh>
+//
+//    // calculate total dayahead consumption
+//    let sum_phevs = 
+//        phevs
+//        |> Array.fold (fun ac d -> ac + d) 0.0<kWh>
+//
+//    let sum_pnodes = 
+//        pnodes
+//        |> Array.fold (fun ac d -> ac + d) 0.0<kWh>
 
 //    printf "Sum PowerNodes: %f\n" <| Energy.toFloat sum_pnodes
 //    printf "Sum PHEVs: %f\n" <| Energy.toFloat sum_phevs
 //    printf "Sum realtime: %f\n" <| Energy.toFloat sum_realtime
 
-    (phevs, pnodes)
+    (dayahead, updated_realtime)

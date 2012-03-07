@@ -9,6 +9,7 @@ open Agent
 open Message
 open Models
 open System.Collections.Generic
+open Tree
 
 //let syncContext = SynchronizationContext.CaptureCurrent()
 
@@ -25,9 +26,10 @@ open System.Collections.Generic
         Same as self.add_agent, except removes the agent from the list
 *)
 type PostalService() = 
-    let agents = new Dictionary<string, Agent<'a Message>>()
+    let agentdict = new Dictionary<string, Agent<Message>>()
+    let mutable _agents = Node(Seq.empty, None) : Node<Agent<_>>
 
-    let agent = Agent<string Message>.Start(fun agent ->
+    let agent = Agent<Message>.Start(fun agent ->
         let rec loop() = async {
             let! msg = agent.Receive()
             
@@ -35,11 +37,11 @@ type PostalService() =
             | Register(name, from_agent) ->
                 syncContext.RaiseEvent jobCompleted (agent, "Agent registered with postal service")
 
-                agents.Add(name, from_agent)
+                agentdict.Add(name, from_agent)
             | Deregister(name, from_agent) ->
                 syncContext.RaiseEvent jobCompleted (agent, "Agent deregistered from postal service")
 
-                agents.Remove(name) |> ignore
+                agentdict.Remove(name) |> ignore
 //            | Broadcast(message) ->
 //                agents |> List.iter (fun agent -> agent.Post(message))
             | Completed(message) ->
@@ -56,19 +58,20 @@ type PostalService() =
     member self.Post(msg) = agent.Post(msg)
 
     member self.send(name, msg) = 
-        agents.[name].Post(msg)
+        agentdict.[name].Post(msg)
 
-    member self.send_to_all(msg) = 
-        agent.Post(Broadcast(msg))
+    member self.send_all(msg) = 
+        _agents |> Tree.send RequestModel
 
-    member self.send_to(to_agent : Agent<unit Message>, msg) = 
+    member self.send_to(to_agent : Agent<Message>, msg) =  
         to_agent.Post(msg)
 
-    member self.add_agent(name, from : Agent<'T Message>) = 
-        agent.Post <| Register(name, from)
-        from
+    member self.agents with get() = _agents and set(agents : Node<string * Agent<Message>>) = _agents <- agents |> Tree.map (fun (name,ag) -> ag); Tree.iter self.add_agent agents
 
-    member self.remove_agent(name, from : Agent<'T Message>) = 
+    member self.add_agent(name, from : Agent<Message>) = 
+        agent.Post <| Register(name, from)
+
+    member self.remove_agent(name, from : Agent<Message>) = 
         agent.Post <| Deregister(name, from)
 //
 //    member self.to_model(agent : Agent<Message>)= 

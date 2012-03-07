@@ -1,4 +1,4 @@
-﻿module FileManager
+﻿module FileManager 
 
 open Models
 open System
@@ -16,20 +16,20 @@ let read_file file =
     }
 
 let (|Integer|_|) (str: string) =
-   let mutable intvalue = 0
-   if System.Int32.TryParse(str, &intvalue) then Some(intvalue)
-   else None
+    let mutable intvalue = 0
+    if System.Int32.TryParse(str, &intvalue) then Some(intvalue)
+    else None
 
 let (|Float|_|) (str: string) =
-   let mutable floatvalue = 0.0
-   if System.Double.TryParse(str, &floatvalue) then Some(floatvalue)
-   else None
+    let mutable floatvalue = 0.0
+    if System.Double.TryParse(str, &floatvalue) then Some(floatvalue)
+    else None
 
 let (|ParseRegex|_|) regex str =
-   let m = Regex(regex).Match(str)
-   if m.Success
-   then Some (List.tail [ for x in m.Groups -> x.Value ])
-   else None
+    let m = Regex(regex).Match(str)
+    if m.Success
+    then Some (List.tail [ for x in m.Groups -> x.Value ])
+    else None
 
 let parse_dist str = 
     match str with 

@@ -6,34 +6,6 @@ open System
 open System.Globalization
 open SynchronizationContext
 open Models
-open PHEV
-open PowerNode
-open BRP
-open Transformer
-
-// make the right kind of agent for a given node
-let make_agent name node = 
-    match node with
-    | Transformer(_) ->
-        (name, trf_agent node)
-    | PHEV(_) ->
-        (name, phev_agent node name)
-    | PowerNode(_) ->
-        (name, pnode_agent node)
-    | BRP(_) ->
-        (name, brp_agent node)
-
-// traverse a tree of models, creating a mirrored tree of agents as we go along
-let rec to_agents node = 
-    match node with
-    | Node(nodes, Some(Transformer({name=name}) as trf)) ->
-        Node(Seq.map (fun n -> to_agents n) nodes |> Seq.cache, Some <| make_agent name trf)
-    | Node(nodes, Some(PowerNode({name=name}) as pnode)) ->
-        Leaf(Some <| make_agent name pnode)
-    | Node(nodes, Some(PHEV({name=name}) as phev)) ->
-        Leaf(Some <| make_agent name phev)
-    | Node(nodes, Some(BRP({name=name}) as brp)) ->
-        Node(Seq.map (fun n -> to_agents n) nodes |> Seq.cache, Some <| make_agent name brp)
 
 // traverse a tree of nodes, applying function iterf to each node
 let rec iter iterf node = 
@@ -49,7 +21,7 @@ let rec iter iterf node =
         ()
 
 // traverse a tree of models, creating a mirrored tree of agents as we go along
-let rec send_and_reply msg (node : Node<Agent<_ Message>>) = 
+let rec send_and_reply msg (node : Node<Agent<Message>>) = 
     try 
         match node with
         | Node(nodes, Some(leaf)) ->
@@ -68,7 +40,7 @@ let rec send_and_reply msg (node : Node<Agent<_ Message>>) =
         Leaf(None)
 
 // traverse a tree of models, creating a mirrored tree of agents as we go along
-let rec send msg (node : Node<Agent<_ Message>>) = 
+let rec send msg (node : Node<Agent<Message>>) = 
     match node with
     | Node(nodes, Some(leaf)) ->
         let res = leaf.Post(msg)
@@ -119,8 +91,8 @@ let rec foldr op node : float<kWh> =
     | Leaf(None) -> 
         0.0<kWh>
         
-let rec collect (node : Node<'a Message>) = 
-    seq<'a Message> {
+let rec collect (node : Node<Message>) = 
+    seq<Message> {
         match node with 
         | Node(nodes, Some(msg)) -> 
             yield! [msg]

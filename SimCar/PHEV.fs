@@ -20,30 +20,32 @@ let sum time profile =
         let n = new Normal(profile.mean, profile.sigma)
         n.CumulativeDistribution(time) - n.CumulativeDistribution((time-1.0))   
     | LogNormal ->
-        let n = new Cauchy(profile.mean, profile.sigma)
-        n.CumulativeDistribution(time) - n.CumulativeDistribution((time-1.0))
-
-let sum_profile profiles time = 
-    profiles
-    |> Seq.fold (fun ac p -> ac + sum time p) 0.0 
+        let n = new MathNet.Numerics.Distributions.Gamma(profile.mean, 7.0)
+        n.CumulativeDistribution(time+1.0) - n.CumulativeDistribution((time))
 
 // pre-calculate distributions
 let calc name (profiles : Distribution list) : Profile =         
     let dist_list = 
         profiles
-        |> List.map (fun p -> { p with dist=(fun i -> sum (float i) p) |> Seq.initInfinite |> Seq.cache })
-        
+        |> List.map (fun p -> { p with dist=(fun i -> sum (float i) p) |> Seq.initInfinite |> Seq.take 96 |> Seq.cache })
+    
+    // calculate the accumulated probability density function of all distributions
+    let prob ({dist=dist}) i = dist |> Seq.nth (i%96)
+    let temp = Seq.initInfinite (fun i -> dist_list |> Seq.fold (fun ac (d : Distribution) -> ac + (prob d i)) 0.0) |> Seq.take 96 |> Array.ofSeq
+
+    probEvent.Trigger [|box temp; box System.EventArgs.Empty|]
+
     FloatProfile(name, dist_list)
 (* 
  * PHEV: This is the PHEV agent
  *)
-let phev_agent _p name = Agent<'a Message>.Start(fun agent ->
+let phev_agent _p name = Agent<Message>.Start(fun agent ->
     let rec loop (PHEV({parent=parent} as phev_args) as phev) = async {
         let! msg = agent.Receive()
 
         match msg with
         | Hello -> 
-            syncContext.RaiseEvent jobCompleted<'a> (agent, sprintf "Agent %s says 'Hello, World!'" phev_args.name)
+            syncContext.RaiseEvent jobCompleted (agent, sprintf "Agent %s says 'Hello, World!'" phev_args.name)
 
             return! loop phev
         | ReplyTo(replyToMsg, reply) ->
@@ -62,11 +64,10 @@ let phev_agent _p name = Agent<'a Message>.Start(fun agent ->
                     // testing broadcast intention
                     if phev_args.battery < phev_args.capacity then
                         postalService.send(parent, Charge(name, Energy.ofFloat (float (phev_args.capacity - phev_args.battery))))
-//                    let test = Charge(name, Energy.ofFloat (float phev_args.left))
+
                     let r = (new System.Random()).NextDouble()
-//                    printfn "%s" parent
                     // try to find a distribution that matches the random number r
-                    let dist = dist_list |> Seq.tryFind (fun ({dist=dist}) -> r < (Seq.nth tick dist))
+                    let dist = dist_list |> Seq.tryFind (fun ({dist=dist}) -> r < (Seq.nth (tick%96) dist))
                     
                     // if a distribution was found, let the PHEV leave with the corresponding duration of the distribution
                     match dist with
@@ -92,7 +93,7 @@ let phev_agent _p name = Agent<'a Message>.Start(fun agent ->
             | DistProfile(name,dist_list) ->
                 // First time running the distribution profile, calculate and cache the distributions
                 let p = calc name dist_list
-                
+
                 let phevArguments = { phev_args with profile=p }
 
                 return! loop <| PHEV(phevArguments)

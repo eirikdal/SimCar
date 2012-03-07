@@ -4,17 +4,17 @@ open System
 open Agent
 open Models
 
-type 'a Message = 
+type Message = 
     | Charge of string * energy
     | Completed of string
-    | Assign of Agent<'a Message> * Grid
-    | Register of string * Agent<'a Message>
-    | Deregister of string * Agent<'a Message>
-    | Broadcast of 'a Message
+    | Assign of Agent<Message> * Grid
+    | Register of string * Agent<Message>
+    | Deregister of string * Agent<Message>
+    | Broadcast of Message
     | Hello
-    | ReplyTo of 'a Message * AsyncReplyChannel<'a Message>
+    | ReplyTo of Message * AsyncReplyChannel<Message>
     | RequestModel
     | Model of Grid
     | Error of string
     | Update of int
-    | Reply of 'a
+    | Reply of Message
