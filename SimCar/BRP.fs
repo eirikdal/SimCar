@@ -22,9 +22,12 @@ let brp_agent brp = Agent.Start(fun agent ->
                 reply.Reply(Model(brp))
         | Update(tick) -> 
             ()
+        | Charge(name, energy) -> 
+            ()
+//            syncContext.RaiseEvent progress <| sprintf "Charge intention from agent %s: %f kWh\n" name (Energy.toFloat energy)
         | Model(brp) -> return! loop brp
         | _ -> 
-            syncContext.RaiseEvent error <| Exception("Not implemented yet")
+            syncContext.RaiseEvent error <| Exception("BRP: Not implemented yet")
 
         return! loop brp
     }

@@ -70,11 +70,12 @@ type Distribution =
     { dist_type : DistributionType;
     mean : float;
     sigma : float;
-    duration : int }
+    duration : int;
+    dist : float seq }
 
 type Profile = 
     | DistProfile of string * Distribution list
-    | FloatProfile of string * float seq
+    | FloatProfile of string * Distribution list
 
 type Node<'T> = 
     | Node of (Node<'T> seq) * 'T option
@@ -83,7 +84,7 @@ type Node<'T> =
 type BrpArguments = 
     { name : string;
     dayahead : dayahead;
-    current : energy }
+    current : energy; }
 
 type PhevArguments =
     { name : string;
@@ -93,17 +94,20 @@ type PhevArguments =
     battery : battery;
     rate : energy;
     left : int;
-    duration : int; }
+    duration : int;
+    parent : string; }
 
 type TrfArguments = 
     { name : string; 
     capacity : capacity;
-    current : energy }
+    current : energy;
+    parent : string; }
 
 type PnodeArguments = 
     { name : string;
     realtime : realtime;
-    current : energy }
+    current : energy;
+    parent : string; }
 
 type Grid = 
     | BRP of BrpArguments
@@ -124,16 +128,17 @@ let gen = (Seq.initInfinite (fun x -> 1.0))
 let take n = sine <| Seq.nth n gen
 
 // function that creates a transformer model, takes name, other connected nodes, capacity and current as parameters
-let create_node name nodes capacity current = 
+let create_node name nodes capacity current parent = 
     let trf_arg = 
         { name=name;
         TrfArguments.capacity=Capacity.ofFloat <| Double.Parse(capacity, CultureInfo.InvariantCulture);
-        TrfArguments.current=Energy.ofFloat <| Double.Parse(current, CultureInfo.InvariantCulture) }
+        TrfArguments.current=Energy.ofFloat <| Double.Parse(current, CultureInfo.InvariantCulture);
+        parent=parent; }
 
     Node(nodes, Some <| Transformer(trf_arg))
 
 // function that creates a PHEV model, takes name, capacity, current and battery as parameters
-let create_phev name capacity current battery rate profile (profiles : Profile seq) =
+let create_phev name capacity current battery rate profile parent (profiles : Profile seq) =
     let phev_arg = 
         { name=name;
         profile=Seq.find (fun (DistProfile(prof_name, dist)) -> prof_name = profile) profiles;
@@ -142,14 +147,16 @@ let create_phev name capacity current battery rate profile (profiles : Profile s
         battery=Battery.ofFloat <| Double.Parse(battery, CultureInfo.InvariantCulture);
         rate=Energy.ofFloat <| Double.Parse(rate, CultureInfo.InvariantCulture);
         duration=(-1);
-        left=(-1) }
+        left=(-1);
+        parent=parent }
     Node(Seq.empty, Some <| PHEV(phev_arg))
 
-let create_powernode name realtime = 
+let create_powernode name realtime parent = 
     let pnode_arg =
         { name=name;
         realtime=realtime;
-        current=0.0<kWh>; }
+        current=0.0<kWh>;
+        parent=parent }
     Node(Seq.empty, Some <| PowerNode(pnode_arg))
 
 let create_brp name nodes dayahead = 
@@ -170,4 +177,5 @@ let create_distribution str_type mean sigma duration =
     { dist_type=dist_type;
     mean=mean;
     sigma=sigma;
-    duration=duration }
+    duration=duration;
+    dist=Seq.empty }

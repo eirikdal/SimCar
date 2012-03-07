@@ -1,0 +1,8 @@
+﻿worker {
+  gauss, mean=08:15, std=15, duration=07:00
+  lognormal, mean=03:15, std=1, duration=05:00
+}
+housewife {
+  gauss, mean=12:15, std=60, duration=02:00
+  gauss, mean=19:00, std=60, duration=03:00
+}

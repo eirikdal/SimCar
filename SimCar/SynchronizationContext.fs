@@ -18,14 +18,20 @@ type SynchronizationContext with
         | ctxt -> ctxt
 
 // Each of these lines declares an F# event that we can raise
-let jobCompleted<'a> = new Event<Agent<'a Message> * string>()
+let jobCompleted<'a> = new Event<Agent<Message> * string>()
 //let allCompleted  = new Event<'T[]>()
 let error         = new Event<System.Exception>()
 let canceled      = new Event<System.OperationCanceledException>()
-let progress      = new Event<string>()
+[<CLIEvent>]
+let progress      = new DelegateEvent<System.EventHandler>()
 let phevEvent     = new Event<string>()
 let brpEvent      = new Event<string>()
 let trfEvent      = new Event<string>()
 let pnodeEvent    = new Event<string>()
 let updateEvent   = new Event<float<kWh>[]>()
 let syncContext = SynchronizationContext.CaptureCurrent()
+let dayahead_step       = new DelegateEvent<System.EventHandler>()
+let dayahead_progress   = new DelegateEvent<System.EventHandler>()
+let dayahead_init   = new DelegateEvent<System.EventHandler>()
+let probEvent = new DelegateEvent<System.EventHandler>()
+let probReset = new DelegateEvent<System.EventHandler>()

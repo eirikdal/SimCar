@@ -21,7 +21,7 @@ let rec iter iterf node =
         ()
 
 // traverse a tree of models, creating a mirrored tree of agents as we go along
-let rec send_and_reply msg (node : Node<Agent<_ Message>>) = 
+let rec send_and_reply msg (node : Node<Agent<Message>>) = 
     try 
         match node with
         | Node(nodes, Some(leaf)) ->
@@ -40,7 +40,7 @@ let rec send_and_reply msg (node : Node<Agent<_ Message>>) =
         Leaf(None)
 
 // traverse a tree of models, creating a mirrored tree of agents as we go along
-let rec send msg (node : Node<Agent<_ Message>>) = 
+let rec send msg (node : Node<Agent<Message>>) = 
     match node with
     | Node(nodes, Some(leaf)) ->
         let res = leaf.Post(msg)
@@ -57,11 +57,11 @@ let rec map mapf node =
     match node with
     | Node(nodes, Some(leaf)) ->
         let res = mapf leaf
-        Node(Seq.map (fun n -> map mapf n) nodes, Some(res))
+        Node(Seq.map (fun n -> map mapf n) nodes |> Seq.cache, Some(res))
     | Leaf(Some(leaf)) ->
         Leaf(Some(mapf leaf))
     | Node(nodes, None) ->
-        Node(Seq.map (fun n -> map mapf n) nodes, None)
+        Node(Seq.map (fun n -> map mapf n) nodes |> Seq.cache, None)
     | Leaf(None) ->
         Leaf(None)
 
@@ -91,8 +91,8 @@ let rec foldr op node : float<kWh> =
     | Leaf(None) -> 
         0.0<kWh>
         
-let rec collect (node : Node<'a Message>) = 
-    seq<'a Message> {
+let rec collect (node : Node<Message>) = 
+    seq<Message> {
         match node with 
         | Node(nodes, Some(msg)) -> 
             yield! [msg]

@@ -8,13 +8,13 @@ open SynchronizationContext
 open Message
 open Agent
 open Models
-
+open PostalService
 (* 
     Transformer: This is the transformer agent
 *)
 
 let trf_agent trf = Agent.Start(fun agent ->
-    let rec loop (Transformer(trf_args)) = async {
+    let rec loop (Transformer({ parent=parent } as trf_args)) = async {
         let! msg = agent.Receive()
         
         match msg with
@@ -28,8 +28,10 @@ let trf_agent trf = Agent.Start(fun agent ->
             return! loop trf
         | Update(tick) ->
             ()
+        | Charge(name, energy) as msg ->
+            postalService.send(parent, msg)
         | _ -> 
-            syncContext.RaiseEvent error <| Exception("Not yet implemented")
+            syncContext.RaiseEvent error <| Exception("Trf: Not yet implemented")
 
         jobCompleted.Publish |> ignore
 
