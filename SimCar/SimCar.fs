@@ -87,18 +87,16 @@ let moving_average (array : float<kWh> array) =
 
 // main control flow of the simulator
 let run day agents =
-    let run_sim tick = 
+    let tick n = 
         agents
-        |> Tree.send (Update(tick)) // inform agents that new tick has begun
+        |> Tree.send (Update(n)) // inform agents that new tick has begun
         |> Tree.send_and_reply RequestModel // request model from agents
 
-    let realtime = Array.init(96) (fun i -> run_sim ((day*96) + i))
+    let realtime = Array.init(96) (fun i -> tick ((day*96) + i))
 
     let updated_realtime = 
         realtime
         |> Array.map (Tree.foldr update) // right-fold over tree, applying the update function (inorder traversal)
-
-    syncContext.RaiseEvent updateEvent updated_realtime
 
     let phevs = 
         realtime
@@ -119,6 +117,6 @@ let run day agents =
         
     // Raise events
     syncContext.RaiseDelegateEvent progressPhev phevs
-    syncContext.RaiseDelegateEvent progressTotal updated_realtime
     syncContext.RaiseDelegateEvent progressPnode pnodes
     syncContext.RaiseDelegateEvent dayaheadProgress dayahead
+    syncContext.RaiseDelegateEvent progressTotal updated_realtime
