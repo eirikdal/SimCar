@@ -17,9 +17,28 @@ namespace WinChart
         private int counter = 0;
         private int nstep = 0;
 
+        void updateChart(int i, Double[] chart, bool saveImage)
+        {
+            updateChart(i, chart);
+
+            if (saveImage)
+                chart1.SaveImage(String.Format("C:\\SimCar\\SimCar\\data\\img\\{0}.png", counter++), ChartImageFormat.Png);
+        }
+
+        void updateChart(int i, Double[] chart)
+        {
+            if (chart1.Series[i].Points.Count > 0)
+                chart1.Series[i].Points.Clear();
+
+            for (int j = 0; j < chart.Length; j++)
+                chart1.Series[i].Points.Add(chart[j]);
+        }
+
         void prob_Reset(object sender, EventArgs e)
         {
+
         }
+
         void prob_Calc(object sender, EventArgs e)
         {
             Double[] prob = (Double[]) sender;
@@ -32,37 +51,32 @@ namespace WinChart
                     chart1.Series[3].Points[i].SetValueY(prob[i]);      
             }
         }
-
-        void chart_Changed(object sender, EventArgs e)
+        
+        void phev_Changed(object sender, EventArgs e)
         {
-            Double[][] chart = (Double[][])sender;
+            updateChart(2, (Double[])sender);
+        }
 
-            //Add series.
-            for (int i = 0; i < chart.Length; i++)
-            {
-                chart1.Series[i].Points.Clear();
+        void pnode_Changed(object sender, EventArgs e)
+        {
+            updateChart(1, (Double[])sender);
+        }
 
-                for (int j = 0; j < chart[i].Length; j++)
-                    chart1.Series[i].Points.Add(chart[i][j]);
-            }
-
-            chart1.SaveImage(String.Format("C:\\SimCar\\SimCar\\data\\img\\{0}.png", counter++), ChartImageFormat.Png);
+        void total_Changed(object sender, EventArgs e)
+        {
+            updateChart(0, (Double[])sender, true);
         }
 
         void chart_moving_average_comparison_Changed(object sender, EventArgs e)
         {
             Double[][] chart = (Double[][])sender;
 
-            //Add series.
-            for (int i = 0; i < chart.Length; i++)
-            {
-                chart1.Series[i].Points.Clear();
+            chart1.Series[0].Points.Clear();
 
-                for (int j = 0; j < chart[i].Length; j++)
-                    chart1.Series[i].Points.Add(chart[i][j]);
-            }
+            for (int j = 0; j < chart.Length; j++)
+                chart1.Series[0].Points.Add(chart[0][j]);
 
-            chart1.SaveImage(String.Format("C:\\SimCar\\SimCar\\data\\img\\{0}.png", counter++), ChartImageFormat.Png);
+            //chart1.SaveImage(String.Format("C:\\SimCar\\SimCar\\data\\img\\{0}.png", counter++), ChartImageFormat.Png);
         }
 
         void dayahead_Init(object sender, EventArgs e)
@@ -71,37 +85,24 @@ namespace WinChart
 
             this.chart1.Titles[0].Text = (String.Format("Iteration #{0} : Step # {0}", counter, nstep));
 
-            chart1.Series[0].Points.Clear();
-
-            for (int j = 0; j < chart.Length; j++)
-                chart1.Series[0].Points.Add(chart[j]);
-  
-            chart1.SaveImage(String.Format("C:\\SimCar\\SimCar\\data\\img\\{0}.png", counter), ChartImageFormat.Png);
+            updateChart(0, chart, true);
         }
         void dayahead_Progress(object sender, EventArgs e)
         {
             Double[] chart = (Double[])sender;
 
-            this.chart1.Titles[0].Text = (String.Format("Iteration #{0} : Step # {1}", counter++, nstep++));
-            chart1.Series[1].Points.Clear();
+            this.chart1.Titles[0].Text = (String.Format("Iteration #{0} : Step # {1}", counter, nstep++));
 
-            for (int j = 0; j < chart.Length; j++)
-                chart1.Series[1].Points.Add(chart[j]);
-
-            chart1.SaveImage(String.Format("C:\\SimCar\\SimCar\\data\\img\\{0}.png", counter), ChartImageFormat.Png);
+            updateChart(1, chart, true);
         }
 
         void dayahead_Step(object sender, EventArgs e)
         {
             Double[] chart = (Double[])sender;
 
-            this.chart1.Titles[0].Text = (String.Format("Iteration #{0} : Step # {1}", counter++, nstep));
-            chart1.Series[2].Points.Clear();
+            this.chart1.Titles[0].Text = (String.Format("Iteration #{0} : Step # {1}", counter, nstep));
 
-            for (int j = 0; j < chart.Length; j++)
-                chart1.Series[2].Points.Add(chart[j]);
-
-            chart1.SaveImage(String.Format("C:\\SimCar\\SimCar\\data\\img\\{0}.png", counter), ChartImageFormat.Png);
+            updateChart(2, chart, true);
         }
         public SimChart()
         {
@@ -147,13 +148,15 @@ namespace WinChart
             seriesArray[nPHEV].BorderWidth = 2;
             seriesArray[nPHEV].BorderDashStyle = ChartDashStyle.Dash;
 
-            Sim.Sim tSim = new Sim.Sim(nSim, nTicks);
+            Sim.SimCar tSim = new Sim.SimCar(nSim, nTicks);
             tSim.Init();
             tSim.RegisterEvents();
-            tSim.RegisterProgress(chart_Changed);
+            tSim.RegisterProgressTotal(total_Changed);
+            tSim.RegisterProgressPhev(phev_Changed);
+            tSim.RegisterProgressPnode(pnode_Changed);
             tSim.RegisterProb(prob_Calc);
             tSim.RegisterProbReset(prob_Reset);
-            double[][] res = tSim.Run();
+            tSim.Run();
             //tSim.RegisterDayaheadInit(new EventHandler(dayahead_Init));
             //tSim.RegisterDayaheadStep(new EventHandler(dayahead_Step));
             //tSim.RegisterDayaheadProgress(new EventHandler(dayahead_Progress));
