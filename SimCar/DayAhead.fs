@@ -9,12 +9,10 @@ let mutable S = 0.0<kWh>
 let alpha = 0.3
 let theta = 0.9
 
-// BEST: alpha = 0.3, theta = 0.5
+// BEST: alpha = 0.3, theta = 0.5-0-9?
 
 let shave(_D : float<kWh>[]) = 
     let D = Array.copy _D
-
-//    progress.Trigger([|box D; box System.EventArgs.Empty|])
 
     S <- 0.0<kWh>
     let x = Array.average D
@@ -30,7 +28,7 @@ let shave(_D : float<kWh>[]) =
         D.[idx] <- D.[idx] + d
 
         S <- S'
-        dayahead_step.Trigger [|box D; box System.EventArgs.Empty|]
+        syncContext.RaiseDelegateEvent dayaheadStep D
     
     // target of peak value should be the average value
     update i x

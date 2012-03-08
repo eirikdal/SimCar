@@ -7,9 +7,11 @@ open System.Threading
 
 type SynchronizationContext with 
     /// A standard helper extension method to raise an event on the GUI thread
+    member syncContext.RaiseDelegateEvent (event: DelegateEvent<_>) args = 
+        syncContext.Post((fun _ -> event.Trigger([|box args; System.EventArgs.Empty|])),state=null)
+
     member syncContext.RaiseEvent (event: Event<_>) args = 
         syncContext.Post((fun _ -> event.Trigger args),state=null)
-
     /// A standard helper extension method to capture the current synchronization context.
     /// If none is present, use a context that executes work in the thread pool.
     static member CaptureCurrent () = 
@@ -23,15 +25,23 @@ let jobCompleted<'a> = new Event<Agent<Message> * string>()
 let error         = new Event<System.Exception>()
 let canceled      = new Event<System.OperationCanceledException>()
 [<CLIEvent>]
-let progress      = new DelegateEvent<System.EventHandler>()
 let phevEvent     = new Event<string>()
 let brpEvent      = new Event<string>()
 let trfEvent      = new Event<string>()
 let pnodeEvent    = new Event<string>()
 let updateEvent   = new Event<float<kWh>[]>()
 let syncContext = SynchronizationContext.CaptureCurrent()
-let dayahead_step       = new DelegateEvent<System.EventHandler>()
-let dayahead_progress   = new DelegateEvent<System.EventHandler>()
-let dayahead_init   = new DelegateEvent<System.EventHandler>()
-let probEvent = new DelegateEvent<System.EventHandler>()
-let probReset = new DelegateEvent<System.EventHandler>()
+
+// EventHandlers for tracking progress
+let progressTotal       = new DelegateEvent<System.EventHandler>()
+let progressPhev        = new DelegateEvent<System.EventHandler>()
+let progressPnode       = new DelegateEvent<System.EventHandler>()
+
+// EventHandlers for debugging Dayahead-algorithm
+let dayaheadStep       = new DelegateEvent<System.EventHandler>()
+let dayaheadProgress   = new DelegateEvent<System.EventHandler>()
+let dayaheadInit       = new DelegateEvent<System.EventHandler>()
+
+// EventHandlers for displaying cumulative pdf 
+let probEvent           = new DelegateEvent<System.EventHandler>()
+let probReset           = new DelegateEvent<System.EventHandler>()

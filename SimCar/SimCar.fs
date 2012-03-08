@@ -108,8 +108,6 @@ let run day agents =
         realtime
         |> Array.map (Tree.foldr fold_pnodes)
 
-    dayahead_init.Trigger([|box updated_realtime; box System.EventArgs.Empty|])
-
     let dayahead=
         updated_realtime
         |> DayAhead.shave
@@ -119,32 +117,8 @@ let run day agents =
 //        |> moving_average
 //        |> Array.ofSeq
         
-    let test = [|updated_realtime; pnodes; phevs|] |> Array.map (fun array -> array |> Array.map (fun f -> float f))
-
-    progress.Trigger([|box test; box System.EventArgs.Empty|])
-    dayahead_progress.Trigger([|box dayahead; box System.EventArgs.Empty|])
-    // calculate dayahead profile
-//    let dayahead = 
-//        updated_realtime
-//        |> moving_average
-//        |> Array.ofSeq
-
-//    // calculate total energy consumption
-//    let sum_realtime = 
-//        updated_realtime 
-//        |> Array.fold (fun ac rt -> ac + rt) 0.0<kWh>
-//
-//    // calculate total dayahead consumption
-//    let sum_phevs = 
-//        phevs
-//        |> Array.fold (fun ac d -> ac + d) 0.0<kWh>
-//
-//    let sum_pnodes = 
-//        pnodes
-//        |> Array.fold (fun ac d -> ac + d) 0.0<kWh>
-
-//    printf "Sum PowerNodes: %f\n" <| Energy.toFloat sum_pnodes
-//    printf "Sum PHEVs: %f\n" <| Energy.toFloat sum_phevs
-//    printf "Sum realtime: %f\n" <| Energy.toFloat sum_realtime
-
-    (dayahead, updated_realtime)
+    // Raise events
+    syncContext.RaiseDelegateEvent progressPhev phevs
+    syncContext.RaiseDelegateEvent progressTotal updated_realtime
+    syncContext.RaiseDelegateEvent progressPnode pnodes
+    syncContext.RaiseDelegateEvent dayaheadProgress dayahead
