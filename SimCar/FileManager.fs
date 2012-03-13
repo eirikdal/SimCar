@@ -37,8 +37,8 @@ let parse_dist str =
         h*4.0 + (m / 15.0)
     | ParseRegex "std=([0-9]+)" [Float std] ->
         (std / 15.0)
-    | ParseRegex "duration=(\d)+" [Float duration] ->
-        duration
+    | ParseRegex "duration=([0-9]+){1,2}:([0-9]+){1,2}" [Float h; Float m] ->
+        h*4.0 + (m / 15.0)
     | _ -> raise <| Exception "Parsing failed"
 
 let rec parse_profile stream (dist : Distribution list) (rest : string list byref) = 
@@ -106,19 +106,23 @@ let powerprofiles : (string * float seq) seq =
 // 
 // Parsing the powergrid, transformers, power nodes and PHEVs.
 //
-let rec parse_powergrid stream nodes (rest : string list byref) parent =
+let rec parse_powergrid stream nodes (rest : string list byref) (children : string list byref) parent =
     match (stream : string list) with 
     | h::t ->
         match h.Split([|' ';'\t'|], StringSplitOptions.RemoveEmptyEntries) with
         | [|"trf";name;capacity;current|] ->
-            let node = create_node name Seq.empty capacity current parent
-            parse_powergrid t (List.append nodes [node]) (&rest) parent
-        | [|"trf";name;capacity;current;"{"|] -> 
-            let node = create_node name (parse_powergrid t [] &rest name) capacity current parent
-            parse_powergrid rest (List.append nodes [node]) (&rest) name
+            let node = create_node name Seq.empty capacity current parent children
+            children <- name :: children
+            parse_powergrid t (List.append nodes [node]) (&rest) (&children) parent
+        | [|"trf";name;capacity;current;"{"|] ->
+            let mutable temp = []
+            let node = create_node name (parse_powergrid t [] &rest (&temp) name) capacity current parent temp
+            children <- name :: children
+            parse_powergrid rest (List.append nodes [node]) (&rest) (&children) name
         | [|"phev";name;profile;capacity;current;battery;rate|] -> 
             let node = create_phev name capacity current battery rate profile parent profiles
-            parse_powergrid t (List.append nodes [node]) (&rest) parent
+            children <- name :: children
+            parse_powergrid t (List.append nodes [node]) (&rest) (&children) parent
         | [|"pnode";name;realtime|] ->
             let realtime = (Seq.tryFind (fun (n, s) -> n = realtime) powerprofiles)
             match realtime with
@@ -126,7 +130,8 @@ let rec parse_powergrid stream nodes (rest : string list byref) parent =
             | Some realtime ->
                 let nth n = Energy.ofFloat ((snd realtime) |> Seq.cache |> Seq.nth n)
                 let node = create_powernode name nth parent
-                parse_powergrid t (List.append nodes [node]) (&rest) parent
+                children <- name :: children
+                parse_powergrid t (List.append nodes [node]) (&rest) (&children) parent
         | [|"}"|] -> 
             rest <- t
             nodes
@@ -135,6 +140,7 @@ let rec parse_powergrid stream nodes (rest : string list byref) parent =
 
 let powergrid = 
     let mutable rest = []
+    let mutable children : string list = []
     let stream = List.ofSeq (read_file "brp.txt")
     
-    create_brp "brp" (parse_powergrid stream [] (&rest) "brp") take
+    create_brp "brp" (parse_powergrid stream [] (&rest) (&children) "brp") take (children)

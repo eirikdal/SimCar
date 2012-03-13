@@ -82,15 +82,59 @@ let fold_pnodes (_, Model(grid)) (ac : float<kWh>) =
     | PowerNode(phev_args) -> ac + phev_args.current
     | _ -> ac
 
+// Compute kernel for the blur algorithm
+let computeCoefficients size =
+  let halfSize = size / 2
+  let gauss = List.init size (fun i -> 
+    Math.Exp(-float((i - halfSize) * (i - halfSize)) / 8.0))
+    
+  // Normalize values and convert them to 'float4'
+  let sum = List.sum gauss
+  [ for v in gauss -> (v / sum) ]
+
+let filter = computeCoefficients 4
+let gaussian_blur (array : float<kWh> array) = 
+    array |> Seq.ofArray |> Seq.windowed (4) |> Seq.map (fun x -> Seq.map2 (fun f x -> f * x) filter x) |> Seq.map Seq.sum
+
 let moving_average (array : float<kWh> array) = 
     array |> Seq.ofArray |> Seq.windowed (4) |> Seq.map Array.average
+
+let test_dayahead iter agents = 
+    let tick n = 
+        agents
+        |> Tree.send (Update(n)) // inform agents that new tick has begun
+        |> Tree.send_reply RequestModel // request model from agents
+
+    let realtime = Array.init(96) (fun i -> tick i)
+
+    let updated_realtime = 
+        realtime
+        |> Array.map (Tree.foldr update) // right-fold over tree, applying the update function (inorder traversal)
+
+    let rec shave n rt = 
+        syncContext.RaiseDelegateEvent dayaheadProgress rt
+        if n > 0 then 
+            shave (n-1) (rt |> DayAhead.shave)
+
+    shave iter updated_realtime
+//
+//    let test = [|0.0<kWh>|] |> Array.append updated_realtime |> Array.append [|0.0<kWh>;0.0<kWh>|]
+//    let moving_dayahead = 
+//        test
+//        |> gaussian_blur
+//        |> Array.ofSeq
+
+//    syncContext.RaiseDelegateEvent progressPnode updated_realtime      
+//    syncContext.RaiseDelegateEvent progressTotal moving_dayahead
+    // Raise events
+    
 
 // main control flow of the simulator
 let run day agents =
     let tick n = 
         agents
         |> Tree.send (Update(n)) // inform agents that new tick has begun
-        |> Tree.send_and_reply RequestModel // request model from agents
+        |> Tree.send_reply RequestModel // request model from agents
 
     let realtime = Array.init(96) (fun i -> tick ((day*96) + i))
 
@@ -109,6 +153,9 @@ let run day agents =
     let dayahead=
         updated_realtime
         |> DayAhead.shave
+
+//    postalService.send("brp", Dayahead(dayahead |> Array.get))
+//    postalService.send("brp", Realtime(pnodes |> Array.get))
 
 //    let moving_dayahead = 
 //        updated_realtime

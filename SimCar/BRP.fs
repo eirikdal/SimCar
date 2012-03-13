@@ -10,26 +10,41 @@ open System.Threading
 open SynchronizationContext
 
 let brp_agent brp = Agent.Start(fun agent ->
-    let rec loop (BRP(brp_args)) = async {
+    let rec loop (BRP(brp_args) as brp) = async {
         let! msg = agent.Receive()
 
         match msg with
-        | Hello -> 
-            syncContext.RaiseEvent jobCompleted<_> (agent, sprintf "Agent %s says 'Hello, World!'" brp_args.name)
         | ReplyTo(replyToMsg, reply) ->
             match replyToMsg with
             | RequestModel ->
                 reply.Reply(Model(brp))
+            | Charge(name, energy, ttd) -> 
+                reply.Reply(Charge_Received)
         | Update(tick) -> 
-            ()
-        | Charge(name, energy) -> 
-            ()
-//            syncContext.RaiseEvent progress <| sprintf "Charge intention from agent %s: %f kWh\n" name (Energy.toFloat energy)
-        | Model(brp) -> return! loop brp
+            return! loop brp
+//            return! collect_intentions brp []
+        | Dayahead(dayahead) ->
+            return! loop <| BRP({ brp_args with dayahead=dayahead })
+        | Realtime(realtime) ->
+            return! loop <| BRP({ brp_args with realtime=realtime })
+        | Model(brp) -> 
+            return! loop brp
         | _ -> 
             syncContext.RaiseEvent error <| Exception("BRP: Not implemented yet")
 
-        return! loop brp
-    }
+        return! loop brp }
+    and collect_intentions (BRP({ children=children } as brp_args)) (intentions : Message list)
+        = agent.Scan(function         
+            | Charge(name, energy, ttd) as msg ->
+                if intentions.Length + 1 = children.Length then
+                    Some(async { return! loop brp })
+                else
+                    Some(async { return! collect_intentions brp (msg :: intentions) })
+            | Charge_OK as msg -> 
+                if intentions.Length + 1 = children.Length then
+                    Some(async { return! loop brp })
+                else
+                    Some(async { return! collect_intentions brp (msg :: intentions) })
+            | _ -> None)
 
     loop brp)

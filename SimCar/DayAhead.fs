@@ -28,7 +28,7 @@ let shave(_D : float<kWh>[]) =
         D.[idx] <- D.[idx] + d
 
         S <- S'
-        syncContext.RaiseDelegateEvent dayaheadStep D
+        syncContext.RaiseDelegateEvent dayaheadStep (D.Clone())
     
     // target of peak value should be the average value
     update i x

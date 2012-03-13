@@ -21,14 +21,14 @@ let rec iter iterf node =
         ()
 
 // traverse a tree of models, creating a mirrored tree of agents as we go along
-let rec send_and_reply msg (node : Node<Agent<Message>>) = 
+let rec send_reply msg (node : Node<Agent<Message>>) = 
     try 
         match node with
         | Node(nodes, Some(leaf)) ->
             let res = leaf.PostAndReply((fun replyChannel -> ReplyTo(msg, replyChannel)), 1000)
-            Node(Seq.map (fun n -> send_and_reply msg n) nodes |> Seq.cache, Some (leaf, res))
+            Node(Seq.map (fun n -> send_reply msg n) nodes |> Seq.cache, Some (leaf, res))
         | Node(nodes, None) -> 
-            Node(Seq.map (fun n -> send_and_reply msg n) nodes, None)
+            Node(Seq.map (fun n -> send_reply msg n) nodes |> Seq.cache, None)
         | Leaf(Some(leaf)) ->
             let res = leaf.PostAndReply((fun replyChannel -> ReplyTo(msg, replyChannel)), 1000)
             Leaf(Some <| (leaf, res))

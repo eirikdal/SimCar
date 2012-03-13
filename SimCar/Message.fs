@@ -5,13 +5,16 @@ open Agent
 open Models
 
 type Message = 
-    | Charge of string * energy
+    | Charge of string * energy * int
+    | Charge_Received
+    | Charge_OK
     | Completed of string
     | Assign of Agent<Message> * Grid
     | Register of string * Agent<Message>
     | Deregister of string * Agent<Message>
     | Broadcast of Message
-    | Hello
+    | Dayahead of dayahead
+    | Realtime of realtime
     | ReplyTo of Message * AsyncReplyChannel<Message>
     | RequestModel
     | Model of Grid

@@ -54,3 +54,6 @@ type SimCar(nIter, nTicksPerDay) =
         |> Seq.take nIter 
         |> Seq.cache
         |> List.ofSeq
+
+    member self.TestDayahead(n) = 
+        test_dayahead n self.Agents

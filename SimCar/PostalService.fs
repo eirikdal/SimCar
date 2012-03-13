@@ -60,6 +60,9 @@ type PostalService() =
     member self.send(name, msg) = 
         agentdict.[name].Post(msg)
 
+    member self.send_reply(name, msg) = 
+        agentdict.[name].PostAndReply(fun replyChannel -> ReplyTo(msg, replyChannel))
+
     member self.send_all(msg) = 
         _agents |> Tree.send RequestModel
 
