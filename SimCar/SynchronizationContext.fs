@@ -19,6 +19,7 @@ type SynchronizationContext with
         | null -> new SynchronizationContext()
         | ctxt -> ctxt
 
+let jobDebug = new Event<string>()
 // Each of these lines declares an F# event that we can raise
 let jobCompleted<'a> = new Event<Agent<Message> * string>()
 //let allCompleted  = new Event<'T[]>()

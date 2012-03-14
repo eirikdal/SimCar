@@ -87,7 +87,7 @@ type Profile =
     | FloatProfile of string * Distribution list
 
 type Node<'T> = 
-    | Node of (Node<'T> seq) * 'T option
+    | Node of (Node<'T> list) * 'T option
     | Leaf of 'T option
 
 type Status = 
@@ -155,10 +155,10 @@ let create_node name nodes capacity current parent children =
     Node(nodes, Some <| Transformer(trf_arg))
 
 // function that creates a PHEV model, takes name, capacity, current and battery as parameters
-let create_phev name capacity current battery rate profile parent (profiles : Profile seq) =
+let create_phev name capacity current battery rate profile parent (profiles : Profile list) =
     let phev_arg = 
         { name=name;
-        profile=Seq.find (fun (DistProfile(prof_name, dist)) -> prof_name = profile) profiles;
+        profile=List.find (fun (DistProfile(prof_name, dist)) -> prof_name = profile) profiles;
         capacity=Capacity.ofFloat <| Double.Parse(capacity, CultureInfo.InvariantCulture);
         current=Energy.ofFloat <| Double.Parse(current, CultureInfo.InvariantCulture);
         battery=Battery.ofFloat <| Double.Parse(battery, CultureInfo.InvariantCulture);
@@ -166,7 +166,7 @@ let create_phev name capacity current battery rate profile parent (profiles : Pr
         duration=(-1);
         left=(-1);
         parent=parent; }
-    Node(Seq.empty, Some <| PHEV(phev_arg))
+    Node(List.empty, Some <| PHEV(phev_arg))
 
 let create_powernode name realtime parent = 
     let pnode_arg =
@@ -174,7 +174,7 @@ let create_powernode name realtime parent =
         realtime=realtime;
         current=0.0<kWh>;
         parent=parent; }
-    Node(Seq.empty, Some <| PowerNode(pnode_arg))
+    Node(List.empty, Some <| PowerNode(pnode_arg))
 
 let create_brp name nodes dayahead children = 
     let brp_arg : BrpArguments = 

@@ -7,7 +7,7 @@ open Models
 type Message = 
     | Charge of string * energy * int
     | Charge_Received
-    | Charge_OK
+    | Charge_OK of string
     | Completed of string
     | Assign of Agent<Message> * Grid
     | Register of string * Agent<Message>

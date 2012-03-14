@@ -72,13 +72,13 @@ let profiles : Profile list =
 
     parse_profiles stream [] (&rest)
 
-let rec parse_powerprofile stream name (dist : float seq) (rest : string list byref) = 
+let rec parse_powerprofile stream name (dist : float list) (rest : string list byref) = 
     match (stream : string list) with 
     | h::t ->
         match h.Split([|' ';';'|], StringSplitOptions.RemoveEmptyEntries) with
         | [|q1;q2;q3;q4|] ->
             let temp = Double.Parse(q1, CultureInfo.InvariantCulture)::Double.Parse(q2, CultureInfo.InvariantCulture)::Double.Parse(q3, CultureInfo.InvariantCulture)::Double.Parse(q4, CultureInfo.InvariantCulture)::[]
-            parse_powerprofile t name (Seq.append dist temp) (&rest)
+            parse_powerprofile t name (List.append dist temp) (&rest)
         | [|"}"|] -> 
             rest <- t
             dist
@@ -90,18 +90,18 @@ let rec parse_powerprofiles stream profiles (rest : string list byref) =
     | h::t ->
         match h.Split([|' '|], StringSplitOptions.RemoveEmptyEntries) with
         | [|name;"{"|] ->
-            let profile = (name, parse_powerprofile t name Seq.empty (&rest) |> Seq.cache)
-            parse_powerprofiles rest (Seq.append [profile] profiles) (&rest)
+            let profile = (name, parse_powerprofile t name List.empty (&rest))
+            parse_powerprofiles rest (List.append [profile] profiles) (&rest)
         | _ -> 
             rest <- t
             profiles
     | _ -> profiles
 
-let powerprofiles : (string * float seq) seq = 
+let powerprofiles : (string * float list) list = 
     let mutable rest = []
     let stream = List.ofSeq (read_file "powerprofiles.txt")
 
-    parse_powerprofiles stream Seq.empty (&rest)
+    parse_powerprofiles stream List.empty (&rest)
 
 // 
 // Parsing the powergrid, transformers, power nodes and PHEVs.
@@ -111,20 +111,20 @@ let rec parse_powergrid stream nodes (rest : string list byref) (children : stri
     | h::t ->
         match h.Split([|' ';'\t'|], StringSplitOptions.RemoveEmptyEntries) with
         | [|"trf";name;capacity;current|] ->
-            let node = create_node name Seq.empty capacity current parent children
+            let node = create_node name List.empty capacity current parent children
             children <- name :: children
             parse_powergrid t (List.append nodes [node]) (&rest) (&children) parent
         | [|"trf";name;capacity;current;"{"|] ->
             let mutable temp = []
             let node = create_node name (parse_powergrid t [] &rest (&temp) name) capacity current parent temp
             children <- name :: children
-            parse_powergrid rest (List.append nodes [node]) (&rest) (&children) name
+            parse_powergrid rest (List.append nodes [node]) (&rest) (&children) parent
         | [|"phev";name;profile;capacity;current;battery;rate|] -> 
             let node = create_phev name capacity current battery rate profile parent profiles
             children <- name :: children
             parse_powergrid t (List.append nodes [node]) (&rest) (&children) parent
         | [|"pnode";name;realtime|] ->
-            let realtime = (Seq.tryFind (fun (n, s) -> n = realtime) powerprofiles)
+            let realtime = (List.tryFind (fun (n, s) -> n = realtime) powerprofiles)
             match realtime with
             | None -> raise <| IOException(sprintf "Could not find powernode with name %s in powerprofiles.txt" name)
             | Some realtime ->

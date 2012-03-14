@@ -3,6 +3,7 @@
 #nowarn "25"
 
 open System
+open System.Collections
 open System.Threading
 open SynchronizationContext
 open Message
@@ -10,54 +11,43 @@ open Agent
 open Models
 open PostalService
 
+
 (* 
     Transformer: This is the transformer agent
 *)
 let trf_agent trf = Agent.Start(fun agent ->
-    let rec loop (Transformer({ parent=parent; children=children } as trf_args) as trf) = async {
-        let! msg = agent.Receive()
-        
+    let queue = new Queue() 
+    let rec loop (Transformer({ name=name; parent=parent; children=children } as trf_args) as trf) (intentions : Message list) = async {
+        let! (msg : Message) = 
+            if (intentions.Length >= children.Length && queue.Count > 0) then
+                async { return queue.Dequeue() :?> Message }
+            else
+                agent.Receive()
         match msg with
+        | Update(tick) ->
+            return! loop trf intentions
         | ReplyTo(replyToMsg, reply) ->
             match replyToMsg with
             | RequestModel ->
-                reply.Reply(Model(trf))
-                return! loop trf
-            | Charge(name, energy, ttd) as intention -> 
-                let replyInt = postalService.send_reply(parent, intention)
-                reply.Reply(replyInt)
-                return! loop trf
+                if children.Length > intentions.Length then
+                    queue.Enqueue(msg)
+                    return! loop trf intentions
+                else
+                    reply.Reply(Model(trf))
+                    return! loop trf [] 
         | Model(trf) -> 
-            return! loop trf
-        | Update(tick) ->
-            if children.Length > 0 then
-                return! collect_intentions trf []
-            else
-                postalService.send(parent, Charge_OK)
-                return! loop trf
-        | _ -> 
-            syncContext.RaiseEvent error <| Exception("Trf: Not yet implemented")
-
-            return! loop trf
-        } 
-    and collect_intentions (Transformer({ parent=parent; children=children } as trf_args) as trf) (intentions : Message list) = agent.Scan((function         
-        | Charge(name, energy, ttd) as msg ->
-            if intentions.Length > 0 then
-                //postalService.send(parent, Charge_OK)
-                printfn "test"
-                Some(async { return! loop trf })
-            else    
-                printfn "test"
-                Some(collect_intentions trf (msg :: intentions))
-        | Charge_OK as msg -> 
-            if intentions.Length > 0 then
-//                    postalService.send(parent, Charge_OK)
-                printfn "test"
-                Some(async { return! loop trf })
-            else
-                printfn "test"
-                Some(collect_intentions trf (msg :: intentions))
-        | _ ->
-            None), 1000)
-    
-    loop trf)
+            return! loop trf intentions
+        | Charge(from, energy, ttd) as msg ->
+            if (intentions.Length+1) = children.Length then
+                postalService.send(parent, Charge_OK(name))
+            return! loop trf (msg :: intentions)
+        | Charge_OK(from) as msg -> 
+            if (intentions.Length+1) = children.Length then
+                postalService.send(parent, Charge_OK(name))
+            return! loop trf (msg :: intentions)
+        | _ as test ->
+            printfn "FFS?"
+            raise (Exception((test.ToString())))
+            return! loop trf intentions
+    }
+    loop trf [])

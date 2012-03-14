@@ -10,7 +10,7 @@ open Models
 open PostalService
 
 let pnode_agent pnode = Agent.Start(fun agent ->
-    let rec loop (PowerNode({ parent=parent } as pnode_args) as pnode) = async {
+    let rec loop (PowerNode({ name=name; parent=parent } as pnode_args) as pnode) = async {
         let! msg = agent.Receive()
 
         match msg with
@@ -20,7 +20,9 @@ let pnode_agent pnode = Agent.Start(fun agent ->
                 reply.Reply(Model(pnode))
         | Update(tick) -> 
             let current = pnode_args.realtime tick
-            postalService.send(parent, Charge_OK)
+//            printfn "%s sending charge to %s" name parent
+            postalService.send(parent, Charge_OK(name))
+//            printfn "PowerNode %s: Sending charge_ok to %s" name parent
             return! loop <| PowerNode({ pnode_args with current=current })
         | Model(pnode) -> 
             return! loop pnode

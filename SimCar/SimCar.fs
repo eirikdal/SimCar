@@ -37,13 +37,13 @@ let make_agent name node =
 let rec to_agents node = 
     match node with
     | Node(nodes, Some(Transformer({name=name}) as trf)) ->
-        Node(Seq.map (fun n -> to_agents n) nodes |> Seq.cache, Some <| make_agent name trf)
+        Node(List.map (fun n -> to_agents n) nodes, Some <| make_agent name trf)
     | Node(nodes, Some(PowerNode({name=name}) as pnode)) ->
         Leaf(Some <| make_agent name pnode)
     | Node(nodes, Some(PHEV({name=name}) as phev)) ->
         Leaf(Some <| make_agent name phev)
     | Node(nodes, Some(BRP({name=name}) as brp)) ->
-        Node(Seq.map (fun n -> to_agents n) nodes |> Seq.cache, Some <| make_agent name brp)
+        Node(List.map (fun n -> to_agents n) nodes, Some <| make_agent name brp)
 
 // for testing purposes
 let print_grid message =
@@ -101,8 +101,12 @@ let moving_average (array : float<kWh> array) =
 
 let test_dayahead iter agents = 
     let tick n = 
-        agents
-        |> Tree.send (Update(n)) // inform agents that new tick has begun
+        syncContext.RaiseEvent jobDebug <| sprintf "Beginning tick %d\n" n
+        let test = 
+            agents
+            |> Tree.send (Update(n)) // inform agents that new tick has begun
+        syncContext.RaiseEvent jobDebug <| sprintf "Ending tick %d\n" n
+        test
         |> Tree.send_reply RequestModel // request model from agents
 
     let realtime = Array.init(96) (fun i -> tick i)
@@ -132,9 +136,13 @@ let test_dayahead iter agents =
 // main control flow of the simulator
 let run day agents =
     let tick n = 
-        agents
-        |> Tree.send (Update(n)) // inform agents that new tick has begun
-        |> Tree.send_reply RequestModel // request model from agents
+        syncContext.RaiseEvent jobDebug <| sprintf "Beginning tick %d\n" n
+        let test = 
+            agents
+            |> Tree.send (Update(n)) // inform agents that new tick has begun
+            |> Tree.send_reply RequestModel // request model from agents
+        syncContext.RaiseEvent jobDebug <| sprintf "Ending tick %d\n" n
+        test
 
     let realtime = Array.init(96) (fun i -> tick ((day*96) + i))
 
@@ -167,3 +175,4 @@ let run day agents =
     syncContext.RaiseDelegateEvent progressPnode pnodes
     syncContext.RaiseDelegateEvent dayaheadProgress dayahead
     syncContext.RaiseDelegateEvent progressTotal updated_realtime
+    

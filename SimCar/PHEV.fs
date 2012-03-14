@@ -66,7 +66,7 @@ module Action =
  * PHEV: This is the PHEV agent
  *)
 let phev_agent _p name = Agent<Message>.Start(fun agent ->
-    let rec loop (PHEV({parent=parent} as phev_args) as phev) = async {
+    let rec loop (PHEV({name=name; parent=parent} as phev_args) as phev) = async {
         let! msg = agent.Receive()
 
         match msg with
@@ -79,28 +79,32 @@ let phev_agent _p name = Agent<Message>.Start(fun agent ->
         | Model(phev) ->
             return! loop phev
         | Update(tick) ->
-            // for debugging: 
-            let intention = Charge(name, Energy.ofFloat (float (phev_args.capacity - phev_args.battery)), 0)
-                        
-            postalService.send(parent, intention)
             match phev_args.profile with 
             | FloatProfile(dist_name,dist_list) ->
                 if phev_args.duration <= 0 then
                     // if PHEV is at home, see if it is time to leave
+                    let intention = Charge_OK(name)
+//                    printfn "%s sending charge to %s" name parent
+                    postalService.send(parent, intention)
                     return! loop <| Action.leave dist_list phev_args tick
                 else
                     if phev_args.duration = 1 then
                         let intention = Charge(name, Energy.ofFloat (float (phev_args.capacity - phev_args.battery)), 0)
-                        
+//                        printfn "%s sending charge to %s" name parent
+                        postalService.send(parent, intention)
+                    else
+                        let intention = Charge_OK(name)
                         postalService.send(parent, intention)
 
                     let phevArgs = { phev_args with battery=(phev_args.battery - phev_args.rate);duration=phev_args.duration-1 }
                     
                     return! loop <| PHEV(phevArgs)
-            | DistProfile(name,dist_list) ->
+            | DistProfile(_,dist_list) ->
                 // First time running the distribution profile, calculate and cache the distributions
                 let p = Action.calc name dist_list
-                
+                let intention = Charge_OK(name)
+                        
+                postalService.send(parent, intention)
                 let phevArguments = { phev_args with profile=p }
 
                 return! loop <| PHEV(phevArguments)

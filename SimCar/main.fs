@@ -44,6 +44,7 @@ type SimCar(nIter, nTicksPerDay) =
     // attach functions to events
     member self.RegisterEvents () = 
         error.Publish.Add(fun e -> postalService.Post(Error(sprintf "%s" e.Message)))
+        jobDebug.Publish.Add(fun str -> printfn "%s" str)
         
     member self.Init() = 
         postalService.agents <- _agents

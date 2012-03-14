@@ -27,7 +27,7 @@ open Tree
 *)
 type PostalService() = 
     let agentdict = new Dictionary<string, Agent<Message>>()
-    let mutable _agents = Node(Seq.empty, None) : Node<Agent<_>>
+    let mutable _agents = Node(List.empty, None) : Node<Agent<_>>
 
     let agent = Agent<Message>.Start(fun agent ->
         let rec loop() = async {
