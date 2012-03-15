@@ -57,6 +57,7 @@ module Action =
         // if a distribution was found, let the PHEV leave with the corresponding duration of the distribution
         match dist with
         | Some d ->   
+            syncContext.RaiseEvent jobDebug <| "PHEV left"
             PHEV({ phev_args with left=(tick%96); duration=d.duration;current=Energy.ofFloat 0.0; })
         | None ->
             charge phev_args accepted
@@ -114,7 +115,7 @@ let phev_agent _p name = Agent<Message>.Start(fun agent ->
                         let intention = Charge_OK(name)
                         postalService.send(parent, intention)
 
-                        return! loop <| PHEV({ phev_args with duration=phev_args.duration-1 })
+                        return! loop <| PHEV({ phev_args with battery=(phev_args.battery - phev_args.rate); duration=phev_args.duration-1 })
 
             | DistProfile(_,dist_list) ->
                 // First time running the distribution profile, calculate and cache the distributions
