@@ -57,7 +57,7 @@ module Action =
         // if a distribution was found, let the PHEV leave with the corresponding duration of the distribution
         match dist with
         | Some d ->   
-            syncContext.RaiseEvent jobDebug <| sprintf "PHEV %s left with prob %f and chance %f" name r (Seq.nth (tick%96) d.dist) 
+            syncContext.RaiseEvent jobDebug <| sprintf "PHEV %s left with chance %f and probability %f" name r (Seq.nth (tick%96) d.dist) 
             
             PHEV({ phev_args with left=(tick%96); duration=d.duration;current=Energy.ofFloat 0.0; })
         | None ->
@@ -90,24 +90,17 @@ let phev_agent _p name = Agent<Message>.Start(fun agent ->
                         syncContext.RaiseDelegateEvent phevStatus 0.0
                     // if PHEV is at home, see if it is time to leave
                     let intention = Charge(name, Energy.ofFloat (float (phev_args.capacity - phev_args.battery)), 30, phev_args.rate)
-//                    printfn "%s sending charge to %s" name parent
-                    let charge = postalService.send_reply(parent, intention)
-                    let accepted = 
-                        match charge with
-                        | Charge_Accepted(accepted) -> accepted
 
+                    let (Charge_Accepted(accepted)) = postalService.send_reply(parent, intention)
+                    
                     return! loop <| Action.leave name dist_list phev_args tick accepted
                 else
                     if name = "Godel" then
                         syncContext.RaiseDelegateEvent phevStatus 1.0
                     if phev_args.duration = 1 then
                         let intention = Charge(name, Energy.ofFloat (float (phev_args.capacity - phev_args.battery)), 30, phev_args.rate)
-//                        printfn "%s sending charge to %s" name parent
 
-                        let reply = postalService.send_reply(parent, intention)
-                        let accepted = 
-                            match reply with
-                            | Charge_Accepted(accepted) -> accepted
+                        let (Charge_Accepted(accepted)) = postalService.send_reply(parent, intention)
 
                         let phevArgs = { phev_args with battery=(phev_args.battery + accepted);duration=phev_args.duration-1 }
                     
