@@ -5,9 +5,11 @@ open Agent
 open Models
 
 type Message = 
-    | Charge of string * energy * int
+    | Charge of string * energy * int * energy
     | Charge_Received
     | Charge_OK of string
+    | Charge_Accepted of energy
+    | Charge_Intentions of string * Message list
     | Completed of string
     | Assign of Agent<Message> * Grid
     | Register of string * Agent<Message>

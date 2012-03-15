@@ -2,14 +2,14 @@
   trf node2 1000.0 0.0 {
     pnode house2 house
     pnode house4 house
-	phev vonNeumann worker 1.0 0.0 1.0 0.1
-    phev Turing worker 1.0 0.0 1.0 0.1
+	phev vonNeumann worker 5.0 0.0 1.0 0.5
+    phev Turing worker 5.0 0.0 1.0 0.5
   }
   trf node7 1000.0 0.0 {
     pnode house3 house
   }
-  phev Church worker 1.0 0.0 1.0 0.1
-  phev Godel housewife 10.0 0.0 1.0 0.1
-  phev Nash worker 1.0 0.0 1.0 0.1
+  phev Church worker 5.0 0.0 1.0 0.5
+  phev Godel housewife 5.0 0.0 1.0 0.5
+  phev Nash worker 5.0 0.0 1.0 0.5
   pnode house1 house
 }

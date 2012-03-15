@@ -46,3 +46,6 @@ let dayaheadInit       = new DelegateEvent<System.EventHandler>()
 // EventHandlers for displaying cumulative pdf 
 let probEvent           = new DelegateEvent<System.EventHandler>()
 let probReset           = new DelegateEvent<System.EventHandler>()
+
+let phevBattery         = new DelegateEvent<System.EventHandler>()
+let phevStatus          = new DelegateEvent<System.EventHandler>()

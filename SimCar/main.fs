@@ -15,6 +15,12 @@ type SimCar(nIter, nTicksPerDay) =
     let _agents = to_agents powergrid
     member self.Agents = _agents |> Tree.map (fun (name, from) -> from)
         
+    member self.RegisterPhevBattery (handler) = 
+        phevBattery.Publish.AddHandler handler
+
+    member self.RegisterPhevStatus (handler) = 
+        phevStatus.Publish.AddHandler handler
+
     member self.RegisterProb (handler) = 
         probEvent.Publish.AddHandler handler
 
@@ -44,7 +50,7 @@ type SimCar(nIter, nTicksPerDay) =
     // attach functions to events
     member self.RegisterEvents () = 
         error.Publish.Add(fun e -> postalService.Post(Error(sprintf "%s" e.Message)))
-        jobDebug.Publish.Add(fun str -> printfn "%s" str)
+//        jobDebug.Publish.Add(fun str -> printfn "%s" str)
         
     member self.Init() = 
         postalService.agents <- _agents

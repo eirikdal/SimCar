@@ -34,19 +34,23 @@ let trf_agent trf = Agent.Start(fun agent ->
                     return! loop trf intentions
                 else
                     reply.Reply(Model(trf))
-                    return! loop trf [] 
+                    return! loop trf []
+            | Charge(from, energy, ttd, _) ->
+                if (intentions.Length+1) = children.Length then
+                    postalService.send(parent, Charge_Intentions(name, (msg :: intentions)))
+//                    postalService.send_reply(parent, msg, reply)
+                return! loop trf (msg :: intentions)
         | Model(trf) -> 
             return! loop trf intentions
-        | Charge(from, energy, ttd) as msg ->
-            if (intentions.Length+1) = children.Length then
-                postalService.send(parent, Charge_OK(name))
-            return! loop trf (msg :: intentions)
         | Charge_OK(from) as msg -> 
             if (intentions.Length+1) = children.Length then
-                postalService.send(parent, Charge_OK(name))
+                postalService.send(parent, Charge_Intentions(name, (msg :: intentions)))
+            return! loop trf (msg :: intentions)
+        | Charge_Intentions(_,msgs) -> 
+            if (intentions.Length+1) = children.Length then
+                postalService.send(parent, Charge_Intentions(name, (msg :: intentions)))
             return! loop trf (msg :: intentions)
         | _ as test ->
-            printfn "FFS?"
             raise (Exception((test.ToString())))
             return! loop trf intentions
     }

@@ -181,7 +181,7 @@ let create_brp name nodes dayahead children =
         { name=name;
         dayahead=dayahead;
         current=0.0<kWh>;
-        realtime=Array.empty |> Array.get;
+        realtime=Array.init (96) (fun _ -> 0.0<kWh>) |> Array.get;
         children=children |> List.map (fun child -> (child, Waiting)); }
 
     Node(nodes, Some <| BRP(brp_arg)) 

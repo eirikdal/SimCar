@@ -24,7 +24,7 @@ let rec iter iterf node =
 let rec send_reply msg (node : Node<Agent<Message>>) = 
     match node with
     | Node(nodes, Some(leaf)) ->
-        let res = leaf.PostAndReply((fun replyChannel -> ReplyTo(msg, replyChannel)), 5000)
+        let res = leaf.PostAndReply((fun replyChannel -> ReplyTo(msg, replyChannel)), 500000)
         Node(List.map (fun n -> send_reply msg n) nodes, Some (leaf, res))
     | Node(nodes, None) -> 
         Node(List.map (fun n -> send_reply msg n) nodes, None)

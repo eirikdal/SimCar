@@ -162,8 +162,8 @@ let run day agents =
         updated_realtime
         |> DayAhead.shave
 
-//    postalService.send("brp", Dayahead(dayahead |> Array.get))
-//    postalService.send("brp", Realtime(pnodes |> Array.get))
+    postalService.send("brp", Dayahead(dayahead |> Array.get))
+    postalService.send("brp", Realtime(pnodes |> Array.get))
 
 //    let moving_dayahead = 
 //        updated_realtime

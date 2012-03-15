@@ -38,18 +38,18 @@ module Action =
 
         FloatProfile(name, dist_list)
 
-    let charge phev_args =
+    let charge phev_args accepted =
         // PHEV stayed home, charge battery if less than full
         if phev_args.battery < phev_args.capacity then
-            let phevArgs = { phev_args with current=phev_args.rate; battery=phev_args.battery+phev_args.rate }
-
+            let phevArgs = { phev_args with current=accepted; battery=phev_args.battery+accepted }
+            
             PHEV(phevArgs)
         else
             let phevArgs = { phev_args with current=0.0<kWh> }
                     
             PHEV(phevArgs)
 
-    let leave dist_list phev_args tick =  
+    let leave dist_list phev_args tick accepted =  
         let r = (new System.Random()).NextDouble()
         // try to find a distribution that matches the random number r
         let dist = dist_list |> Seq.tryFind (fun ({dist=dist}) -> r < (Seq.nth (tick%96) dist))
@@ -59,7 +59,7 @@ module Action =
         | Some d ->   
             PHEV({ phev_args with left=(tick%96); duration=d.duration;current=Energy.ofFloat 0.0; })
         | None ->
-            charge phev_args
+            charge phev_args accepted
     
 
 (* 
@@ -79,26 +79,43 @@ let phev_agent _p name = Agent<Message>.Start(fun agent ->
         | Model(phev) ->
             return! loop phev
         | Update(tick) ->
+            if name = "Godel" then
+                syncContext.RaiseDelegateEvent phevBattery phev_args.battery
             match phev_args.profile with 
             | FloatProfile(dist_name,dist_list) ->
                 if phev_args.duration <= 0 then
+                    if name = "Godel" then
+                        syncContext.RaiseDelegateEvent phevStatus 0.0
                     // if PHEV is at home, see if it is time to leave
-                    let intention = Charge_OK(name)
+                    let intention = Charge(name, Energy.ofFloat (float (phev_args.capacity - phev_args.battery)), 30, phev_args.rate)
 //                    printfn "%s sending charge to %s" name parent
-                    postalService.send(parent, intention)
-                    return! loop <| Action.leave dist_list phev_args tick
+                    let charge = postalService.send_reply(parent, intention)
+                    let accepted = 
+                        match charge with
+                        | Charge_Accepted(accepted) -> accepted
+
+                    return! loop <| Action.leave dist_list phev_args tick accepted
                 else
+                    if name = "Godel" then
+                        syncContext.RaiseDelegateEvent phevStatus 1.0
                     if phev_args.duration = 1 then
-                        let intention = Charge(name, Energy.ofFloat (float (phev_args.capacity - phev_args.battery)), 0)
+                        let intention = Charge(name, Energy.ofFloat (float (phev_args.capacity - phev_args.battery)), 30, phev_args.rate)
 //                        printfn "%s sending charge to %s" name parent
-                        postalService.send(parent, intention)
+
+                        let reply = postalService.send_reply(parent, intention)
+                        let accepted = 
+                            match reply with
+                            | Charge_Accepted(accepted) -> accepted
+
+                        let phevArgs = { phev_args with battery=(phev_args.battery + accepted);duration=phev_args.duration-1 }
+                    
+                        return! loop <| Action.leave dist_list phevArgs tick accepted
                     else
                         let intention = Charge_OK(name)
                         postalService.send(parent, intention)
 
-                    let phevArgs = { phev_args with battery=(phev_args.battery - phev_args.rate);duration=phev_args.duration-1 }
-                    
-                    return! loop <| PHEV(phevArgs)
+                        return! loop <| PHEV({ phev_args with duration=phev_args.duration-1 })
+
             | DistProfile(_,dist_list) ->
                 // First time running the distribution profile, calculate and cache the distributions
                 let p = Action.calc name dist_list
