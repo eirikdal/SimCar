@@ -11,7 +11,7 @@ open Models
 open PostalService
 open MathNet.Numerics.Distributions
 //open Node
-
+let rand = new System.Random()
 //let syncContext = SynchronizationContext.CaptureCurrent()
 
 module Action = 
@@ -49,15 +49,16 @@ module Action =
                     
             PHEV(phevArgs)
 
-    let leave dist_list phev_args tick accepted =  
-        let r = (new System.Random()).NextDouble()
+    let leave name dist_list phev_args tick accepted =  
+        let r = rand.NextDouble()
         // try to find a distribution that matches the random number r
         let dist = dist_list |> Seq.tryFind (fun ({dist=dist}) -> r < (Seq.nth (tick%96) dist))
                        
         // if a distribution was found, let the PHEV leave with the corresponding duration of the distribution
         match dist with
         | Some d ->   
-            syncContext.RaiseEvent jobDebug <| "PHEV left"
+            syncContext.RaiseEvent jobDebug <| sprintf "PHEV %s left with prob %f and chance %f" name r (Seq.nth (tick%96) d.dist) 
+            
             PHEV({ phev_args with left=(tick%96); duration=d.duration;current=Energy.ofFloat 0.0; })
         | None ->
             charge phev_args accepted
@@ -95,7 +96,7 @@ let phev_agent _p name = Agent<Message>.Start(fun agent ->
                         match charge with
                         | Charge_Accepted(accepted) -> accepted
 
-                    return! loop <| Action.leave dist_list phev_args tick accepted
+                    return! loop <| Action.leave name dist_list phev_args tick accepted
                 else
                     if name = "Godel" then
                         syncContext.RaiseDelegateEvent phevStatus 1.0
@@ -110,7 +111,7 @@ let phev_agent _p name = Agent<Message>.Start(fun agent ->
 
                         let phevArgs = { phev_args with battery=(phev_args.battery + accepted);duration=phev_args.duration-1 }
                     
-                        return! loop <| Action.leave dist_list phevArgs tick accepted
+                        return! loop <| Action.leave name dist_list phevArgs tick accepted
                     else
                         let intention = Charge_OK(name)
                         postalService.send(parent, intention)
