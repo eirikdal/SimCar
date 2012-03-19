@@ -1,5 +1,7 @@
 ﻿module FileManager 
 
+#nowarn "25"
+
 open Models
 open System
 open System.IO
@@ -54,14 +56,15 @@ module Parsing =
     open Regex
     open IO 
 
-    let parse_dayahead (dayahead : float<kWh> list) = 
+    let parse_dayahead (_dayahead : float<kWh> list) = 
         let rec _parse dayahead ac =
             match dayahead with 
             | q1::q2::q3::q4::rest ->
                 let (f1,f2,f3,f4) = (Energy.toFloat q1, Energy.toFloat q2, Energy.toFloat q3, Energy.toFloat q4)
-                _parse rest (Seq.append ac [sprintf "%f;%f;%f;%f" f1 f2 f3 f4]) 
-            | _ -> ac
-        _parse dayahead Seq.empty
+                let str = sprintf "%f;%f;%f;%f" f1 f2 f3 f4
+                _parse rest (str::ac) 
+            | _ -> List.rev ac
+        _parse _dayahead List.empty
 
     let parse_dist str = 
         match str with 
@@ -79,7 +82,7 @@ module Parsing =
             match h.Split([|' ';','|], StringSplitOptions.RemoveEmptyEntries) with
             | [|dist_type;mean;std;duration|] ->
                 let temp = create_distribution dist_type (parse_dist mean) (parse_dist std) (int <| parse_dist duration)
-                parse_profile t (List.append dist [temp]) (&rest)
+                parse_profile t (temp::dist) (&rest)
             | [|"}"|] -> 
                 rest <- t
                 dist
@@ -92,7 +95,7 @@ module Parsing =
             match h.Split([|' '|], StringSplitOptions.RemoveEmptyEntries) with
             | [|profile;"{"|] ->
                 let profile = DistProfile(profile, parse_profile t [] (&rest))
-                parse_profiles rest (List.append [profile] profiles) (&rest)
+                parse_profiles rest (profile::profiles) (&rest)
             | _ -> 
                 rest <- t
                 profiles
@@ -108,12 +111,12 @@ module Parsing =
         match (stream : string list) with 
         | h::t ->
             match h.Split([|' ';';'|], StringSplitOptions.RemoveEmptyEntries) with
-            | [|q1;q2;q3;q4|] ->
-                let temp = Double.Parse(q1, CultureInfo.InvariantCulture)::Double.Parse(q2, CultureInfo.InvariantCulture)::Double.Parse(q3, CultureInfo.InvariantCulture)::Double.Parse(q4, CultureInfo.InvariantCulture)::[]
-                parse_powerprofile t name (List.append dist temp) (&rest)
+            | [|q4;q3;q2;q1|] ->
+                let temp = Double.Parse(q1, CultureInfo.InvariantCulture)::Double.Parse(q2, CultureInfo.InvariantCulture)::Double.Parse(q3, CultureInfo.InvariantCulture)::Double.Parse(q4, CultureInfo.InvariantCulture)::dist
+                parse_powerprofile t name temp (&rest)
             | [|"}"|] -> 
                 rest <- t
-                dist
+                List.rev dist
             | _ -> raise <| Exception "Unexpected end of stream."
         | _ -> raise <| Exception("Unexpected end of stream. Maybe missing closing '}'?")
      
@@ -123,7 +126,7 @@ module Parsing =
             match h.Split([|' '|], StringSplitOptions.RemoveEmptyEntries) with
             | [|name;"{"|] ->
                 let profile = (name, parse_powerprofile t name List.empty (&rest))
-                parse_powerprofiles rest (List.append [profile] profiles) (&rest)
+                parse_powerprofiles rest (profile::profiles) (&rest)
             | _ -> 
                 rest <- t
                 profiles
@@ -145,16 +148,16 @@ module Parsing =
             | [|"trf";name;capacity;current|] ->
                 let node = create_node name List.empty capacity current parent children
                 children <- name :: children
-                parse_powergrid t (List.append nodes [node]) (&rest) (&children) parent
+                parse_powergrid t (node::nodes) (&rest) (&children) parent
             | [|"trf";name;capacity;current;"{"|] ->
                 let mutable temp = []
                 let node = create_node name (parse_powergrid t [] &rest (&temp) name) capacity current parent temp
                 children <- name :: children
-                parse_powergrid rest (List.append nodes [node]) (&rest) (&children) parent
+                parse_powergrid rest (node::nodes) (&rest) (&children) parent
             | [|"phev";name;profile;capacity;current;battery;rate|] -> 
                 let node = create_phev name capacity current battery rate profile parent profiles
                 children <- name :: children
-                parse_powergrid t (List.append nodes [node]) (&rest) (&children) parent
+                parse_powergrid t (node::nodes) (&rest) (&children) parent
             | [|"pnode";name;realtime|] ->
                 let realtime = (List.tryFind (fun (n, s) -> n = realtime) powerprofiles)
                 match realtime with
@@ -163,26 +166,25 @@ module Parsing =
                     let nth n = Energy.ofFloat ((snd realtime) |> Seq.cache |> Seq.nth n)
                     let node = create_powernode name nth parent
                     children <- name :: children
-                    parse_powergrid t (List.append nodes [node]) (&rest) (&children) parent
+                    parse_powergrid t (node::nodes) (&rest) (&children) parent
             | [|"}"|] -> 
                 rest <- t
                 nodes
             | _ -> raise <| IOException("Error while reading Transformers from file")
         | _ -> nodes
 
-
     let rec parse_dayahead_file (ac : float<kWh> list) stream = 
         match (stream : string list) with 
         | h::t ->
             match h.Split([|' ';';'|], StringSplitOptions.RemoveEmptyEntries) with
             | [|q1;q2;q3;q4|] ->
-                let temp = 
+                let (q1'::q2'::q3'::q4'::_) = 
                     q1::q2::q3::q4::[]
                     |> List.map (fun q -> Energy.ofFloat <| Double.Parse(q,CultureInfo.InvariantCulture))
 
-                parse_dayahead_file (List.append ac temp) t
+                parse_dayahead_file (q1'::q2'::q3'::q4'::ac) t
             | _ -> raise <| Exception "Unexpected line"
-        | _ -> ac
+        | _ -> List.rev ac
     
 let dayahead = List.ofSeq (IO.read_file file_dayahead) |> Parsing.parse_dayahead_file [] |> List.nth
 
