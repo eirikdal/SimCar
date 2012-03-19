@@ -59,7 +59,7 @@ module Parsing =
     let parse_dayahead (_dayahead : float<kWh> list) = 
         let rec _parse dayahead ac =
             match dayahead with 
-            | q1::q2::q3::q4::rest ->
+            | q4::q3::q2::q1::rest ->
                 let (f1,f2,f3,f4) = (Energy.toFloat q1, Energy.toFloat q2, Energy.toFloat q3, Energy.toFloat q4)
                 let str = sprintf "%f;%f;%f;%f" f1 f2 f3 f4
                 _parse rest (str::ac) 
@@ -111,8 +111,8 @@ module Parsing =
         match (stream : string list) with 
         | h::t ->
             match h.Split([|' ';';'|], StringSplitOptions.RemoveEmptyEntries) with
-            | [|q4;q3;q2;q1|] ->
-                let temp = Double.Parse(q1, CultureInfo.InvariantCulture)::Double.Parse(q2, CultureInfo.InvariantCulture)::Double.Parse(q3, CultureInfo.InvariantCulture)::Double.Parse(q4, CultureInfo.InvariantCulture)::dist
+            | [|q1;q2;q3;q4|] ->
+                let temp = Double.Parse(q4, CultureInfo.InvariantCulture)::Double.Parse(q3, CultureInfo.InvariantCulture)::Double.Parse(q2, CultureInfo.InvariantCulture)::Double.Parse(q1, CultureInfo.InvariantCulture)::dist
                 parse_powerprofile t name temp (&rest)
             | [|"}"|] -> 
                 rest <- t
@@ -186,9 +186,9 @@ module Parsing =
             | _ -> raise <| Exception "Unexpected line"
         | _ -> List.rev ac
     
-let dayahead = List.ofSeq (IO.read_file file_dayahead) |> Parsing.parse_dayahead_file [] |> List.nth
+let dayahead() = List.ofSeq (IO.read_file file_dayahead) |> Parsing.parse_dayahead_file [] |> List.nth
 
-let prediction =  List.ofSeq (IO.read_file file_prediction) |> Parsing.parse_dayahead_file [] |> List.nth
+let prediction() =  List.ofSeq (IO.read_file file_prediction) |> Parsing.parse_dayahead_file [] |> List.nth
 
 let powergrid = 
     let mutable rest = []

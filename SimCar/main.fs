@@ -80,8 +80,8 @@ type SimCar(nIter, nTicksPerDayq) =
     member self.Run(?days) = 
         let n = match days with Some d -> d | None -> nIter
 
-        postalService.send("brp", Dayahead(FileManager.dayahead))
-        postalService.send("brp", Prediction(FileManager.prediction))
+        postalService.send("brp", Dayahead(FileManager.dayahead()))
+        postalService.send("brp", Prediction(FileManager.prediction()))
         postalService.send("brp", Schedule(BRP.Action.schedule_reactive))
 
         Seq.initInfinite (fun day -> run day self.Agents false)
