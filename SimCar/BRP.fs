@@ -82,14 +82,19 @@ module Action =
 //        |> Array.ofList
 //        |> Array.filter (fun msg -> match msg with | ReplyTo(Charge(_,_,_,_),_) -> true | _ -> false)
 
-    let schedule(dayahead : dayahead, prediction : realtime, queue : Message list, tick) = 
+    let schedule_reactive (dayahead : dayahead) (prediction : realtime) queue tick = 
         reduce_queue queue
         |> List.sortBy (fun (ReplyTo(Charge(_,_,ttl,_),_)) -> ttl)
-        |> List.fold (fun ac (ReplyTo(Charge(_,energy,_,rate), reply)) -> reserve ac energy rate reply) (dayahead (tick%96) - prediction (tick%96))
+        |> List.fold (fun ac (ReplyTo(Charge(_,energy,_,rate), reply)) -> reserve ac energy rate reply) (dayahead (tick) - prediction (tick))
+        |> ignore
 
-let brp_agent brp = Agent.Start(fun agent ->
+    let schedule_greedy dayahead prediction queue tick =
+        reduce_queue queue
+        |> List.iter (fun (ReplyTo(Charge(_,_,_,rate),reply)) -> reply.Reply(Charge_Accepted(rate)))
+
+let brp_agent brp schedule = Agent.Start(fun agent ->
     let queue = new Queue() 
-    let rec loop (BRP({ children=children } as brp_args) as brp) (intentions : Message list) (tick : int) = async {
+    let rec loop (BRP({ children=children; } as brp_args) as brp) (intentions : Message list) schedule (tick : int) = async {
         let! (msg : Message) = 
             if (intentions.Length = children.Length && queue.Count > 0) then
                 async { return queue.Dequeue() :?> Message }
@@ -102,12 +107,14 @@ let brp_agent brp = Agent.Start(fun agent ->
             | RequestModel ->
                 if children.Length > intentions.Length then
                     queue.Enqueue(msg)
-                    return! loop brp intentions tick
+                    return! loop brp intentions schedule tick
                 else
-//                    printfn "BRP responding to RequestModel"
                     syncContext.RaiseEvent jobDebug <| "BRP responding to RequestModel"
                     reply.Reply(Model(brp))
-                    return! loop brp [] tick
+                    return! loop brp [] schedule tick
+            | RequestDayahead ->
+                reply.Reply(Model(brp))
+                return! loop brp [] schedule tick
 //            | Charge(from,_,_,_) ->
 //                syncContext.RaiseEvent jobDebug <| sprintf "%s received charge from %s" "BRP" from
 //                printfn "%s received charge from %s" "BRP" from 
@@ -121,13 +128,15 @@ let brp_agent brp = Agent.Start(fun agent ->
 //                    queue.Enqueue(msg)
 //                    return! loop brp (msg :: intentions) tick 
         | Update(tick) -> 
-            return! loop brp [] tick
+            return! loop brp [] schedule tick
         | Dayahead(dayahead) ->
-            return! loop <| BRP({ brp_args with dayahead=dayahead }) <| intentions <| tick
-        | Realtime(realtime) ->
-            return! loop <| BRP({ brp_args with realtime=realtime }) <| intentions <| tick
+            return! loop <| BRP({ brp_args with dayahead=dayahead }) <| intentions <| schedule <| tick
+        | Prediction(realtime) ->
+            return! loop <| BRP({ brp_args with realtime=realtime }) <| intentions <| schedule <| tick
+        | Schedule(schedule) ->
+            return! loop brp intentions schedule tick
         | Model(brp) -> 
-            return! loop brp intentions tick
+            return! loop brp intentions schedule tick
         | Charge_Intentions(from, messages) -> 
             syncContext.RaiseEvent jobDebug <| sprintf "%s received charge from %s" "BRP" from
 
@@ -135,12 +144,12 @@ let brp_agent brp = Agent.Start(fun agent ->
                 syncContext.RaiseEvent jobDebug <| "BRP got charges"
                 
                 let messages = (msg :: intentions) |> List.collect (fun x -> match x with | Charge_Intentions(_,msgs) -> msgs)
-                let test = Action.schedule(brp_args.dayahead, brp_args.realtime, messages, tick)
+                schedule brp_args.dayahead brp_args.realtime messages tick
 //                printfn "Excess energy %f" (Energy.toFloat test)
 
-                return! loop brp (msg :: intentions) tick
+                return! loop brp (msg :: intentions) schedule tick
             else
-                return! loop brp (msg :: intentions) tick
+                return! loop brp (msg :: intentions) schedule tick
 //        | Charge_OK(from) as msg -> 
 //            syncContext.RaiseEvent jobDebug <| sprintf "%s received charge from %s" "BRP" from
 //
@@ -156,6 +165,6 @@ let brp_agent brp = Agent.Start(fun agent ->
         | _ -> 
             syncContext.RaiseEvent error <| Exception("BRP: Not implemented yet")
 
-        return! loop brp intentions tick}    
+        return! loop brp intentions schedule tick}    
 
-    loop brp [] 0)
+    loop brp [] schedule 0)

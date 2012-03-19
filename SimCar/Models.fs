@@ -138,11 +138,6 @@ type Grid =
         | PowerNode(pnode_arg) -> pnode_arg.name
         | BRP(brp_arg) -> brp_arg.name
 
-// dummy functions for dayahead and realtime mode, for testing purposes
-let sine n = Energy.ofFloat <| sin (2.0 * Math.PI * (float n))
-let gen = (Seq.initInfinite (fun x -> 1.0))
-let take n = sine <| Seq.nth n gen
-
 // function that creates a transformer model, takes name, other connected nodes, capacity and current as parameters
 let create_node name nodes capacity current parent children = 
     let trf_arg = 

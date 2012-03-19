@@ -11,7 +11,7 @@ open MSDN.FSharp.Charting
 open Models
 open Tree
 
-type SimCar(nIter, nTicksPerDay) = 
+type SimCar(nIter, nTicksPerDayq) = 
     let _agents = to_agents powergrid
     member self.Agents = _agents |> Tree.map (fun (name, from) -> from)
         
@@ -46,21 +46,49 @@ type SimCar(nIter, nTicksPerDay) =
 
     member self.RegisterDayaheadInit (handler) =
         dayaheadInit.Publish.AddHandler handler
+
+    member self.RegisterComputeDayahead () = 
+        updateEvent.Publish.Add(fun dayahead -> IO.write_to_file <| FileManager.file_dayahead <| Parsing.parse_dayahead (List.ofArray dayahead))
     
     // attach functions to events
     member self.RegisterEvents () = 
         error.Publish.Add(fun e -> postalService.Post(Error(sprintf "%s" e.Message)))
         jobDebug.Publish.Add(fun str -> printfn "%s" str)
-        
+
     member self.Init() = 
         postalService.agents <- _agents
 
-    // create an infinite sequence of simulation steps
-    member self.Run() = 
-        Seq.initInfinite (fun day -> run day self.Agents)
-        |> Seq.take nIter 
+    member self.ComputeDayahead(?days) = 
+        let n = match days with Some d -> d | None -> nIter
+
+        IO.clear_dayahead_data()
+//        self.RegisterComputeDayahead()
+
+        postalService.send("brp", Dayahead((fun _ -> 0.0<kWh>)))
+        postalService.send("brp", Prediction((fun _ -> 0.0<kWh>)))
+        postalService.send("brp", Schedule(BRP.Action.schedule_greedy))
+
+        syncContext.RaiseEvent jobDebug <| "Computing dayahead"
+        Seq.initInfinite (fun day -> run day self.Agents true)
+        |> Seq.take n 
         |> Seq.cache
         |> List.ofSeq
+        |> ignore
+        syncContext.RaiseEvent jobDebug <| "Dayahead computed"
+        
+    // create an infinite sequence of simulation steps
+    member self.Run(?days) = 
+        let n = match days with Some d -> d | None -> nIter
+
+        postalService.send("brp", Dayahead(FileManager.dayahead))
+        postalService.send("brp", Prediction(FileManager.prediction))
+        postalService.send("brp", Schedule(BRP.Action.schedule_reactive))
+
+        Seq.initInfinite (fun day -> run day self.Agents false)
+        |> Seq.take n
+        |> Seq.cache
+        |> List.ofSeq
+        |> ignore
 
     member self.TestDayahead(n) = 
         test_dayahead n self.Agents

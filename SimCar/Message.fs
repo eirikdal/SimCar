@@ -16,10 +16,12 @@ type Message =
     | Deregister of string * Agent<Message>
     | Broadcast of Message
     | Dayahead of dayahead
-    | Realtime of realtime
+    | Prediction of realtime
     | ReplyTo of Message * AsyncReplyChannel<Message>
     | RequestModel
+    | RequestDayahead
     | Model of Grid
     | Error of string
     | Update of int
     | Reply of Message
+    | Schedule of (dayahead -> realtime -> Message list -> int -> unit)
