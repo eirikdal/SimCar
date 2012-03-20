@@ -1,16 +1,21 @@
-﻿open System
+﻿#r "bin/Debug/SimCar.dll"
+
+open System
 open System.IO
 open System.Globalization
 open System.Text.RegularExpressions
+open FileManager
+
 
 #nowarn "25"
 
-let folder_of file = sprintf "%s\\data\\%s" (Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName) file
-let profile_file = sprintf "%s\\%s" (Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName) "powerprofiles.txt"
+let powerprofile_file = "C:\\SimCar\\SimCar\\data\\buskerud.txt"
+let profile_file = "C:\\SimCar\\SimCar\\data\\powerprofiles.txt"
+let data_folder = "C:\\SimCar\\SimCar\\data\\powernodes\\"
 
-let read_file file = 
+let read_file = 
     seq {
-        use sr = new StreamReader(folder_of file)
+        use sr = new StreamReader(powerprofile_file)
         while not sr.EndOfStream do
             yield sr.ReadLine()
     }
@@ -20,22 +25,31 @@ let make_day values =
                 let f = Double.Parse(qi, NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture) / 4.0
                 sprintf "%f;%f;%f;%f" f f f f) values
 
-let rec parse_powerprofiles stream (values : string list) days =
+let rec parse_powerprofiles stream (values : string list) days customer =
     match (stream : string list) with 
     | h::t ->
         match h.Split([|' ';'\t'|], StringSplitOptions.RemoveEmptyEntries) with
+        | [|cust;_;_;_;_;_;_;_;_;_;_;_;_;_;_;_;_;_;_;_;_;_;_;_;_;_;_|] when cust = "Customer" ->
+            parse_powerprofiles t values days customer
         | [|cust;date;est;q1;q2;q3;q4;q5;q6;q7;q8;q9;q10;q11;q12;q13;q14;q15;q16;q17;q18;q19;q20;q21;q22;q23;q24|] when days = 0 ->
-            File.WriteAllLines (profile_file, ["house {"] @ (List.rev values) @ ["}"]) 
+//            IO.write_doubles (data_folder + (sprintf "%s.dat" cust)) (List.rev (values |> List.map Double.Parse))
+            File.AppendAllLines (profile_file, [sprintf "%s {" cust] @ (List.rev values) @ ["}"]) 
+            parse_powerprofiles t [] (days-1) cust
+        | [|cust;_;_;_;_;_;_;_;_;_;_;_;_;_;_;_;_;_;_;_;_;_;_;_;_;_;_|] when days < 0 && customer = cust ->
+            parse_powerprofiles t values days cust
+        | [|cust;date;est;q1;q2;q3;q4;q5;q6;q7;q8;q9;q10;q11;q12;q13;q14;q15;q16;q17;q18;q19;q20;q21;q22;q23;q24|] when days < 0 && cust <> customer ->
+            let hours = q1::q2::q3::q4::q5::q6::q7::q8::q9::q10::q11::q12::q13::q14::q15::q16::q17::q18::q19::q20::q21::q22::q23::q24::[]
+            let (day : string list) = make_day hours
+            parse_powerprofiles t ((List.rev day) @ values) 30 cust
         | [|cust;date;est;q1;q2;q3;q4;q5;q6;q7;q8;q9;q10;q11;q12;q13;q14;q15;q16;q17;q18;q19;q20;q21;q22;q23;q24|] when cust <> "Customer" ->
             let hours = q1::q2::q3::q4::q5::q6::q7::q8::q9::q10::q11::q12::q13::q14::q15::q16::q17::q18::q19::q20::q21::q22::q23::q24::[]
             let (day : string list) = make_day hours
-            parse_powerprofiles t ((List.rev day) @ values) (days-1)
-        | [|cust;date;est;q1;q2;q3;q4;q5;q6;q7;q8;q9;q10;q11;q12;q13;q14;q15;q16;q17;q18;q19;q20;q21;q22;q23;q24|] when cust = "Customer" ->
-            parse_powerprofiles t values days
-    | _ -> File.WriteAllLines (profile_file, ["house {"] @ values @ ["}"])
+            parse_powerprofiles t ((List.rev day) @ values) (days-1) customer
+    | _ -> ()
 
 let powerprofiles = 
+    File.Delete(profile_file)
     let mutable rest = []
-    let stream = List.ofSeq (read_file "buskerud.txt")
+    let stream = List.ofSeq read_file
 
-    parse_powerprofiles stream [] 30
+    parse_powerprofiles stream [] 30 "-1"
