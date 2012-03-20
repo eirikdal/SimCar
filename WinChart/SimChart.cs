@@ -203,7 +203,7 @@ namespace WinChart
         {
             InitializeComponent();
 
-            const int nSim = 10;
+            const int nSim = 3;
             const int nTicks = 96;
 
             chart1.Titles.Add("Iteration # 0 : Step # 0");
@@ -270,7 +270,8 @@ namespace WinChart
             //tSim.RegisterDayaheadInit(new EventHandler(dayahead_Init));
             //tSim.RegisterDayaheadStep(new EventHandler(dayahead_Step));
             //tSim.TestDayahead(nSim);
-            tSim.Run();
+            tSim.ComputeDayahead(new Microsoft.FSharp.Core.FSharpOption<int>(nSim));
+            tSim.Run(new Microsoft.FSharp.Core.FSharpOption<int>(nSim));
         }
     }
 }
