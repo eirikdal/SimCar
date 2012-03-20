@@ -6,7 +6,7 @@ open SynchronizationContext
 
 let dist x x' = abs(x - x')
 let mutable S = 0.0<kWh>
-let alpha = 0.3
+let alpha = 0.1
 let theta = 0.9
 
 // BEST: alpha = 0.3, theta = 0.5-0-9?

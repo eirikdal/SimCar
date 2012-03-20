@@ -26,6 +26,13 @@ module IO =
                 yield sr.ReadLine()
         }
 
+    let write_file (file : string) = 
+        seq {
+            use wr = new BinaryWriter(file)
+
+
+        }
+
     let write_to_file (file : string) (contents  : string seq) = 
         if File.Exists file_dayahead then
             File.AppendAllLines(file, contents)
