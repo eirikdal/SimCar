@@ -34,9 +34,13 @@ module IO =
         use br = new BinaryReader(File.Open(file, FileMode.Open))
 
         let length = int br.BaseStream.Length
-            
-        [for pos in 0 .. sizeof<float> .. (length - sizeof<float>) do
-            yield Energy.ofFloat <| br.ReadDouble()] 
+        
+//        [for pos in 0 .. sizeof<float> .. (length - sizeof<float>) do
+//            yield Energy.ofFloat <| br.ReadDouble()] 
+        let bytes = br.ReadBytes(length)
+        let doubles = Array.init (length / sizeof<float>) (fun _ -> 0.0)
+        Buffer.BlockCopy(bytes, 0, doubles, 0, length)
+        doubles
 
     let write_to_file (file : string) (contents  : string seq) = 
         if File.Exists file_dayahead then
@@ -112,7 +116,7 @@ module Parsing =
 
         parse_profiles stream [] (&rest)
 
-    let rec parse_powerprofiles profiles (rest : string list byref) =
+    let parse_powerprofiles () =
         let files = Directory.GetFiles(data_folder)
 
         files 
@@ -123,11 +127,8 @@ module Parsing =
                 (name, read_doubles(file)))
         |> List.ofArray
 
-    let powerprofiles : (string * float<kWh> list) list = 
-        let mutable rest = []
-
-        parse_powerprofiles List.empty (&rest)
-
+    
+    let powerprofiles = parse_powerprofiles ()
     // 
     // Parsing the powergrid, transformers, power nodes and PHEVs.
     //
@@ -153,7 +154,7 @@ module Parsing =
                 match realtime with
                 | None -> raise <| IOException(sprintf "Could not find powernode with name %s in powerprofiles.txt" name)
                 | Some realtime ->
-                    let nth n = (snd realtime) |> Seq.cache |> Seq.nth n
+                    let nth = (snd realtime) |> Array.get >> Energy.ofFloat
                     let node = create_powernode name nth parent
                     children <- name :: children
                     parse_powergrid t (node::nodes) (&rest) (&children) parent
@@ -165,9 +166,9 @@ module Parsing =
 
     let parse_dayahead_file (file) = read_doubles(file)
     
-let dayahead() = Parsing.parse_dayahead_file(file_dayahead) |> List.nth
+let dayahead() = Parsing.parse_dayahead_file(file_dayahead) |> Array.get >> Energy.ofFloat
 
-let prediction() = Parsing.parse_dayahead_file(file_prediction) |> List.nth
+let prediction() = Parsing.parse_dayahead_file(file_prediction) |> Array.get >> Energy.ofFloat
 
 let powergrid = 
     let mutable rest = []
