@@ -8,6 +8,7 @@ open Models
 open System
 open System.Collections
 open System.Threading
+open PostalService
 open SynchronizationContext
 
 //let gen charge tick = 
@@ -61,12 +62,13 @@ open SynchronizationContext
 //        Seq.unfold (fun (energy, i) -> reserve energy i) (sum_of_intentions, 0) |> Array.ofSeq
 
 module Action = 
-    let reserve ac energy rate (reply : AsyncReplyChannel<Message>) = 
-        if ac > rate then
-            reply.Reply(Charge_Accepted(rate))                
+    let reserve ac energy rate from = 
+        if ac > 0.0<kWh> then
+            let accepted = if energy > rate then rate else energy
+            postalService.send(from, Charge_Accepted(accepted))                
             ac - rate
         else
-            reply.Reply(Charge_Accepted(0.0<kWh>))
+            postalService.send(from, Charge_Accepted(0.0<kWh>))
             ac
 
     let rec reduce_queue queue = 
@@ -74,8 +76,7 @@ module Action =
             match msg with 
             | Charge_Intentions(_, msg) ->
                 yield! reduce_queue msg
-            | ReplyTo(Charge(_,_,_,_),_) as msg ->
-                yield! [msg]
+            | Charge(_,_,_,_) -> yield! [msg]
             | Charge_OK(_) ->
                 yield! []]
 //        queue
@@ -83,14 +84,14 @@ module Action =
 //        |> Array.filter (fun msg -> match msg with | ReplyTo(Charge(_,_,_,_),_) -> true | _ -> false)
 
     let schedule_reactive (dayahead : dayahead) (prediction : realtime) queue tick = 
-        reduce_queue queue
-        |> List.sortBy (fun (ReplyTo(Charge(_,_,ttl,_),_)) -> ttl)
-        |> List.fold (fun ac (ReplyTo(Charge(_,energy,_,rate), reply)) -> reserve ac energy rate reply) (dayahead (tick) - prediction (tick))
+        queue
+        |> List.sortBy (fun (Charge(_,_,ttl,_)) -> ttl)
+        |> List.fold (fun ac (Charge(from,energy,_,rate)) -> reserve ac energy rate from) (dayahead (tick) - prediction (tick))
         |> ignore
 
     let schedule_greedy dayahead prediction queue tick =
         reduce_queue queue
-        |> List.iter (fun (ReplyTo(Charge(_,_,_,rate),reply)) -> reply.Reply(Charge_Accepted(rate)))
+        |> List.iter (fun (Charge(from,energy,_,rate)) -> reserve 1.0<kWh> energy rate from |> ignore)
 
 let brp_agent brp schedule = Agent.Start(fun agent ->
     let queue = new Queue() 
@@ -107,26 +108,16 @@ let brp_agent brp schedule = Agent.Start(fun agent ->
             | RequestModel ->
                 if children.Length > intentions.Length then
                     queue.Enqueue(msg)
+//                    printfn "RequestModel received"
                     return! loop brp intentions schedule tick
                 else
+//                    printfn "BRP responding to RequestModel"
                     syncContext.RaiseEvent jobDebug <| "BRP responding to RequestModel"
                     reply.Reply(Model(brp))
                     return! loop brp [] schedule tick
             | RequestDayahead ->
                 reply.Reply(Model(brp))
                 return! loop brp [] schedule tick
-//            | Charge(from,_,_,_) ->
-//                syncContext.RaiseEvent jobDebug <| sprintf "%s received charge from %s" "BRP" from
-//                printfn "%s received charge from %s" "BRP" from 
-//                if intentions.Length + 1 >= children.Length then
-//                    syncContext.RaiseEvent jobDebug <| "BRP got charges"
-//                    
-//                    let test = Action.schedule(brp_args.dayahead, brp_args.realtime, queue, tick)
-//                    printf "Excess energy %f" (Energy.toFloat test)
-//                    return! loop brp (msg :: intentions) tick
-//                else
-//                    queue.Enqueue(msg)
-//                    return! loop brp (msg :: intentions) tick 
         | Update(tick) -> 
             return! loop brp [] schedule tick
         | Dayahead(dayahead) ->
@@ -138,30 +129,18 @@ let brp_agent brp schedule = Agent.Start(fun agent ->
         | Model(brp) -> 
             return! loop brp intentions schedule tick
         | Charge_Intentions(from, messages) -> 
-            syncContext.RaiseEvent jobDebug <| sprintf "%s received charge from %s" "BRP" from
-
+//            printfn "Received charges from %s: %d > %d" from (intentions.Length+1) children.Length
             if intentions.Length + 1 >= children.Length then
                 syncContext.RaiseEvent jobDebug <| "BRP got charges"
-                
-                let messages = (msg :: intentions) |> List.collect (fun x -> match x with | Charge_Intentions(_,msgs) -> msgs)
+                let messages = (msg :: intentions) |> List.collect (fun x -> match x with | Charge_Intentions(_,msgs) -> msgs) |> Action.reduce_queue
                 schedule brp_args.dayahead brp_args.realtime messages tick
 //                printfn "Excess energy %f" (Energy.toFloat test)
+//                printfn "BRP got charges"
 
                 return! loop brp (msg :: intentions) schedule tick
             else
                 return! loop brp (msg :: intentions) schedule tick
-//        | Charge_OK(from) as msg -> 
-//            syncContext.RaiseEvent jobDebug <| sprintf "%s received charge from %s" "BRP" from
-//
-//            if intentions.Length + 1 >= children.Length then
-//                syncContext.RaiseEvent jobDebug <| "BRP got charges"
-//                
-//                let test = Action.schedule(brp_args.dayahead, brp_args.realtime, queue, tick)
-//                printf "Excess energy %f" (Energy.toFloat test)
-//                
-//                return! loop brp (msg :: intentions) tick
-//            else             
-//                return! loop brp (msg :: intentions) tick
+        | Reset -> return! loop brp intentions schedule tick
         | _ -> 
             syncContext.RaiseEvent error <| Exception("BRP: Not implemented yet")
 

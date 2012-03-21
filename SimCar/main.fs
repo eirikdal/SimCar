@@ -12,7 +12,7 @@ open Models
 open Tree
 
 type SimCar(nIter, nTicksPerDayq) = 
-    let _agents = to_agents powergrid
+    let _agents = to_agents <| powergrid()
     member self.Agents = _agents |> Tree.map (fun (name, from) -> from)
         
     member self.RegisterPhevBattery (handler) = 
@@ -68,13 +68,19 @@ type SimCar(nIter, nTicksPerDayq) =
         postalService.send("brp", Prediction((fun _ -> 0.0<kWh>)))
         postalService.send("brp", Schedule(BRP.Action.schedule_greedy))
 
-        syncContext.RaiseEvent jobDebug <| "Computing dayahead"
-        Seq.initInfinite (fun day -> run day self.Agents true)
-        |> Seq.take n 
-        |> Seq.cache
-        |> List.ofSeq
-        |> ignore
-        syncContext.RaiseEvent jobDebug <| "Dayahead computed"
+        printfn "Computing dayahead"
+//        syncContext.RaiseEvent jobDebug <| "Computing dayahead"
+        [for i in 0 .. (n-1) do run i self.Agents true] |> ignore 
+//
+//        Seq.initInfinite (fun day -> run day self.Agents true)
+//        |> Seq.take n 
+//        |> Seq.cache
+//        |> List.ofSeq
+//        |> ignore
+//        syncContext.RaiseEvent jobDebug <| "Dayahead computed"
+//        self.Agents |> Tree.send (Reset) |> ignore
+        PHEV.rand <- new System.Random()
+        printfn "Dayahead computed"
         
     // create an infinite sequence of simulation steps
     member self.Run(?days) = 
@@ -84,11 +90,14 @@ type SimCar(nIter, nTicksPerDayq) =
         postalService.send("brp", Prediction(FileManager.prediction()))
         postalService.send("brp", Schedule(BRP.Action.schedule_reactive))
 
-        Seq.initInfinite (fun day -> run day self.Agents false)
-        |> Seq.take n
-        |> Seq.cache
-        |> List.ofSeq
-        |> ignore
+        printfn "Running simulations"
+        [for i in 0 .. (n-1) do run i self.Agents false] |> ignore 
+//        Seq.initInfinite (fun day -> run day self.Agents false)
+//        |> Seq.take n
+//        |> Seq.cache
+//        |> List.ofSeq
+//        |> ignore
+        printfn "Finished simulations"
 
     member self.TestDayahead(n) = 
         test_dayahead n self.Agents

@@ -18,6 +18,8 @@ let pnode_agent pnode = Agent.Start(fun agent ->
             match replyToMsg with
             | RequestModel ->
                 reply.Reply(Model(pnode))
+
+                return! loop pnode
         | Update(tick) -> 
             let current = pnode_args.realtime tick
 //            printfn "%s sending charge to %s" name parent
@@ -26,6 +28,8 @@ let pnode_agent pnode = Agent.Start(fun agent ->
             return! loop <| PowerNode({ pnode_args with current=current })
         | Model(pnode) -> 
             return! loop pnode
+        | Reset ->
+            return! loop <| PowerNode({ pnode_args with current=0.0<kWh>})
         | _ -> 
             syncContext.RaiseEvent error <| Exception("Not implemented yet")
 
