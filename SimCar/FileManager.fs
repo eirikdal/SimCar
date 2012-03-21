@@ -35,8 +35,6 @@ module IO =
 
         let length = int br.BaseStream.Length
         
-//        [for pos in 0 .. sizeof<float> .. (length - sizeof<float>) do
-//            yield Energy.ofFloat <| br.ReadDouble()] 
         let bytes = br.ReadBytes(length)
         let doubles = Array.init (length / sizeof<float>) (fun _ -> 0.0)
         Buffer.BlockCopy(bytes, 0, doubles, 0, length)
