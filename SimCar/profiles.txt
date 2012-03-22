@@ -1,6 +1,0 @@
-﻿worker {
-  gauss, mean=08:15, std=15, duration=07:00
-  gauss, mean=16:15, std=15, duration=02:00
-  gauss, mean=12:15, std=60, duration=02:00
-  gauss, mean=19:00, std=60, duration=03:00
-}
