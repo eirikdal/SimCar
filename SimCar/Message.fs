@@ -23,5 +23,6 @@ type Message =
     | Model of Grid
     | Error of string
     | Update of int
+    | Reset
     | Reply of Message
     | Schedule of (dayahead -> realtime -> Message list -> int -> unit)

@@ -62,7 +62,7 @@ let update (ag:Agent<_>, Model(grid)) (ac : float<kWh>) : float<kWh> =
         if phev_args.current > 0.0<kWh> then
             ac + phev_args.current
         else
-            ac + phev_args.current
+            ac
     | BRP(brp_args) ->
         let brp = BRP({ brp_args with current=ac })
         ag.Post(Model(brp))
@@ -107,6 +107,7 @@ let test_dayahead iter agents =
         syncContext.RaiseEvent jobDebug <| sprintf "Ending tick %d\n" n
         test
         |> Tree.send_reply RequestModel // request model from agents
+        |> Tree.map (fun (ag, msg) -> (ag, Async.RunSynchronously(msg)))
 
     let realtime = Array.init(96) (fun i -> tick i)
 
@@ -114,6 +115,7 @@ let test_dayahead iter agents =
         realtime
         |> Array.map (Tree.foldr update) // right-fold over tree, applying the update function (inorder traversal)
 
+    
     let rec shave n rt = 
         syncContext.RaiseDelegateEvent dayaheadProgress rt
         if n > 0 then 
@@ -135,15 +137,18 @@ let test_dayahead iter agents =
 let run day agents compute_dayahead =
     let tick n = 
         syncContext.RaiseEvent jobDebug <| sprintf "Beginning tick %d\n" n
+
         let test = 
             agents
             |> Tree.send (Update(n)) // inform agents that new tick has begun
             |> Tree.send_reply RequestModel // request model from agents
+            |> Tree.map (fun (ag, msg) -> (ag, Async.RunSynchronously(msg)))
+        
         syncContext.RaiseEvent jobDebug <| sprintf "Ending tick %d\n" n
         test
 
+    printfn "Simulating day %d" day
     let realtime = Array.init(96) (fun i -> tick ((day*96) + i))
-    
 
     // right-fold over tree, applying the update function (inorder traversal)
     let updated_realtime = 
@@ -157,7 +162,7 @@ let run day agents compute_dayahead =
 //        updated_realtime
 //        |> moving_average
 //        |> Array.ofSeq
-
+    
     if compute_dayahead then
         let dayahead = 
             updated_realtime

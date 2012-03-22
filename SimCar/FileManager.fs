@@ -11,7 +11,7 @@ open System.Text.RegularExpressions
 //let folder_of file = sprintf "%s\\%s" (Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName) file
 let file_powerprofiles = "c:\\simcar\simcar\\data\\powerprofiles.txt"
 let file_phevprofiles = "C:\\SimCar\\SimCar\\data\\profiles.txt"
-let file_brp = "C:\\SimCar\\SimCar\\data\\brp.txt"
+let file_brp = "C:\\SimCar\\SimCar\\data\\brp2.txt"
 let file_dayahead = "c:\\simcar\simcar\\data\\dayahead.txt"
 let file_prediction = "c:\\simcar\simcar\\data\\prediction.txt"
 let data_folder = "C:\\SimCar\\SimCar\\data\\powernodes\\"
@@ -124,6 +124,7 @@ module Parsing =
                 let name = sprintf "%i" i
                 (name, read_doubles(file)))
         |> List.ofArray
+        |> List.filter (fun (_,p) -> if p.Length = 2976 then true else false)
 
     
     let powerprofiles = parse_powerprofiles ()
@@ -148,7 +149,7 @@ module Parsing =
                 children <- name :: children
                 parse_powergrid t (node::nodes) (&rest) (&children) parent
             | [|"pnode";name;realtime|] ->
-                let realtime = (List.tryFind (fun (n, s) -> n = realtime) powerprofiles)
+                let realtime = (List.tryFind (fun (n, s) -> n = name) powerprofiles)
                 match realtime with
                 | None -> raise <| IOException(sprintf "Could not find powernode with name %s in powerprofiles.txt" name)
                 | Some realtime ->
@@ -168,7 +169,7 @@ let dayahead() = Parsing.parse_dayahead_file(file_dayahead) |> Array.get >> Ener
 
 let prediction() = Parsing.parse_dayahead_file(file_prediction) |> Array.get >> Energy.ofFloat
 
-let powergrid = 
+let powergrid() = 
     let mutable rest = []
     let mutable children : string list = []
     let stream = IO.read_file file_brp
