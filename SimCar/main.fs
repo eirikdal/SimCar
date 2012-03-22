@@ -69,7 +69,7 @@ type SimCar(nIter, nTicksPerDayq) =
 
         printfn "Computing dayahead"
 //        syncContext.RaiseEvent jobDebug <| "Computing dayahead"
-        [for i in 0 .. (n-1) do run i self.Agents true] |> ignore 
+        [for i in 0 .. (n-1) do run i self.Agents true] |> ignore
 //
 //        Seq.initInfinite (fun day -> run day self.Agents true)
 //        |> Seq.take n 

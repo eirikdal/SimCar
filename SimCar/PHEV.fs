@@ -117,7 +117,7 @@ let phev_agent _p name = Agent<Message>.Start(fun agent ->
                         let intention = Charge_OK(name)
                         postalService.send(parent, intention)
 
-                        return! loop <| PHEV({ phev_args with battery=(phev_args.battery - phev_args.rate); duration=phev_args.duration-1 }) <| false
+                        return! loop <| PHEV({ phev_args with current=0.0<kWh>; battery=(phev_args.battery - phev_args.rate); duration=phev_args.duration-1 }) <| false
 
             | DistProfile(_,dist_list) ->
                 // First time running the distribution profile, calculate and cache the distributions

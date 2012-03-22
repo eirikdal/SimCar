@@ -63,10 +63,10 @@ open SynchronizationContext
 
 module Action = 
     let reserve ac energy rate from = 
-        if ac > 0.0<kWh> then
+        if ac > 0.0<kWh> && ac > rate then
             let accepted = if energy > rate then rate else energy
             postalService.send(from, Charge_Accepted(accepted))                
-            ac - rate
+            ac - accepted
         else
             postalService.send(from, Charge_Accepted(0.0<kWh>))
             ac
