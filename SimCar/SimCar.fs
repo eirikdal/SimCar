@@ -109,7 +109,7 @@ let test_dayahead iter agents =
         syncContext.RaiseEvent jobDebug <| sprintf "Ending tick %d\n" n
         test
         |> Tree.send_reply RequestModel // request model from agents
-//        |> Tree.map (fun (ag, msg) -> (ag, Async.RunSynchronously(msg)))
+        |> Tree.map (fun (ag, msg) -> (ag, Async.RunSynchronously(msg)))
 
     let realtime = Array.init(96) (fun i -> tick i)
 
@@ -144,7 +144,7 @@ let run day agents compute_dayahead =
             agents
             |> Tree.send (Update(n)) // inform agents that new tick has begun
             |> Tree.send_reply RequestModel // request model from agents
-//            |> Tree.map (fun (ag, msg) -> (ag, Async.RunSynchronously(msg)))
+            |> Tree.map (fun (ag, msg) -> (ag, Async.RunSynchronously(msg)))
         
         syncContext.RaiseEvent jobDebug <| sprintf "Ending tick %d\n" n
         test
