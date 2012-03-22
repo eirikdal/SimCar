@@ -15,8 +15,6 @@ open PowerNode
 open PostalService
 open FileManager
 open Transformer
-open MSDN.FSharp
-open MSDN.FSharp.Charting
 open System.Windows
 
 #nowarn "25"
