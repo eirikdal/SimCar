@@ -15,12 +15,11 @@ open PowerNode
 open PostalService
 open FileManager
 open Transformer
-open MSDN.FSharp
-open MSDN.FSharp.Charting
 open System.Windows
 
 #nowarn "25"
 
+let mutable schedule = BRP.Action.schedule_greedy
 // make the right kind of agent for a given node
 let make_agent name node = 
     match node with
@@ -31,7 +30,7 @@ let make_agent name node =
     | PowerNode(_) ->
         (name, pnode_agent node)
     | BRP(_) ->
-        (name, brp_agent node)
+        (name, brp_agent node schedule)
 
 // traverse a tree of models, creating a mirrored tree of agents as we go along
 let rec to_agents node = 
@@ -131,10 +130,9 @@ let test_dayahead iter agents =
 //    syncContext.RaiseDelegateEvent progressPnode updated_realtime      
 //    syncContext.RaiseDelegateEvent progressTotal moving_dayahead
     // Raise events
-    
 
 // main control flow of the simulator
-let run day agents =
+let run day agents compute_dayahead =
     let tick n = 
         syncContext.RaiseEvent jobDebug <| sprintf "Beginning tick %d\n" n
         let test = 
@@ -145,34 +143,39 @@ let run day agents =
         test
 
     let realtime = Array.init(96) (fun i -> tick ((day*96) + i))
+    
 
+    // right-fold over tree, applying the update function (inorder traversal)
     let updated_realtime = 
         realtime
-        |> Array.map (Tree.foldr update) // right-fold over tree, applying the update function (inorder traversal)
-
-    let phevs = 
-        realtime
-        |> Array.map (Tree.foldr fold_phevs)
+        |> Array.map (Tree.foldr update) 
 
     let pnodes = 
         realtime
         |> Array.map (Tree.foldr fold_pnodes)
-
-    let dayahead =
-        updated_realtime
-        |> DayAhead.shave
-
-    postalService.send("brp", Dayahead(dayahead |> Array.get))
-//    postalService.send("brp", Realtime(pnodes |> Array.get))
-
 //    let moving_dayahead = 
 //        updated_realtime
 //        |> moving_average
 //        |> Array.ofSeq
+
+    if compute_dayahead then
+        let dayahead = 
+            updated_realtime
+            |> DayAhead.shave
         
-    // Raise events
-    syncContext.RaiseDelegateEvent progressPhev phevs
-    syncContext.RaiseDelegateEvent progressPnode pnodes
-    syncContext.RaiseDelegateEvent dayaheadProgress dayahead
-    syncContext.RaiseDelegateEvent progressTotal updated_realtime
-    
+        IO.write_to_file <| FileManager.file_prediction <| Parsing.parse_dayahead (List.ofArray pnodes)
+        IO.write_to_file <| FileManager.file_dayahead <| Parsing.parse_dayahead (List.ofArray dayahead)
+//        syncContext.RaiseEvent updateEvent <| dayahead
+    else
+        let phevs = 
+            realtime
+            |> Array.map (Tree.foldr fold_phevs)
+
+        let (Model(BRP( { dayahead=dayahead }))) = postalService.send_reply("brp", RequestDayahead)
+
+        let dayahead = Array.init(96) (fun i -> dayahead ((day*96) + i))
+        // Raise events
+        syncContext.RaiseDelegateEvent dayaheadProgress dayahead
+        syncContext.RaiseDelegateEvent progressPhev phevs
+        syncContext.RaiseDelegateEvent progressPnode pnodes
+        syncContext.RaiseDelegateEvent progressTotal updated_realtime
