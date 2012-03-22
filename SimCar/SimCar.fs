@@ -15,6 +15,8 @@ open PowerNode
 open PostalService
 open FileManager
 open Transformer
+open MSDN.FSharp
+open MSDN.FSharp.Charting
 open System.Windows
 
 #nowarn "25"
@@ -162,9 +164,9 @@ let run day agents compute_dayahead =
         let dayahead = 
             updated_realtime
             |> DayAhead.shave
-        
-        IO.write_to_file <| FileManager.file_prediction <| Parsing.parse_dayahead (List.ofArray pnodes)
-        IO.write_to_file <| FileManager.file_dayahead <| Parsing.parse_dayahead (List.ofArray dayahead)
+
+        IO.write_doubles <| FileManager.file_prediction <| Parsing.parse_dayahead (List.ofArray pnodes)
+        IO.write_doubles <| FileManager.file_dayahead <| Parsing.parse_dayahead (List.ofArray dayahead)
 //        syncContext.RaiseEvent updateEvent <| dayahead
     else
         let phevs = 

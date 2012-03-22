@@ -46,9 +46,9 @@ type SimCar(nIter, nTicksPerDayq) =
     member self.RegisterDayaheadInit (handler) =
         dayaheadInit.Publish.AddHandler handler
 
-    member self.RegisterComputeDayahead () = 
-        updateEvent.Publish.Add(fun dayahead -> IO.write_to_file <| FileManager.file_dayahead <| Parsing.parse_dayahead (List.ofArray dayahead))
-    
+//    member self.RegisterComputeDayahead () = 
+//        updateEvent.Publish.Add(fun dayahead -> IO.write_to_file <| FileManager.file_dayahead <| Parsing.parse_dayahead (List.ofArray dayahead))
+//    
     // attach functions to events
     member self.RegisterEvents () = 
         error.Publish.Add(fun e -> postalService.Post(Error(sprintf "%s" e.Message)))

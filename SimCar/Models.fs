@@ -7,7 +7,7 @@ open System
 open System.Globalization
 
 // scalar units
-[<Measure>] type k  
+[<Measure>] type k
 [<Measure>] type M
 // units of time
 [<Measure>] type tick
@@ -20,7 +20,9 @@ let tick_to_min tick = tick / 15<min/tick>
 let min_per_tick : int<min/tick> = 15<min/tick>
 
 // units of power
-[<Measure>] type W
+[<Measure>] type A
+[<Measure>] type V
+[<Measure>] type W = A*V
 [<Measure>] type kW = k*W
 [<Measure>] type MW = M*W
 [<Measure>] type Wh = W*h
@@ -68,6 +70,16 @@ module Energy =
             raise <| System.ArgumentOutOfRangeException ("value")
         else
             LanguagePrimitives.FloatWithMeasure<kWh> (float value)
+    let inline toKilo (value : float<W>) = 
+        LanguagePrimitives.FloatWithMeasure<kWh> ((float value) / 1000.0)
+
+module Current = 
+    let inline toFloat (value : energy) = float value
+    let inline ofFloat (value : float) = LanguagePrimitives.FloatWithMeasure<A> (float value)
+
+module Voltage = 
+    let inline toFloat (value : energy) = float value
+    let inline ofFloat (value : float) = LanguagePrimitives.FloatWithMeasure<V> (float value)
 
 //let (+) (a:float<kW>) (b:float<kW>) = Energy.ofFloat ((float a) + 1000.0*(float b))
 

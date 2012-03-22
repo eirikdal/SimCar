@@ -14,17 +14,31 @@ let file_phevprofiles = "C:\\SimCar\\SimCar\\data\\profiles.txt"
 let file_brp = "C:\\SimCar\\SimCar\\data\\brp.txt"
 let file_dayahead = "c:\\simcar\simcar\\data\\dayahead.txt"
 let file_prediction = "c:\\simcar\simcar\\data\\prediction.txt"
+let data_folder = "C:\\SimCar\\SimCar\\data\\powernodes\\"
 
 module IO =
     let read_file (file : string) = 
         if not <| File.Exists(file) then File.WriteAllText(file, "")
-        seq {
     //        use sr = new StreamReader(folder_of file)
-            use sr = new StreamReader(file)
+        use sr = new StreamReader(file)
 
-            while not sr.EndOfStream do
-                yield sr.ReadLine()
-        }
+        [while not sr.EndOfStream do
+            yield sr.ReadLine()]
+
+    let write_doubles (file : string) (contents : float list) = 
+        use bw = new BinaryWriter(File.Open(file, FileMode.Append))
+            
+        contents |> List.iter (fun q -> bw.Write(q)) |> ignore
+
+    let read_doubles (file : string) = 
+        use br = new BinaryReader(File.Open(file, FileMode.Open))
+
+        let length = int br.BaseStream.Length
+        
+        let bytes = br.ReadBytes(length)
+        let doubles = Array.init (length / sizeof<float>) (fun _ -> 0.0)
+        Buffer.BlockCopy(bytes, 0, doubles, 0, length)
+        doubles
 
     let write_to_file (file : string) (contents  : string seq) = 
         if File.Exists file_dayahead then
@@ -33,6 +47,7 @@ module IO =
             File.WriteAllLines(file, contents)
 
     let clear_dayahead_data () = 
+        File.Delete (file_prediction)
         File.Delete (file_dayahead)
 
 module Regex = 
@@ -56,15 +71,7 @@ module Parsing =
     open Regex
     open IO 
 
-    let parse_dayahead (_dayahead : float<kWh> list) = 
-        let rec _parse dayahead ac =
-            match dayahead with 
-            | q4::q3::q2::q1::rest ->
-                let (f1,f2,f3,f4) = (Energy.toFloat q1, Energy.toFloat q2, Energy.toFloat q3, Energy.toFloat q4)
-                let str = sprintf "%f;%f;%f;%f" f1 f2 f3 f4
-                _parse rest (str::ac) 
-            | _ -> List.rev ac
-        _parse _dayahead List.empty
+    let parse_dayahead (_dayahead : float<kWh> list) = List.map (fun f -> Energy.toFloat f) _dayahead
 
     let parse_dist str = 
         match str with 
@@ -103,41 +110,23 @@ module Parsing =
 
     let profiles : Profile list = 
         let mutable rest = []
-        let stream = List.ofSeq (read_file file_phevprofiles)
+        let stream = read_file file_phevprofiles
 
         parse_profiles stream [] (&rest)
 
-    let rec parse_powerprofile stream name (dist : float list) (rest : string list byref) = 
-        match (stream : string list) with 
-        | h::t ->
-            match h.Split([|' ';';'|], StringSplitOptions.RemoveEmptyEntries) with
-            | [|q1;q2;q3;q4|] ->
-                let temp = Double.Parse(q4, CultureInfo.InvariantCulture)::Double.Parse(q3, CultureInfo.InvariantCulture)::Double.Parse(q2, CultureInfo.InvariantCulture)::Double.Parse(q1, CultureInfo.InvariantCulture)::dist
-                parse_powerprofile t name temp (&rest)
-            | [|"}"|] -> 
-                rest <- t
-                List.rev dist
-            | _ -> raise <| Exception "Unexpected end of stream."
-        | _ -> raise <| Exception("Unexpected end of stream. Maybe missing closing '}'?")
-     
-    let rec parse_powerprofiles stream profiles (rest : string list byref) =
-        match (stream : string list) with 
-        | h::t ->
-            match h.Split([|' '|], StringSplitOptions.RemoveEmptyEntries) with
-            | [|name;"{"|] ->
-                let profile = (name, parse_powerprofile t name List.empty (&rest))
-                parse_powerprofiles rest (profile::profiles) (&rest)
-            | _ -> 
-                rest <- t
-                profiles
-        | _ -> profiles
+    let parse_powerprofiles () =
+        let files = Directory.GetFiles(data_folder)
 
-    let powerprofiles : (string * float list) list = 
-        let mutable rest = []
-    //    let stream = List.ofSeq (read_file "powerprofiles.txt")
-        let stream = List.ofSeq (read_file file_powerprofiles)
-        parse_powerprofiles stream List.empty (&rest)
+        files 
+        |> Array.map (fun file -> 
+            match file with
+            | Regex.ParseRegex "([0-9]+).dat" [Integer i] ->
+                let name = sprintf "%i" i
+                (name, read_doubles(file)))
+        |> List.ofArray
 
+    
+    let powerprofiles = parse_powerprofiles ()
     // 
     // Parsing the powergrid, transformers, power nodes and PHEVs.
     //
@@ -163,7 +152,7 @@ module Parsing =
                 match realtime with
                 | None -> raise <| IOException(sprintf "Could not find powernode with name %s in powerprofiles.txt" name)
                 | Some realtime ->
-                    let nth n = Energy.ofFloat ((snd realtime) |> Seq.cache |> Seq.nth n)
+                    let nth = (snd realtime) |> Array.get >> Energy.ofFloat
                     let node = create_powernode name nth parent
                     children <- name :: children
                     parse_powergrid t (node::nodes) (&rest) (&children) parent
@@ -173,26 +162,15 @@ module Parsing =
             | _ -> raise <| IOException("Error while reading Transformers from file")
         | _ -> nodes
 
-    let rec parse_dayahead_file (ac : float<kWh> list) stream = 
-        match (stream : string list) with 
-        | h::t ->
-            match h.Split([|' ';';'|], StringSplitOptions.RemoveEmptyEntries) with
-            | [|q1;q2;q3;q4|] ->
-                let (q1'::q2'::q3'::q4'::_) = 
-                    q1::q2::q3::q4::[]
-                    |> List.map (fun q -> Energy.ofFloat <| Double.Parse(q,CultureInfo.InvariantCulture))
-
-                parse_dayahead_file (q1'::q2'::q3'::q4'::ac) t
-            | _ -> raise <| Exception "Unexpected line"
-        | _ -> List.rev ac
+    let parse_dayahead_file (file) = read_doubles(file)
     
-let dayahead() = List.ofSeq (IO.read_file file_dayahead) |> Parsing.parse_dayahead_file [] |> List.nth
+let dayahead() = Parsing.parse_dayahead_file(file_dayahead) |> Array.get >> Energy.ofFloat
 
-let prediction() =  List.ofSeq (IO.read_file file_prediction) |> Parsing.parse_dayahead_file [] |> List.nth
+let prediction() = Parsing.parse_dayahead_file(file_prediction) |> Array.get >> Energy.ofFloat
 
 let powergrid = 
     let mutable rest = []
     let mutable children : string list = []
-    let stream = List.ofSeq (IO.read_file file_brp)
+    let stream = IO.read_file file_brp
 
     create_brp "brp" (Parsing.parse_powergrid stream [] (&rest) (&children) "brp") (fun n -> 0.0<kWh>) (children)
