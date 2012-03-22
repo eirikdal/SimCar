@@ -7,7 +7,6 @@ open Message
 open PostalService
 open FileManager
 open System
-open MSDN.FSharp.Charting
 open Models
 open Tree
 
