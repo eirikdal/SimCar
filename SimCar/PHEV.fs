@@ -31,7 +31,7 @@ module Action =
         // PHEV stayed home, charge battery if less than full
         PHEV(phev_args.charge())
 
-    let leave name profile (phev_args : PhevArguments) tick =  
+    let leave name (phev_args : PhevArguments) tick =  
         // If first time running, calculate and cache the distributions
         let ({ profile=(FloatProfile(_,dist_list)) } as phevArgs) = 
             { phev_args with profile=phev_args.profile.float_profile() }
@@ -50,7 +50,7 @@ module Action =
 
     let find_ttl (histogram : int array) tick =
         let tick' = (tick%96)
-        let nbhood = (tick'+36)
+        let nbhood = (tick'+ 10)
 
         // finding the mode
         [for i in tick' .. nbhood do yield histogram.[(i%96)]] 
@@ -102,7 +102,7 @@ let phev_agent _p name = Agent<Message>.Start(fun agent ->
                     phev_args.charge()
 
             if phevArgs.duration <= 1 then
-                return! loop <| Action.leave name phevArgs.profile phevArgs tick <| wait_for_reply
+                return! loop <| Action.leave name phevArgs tick <| wait_for_reply
             else
                 return! loop <| PHEV(phevArgs.drive()) <| wait_for_reply
         | Reset -> 
@@ -112,7 +112,9 @@ let phev_agent _p name = Agent<Message>.Start(fun agent ->
 
             return! loop phev waiting
         
-        return! loop phev waiting
-    } 
+        return! loop phev waiting } 
+    and waiting() = async {
+        ()
+    }
 
     loop _p false)

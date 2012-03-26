@@ -77,7 +77,7 @@ type SimCar(nIter, nTicksPerDayq) =
 //        |> List.ofSeq
 //        |> ignore
 //        syncContext.RaiseEvent jobDebug <| "Dayahead computed"
-//        self.Agents |> Tree.send (Reset) |> ignore
+        self.Agents |> Tree.send (Reset) |> ignore
         
         PHEV.rand <- new System.Random()
         printfn "Dayahead computed"
@@ -88,7 +88,7 @@ type SimCar(nIter, nTicksPerDayq) =
 
         postalService.send("brp", Dayahead(FileManager.dayahead()))
         postalService.send("brp", Prediction(FileManager.prediction()))
-        postalService.send("brp", Schedule(BRP.Action.schedule_reactive))
+        postalService.send("brp", Schedule(BRP.Action.schedule_proactive))
 
         printfn "Running simulations"
         [for i in 0 .. (n-1) do run i self.Agents false] |> ignore 

@@ -13,6 +13,7 @@ open SynchronizationContext
 
 module Action = 
     let prediction' = FileManager.Parsing.parse_dayahead_file(FileManager.file_prediction)
+    let dayahead' = FileManager.Parsing.parse_dayahead_file(FileManager.file_dayahead)
 
     let reserve ac energy rate from = 
         if ac > 0.0<kWh> && ac > rate then
@@ -25,27 +26,21 @@ module Action =
 
     let rec create_plan remaining (avail : (int * energy) list) (plan : (int * energy) list) rate = 
         if avail.Length > 0 then
-            let (tick, max) = List.max avail
+            let (tick, max) = List.maxBy (fun (_,v) -> v) avail
             let avail' = avail |> List.filter (fun (tick',_) -> if tick = tick' then false else true)
             
-            let rate' = if remaining > 0.0<kWh> then rate else 0.0<kWh>
+            let rate' = if remaining >= rate then rate else if remaining > 0.0<kWh> then remaining else 0.0<kWh>
             create_plan (remaining - rate') avail' ((tick,rate')::plan) rate
         else
             // for each tick, increase prediction by rate at tick t
-            plan |> List.iter (fun (tick,_) -> prediction'.[tick] <- prediction'.[tick] + (rate |> Energy.toFloat))
+            plan |> List.iter (fun (t,_) -> prediction'.[t] <- prediction'.[t] + (rate |> Energy.toFloat))
             plan |> List.sortBy (fun (tick,_) -> tick) |> List.unzip |> snd
 
     let schedule_greedy (dayahead : dayahead) (prediction : realtime) queue tick = 
         queue
         |> List.iter 
             (fun (Charge(from,energy,ttl,rate)) ->
-                let dayahead' = [for i in tick .. ttl do yield dayahead(i)]
-                let pred_test' = [for i in tick .. ttl do yield prediction'.[i]]
-
-                let avail = [for i in tick .. ttl do yield i,(dayahead(i) - (prediction'.[i] |> Energy.ofFloat))]
-
-                if energy > 0.0<kWh> then 
-                    printfn ""
+                let avail = [for i in tick .. ttl do yield i,((dayahead'.[i] |> Energy.ofFloat) - (prediction'.[i] |> Energy.ofFloat))]
 
                 let plan = create_plan energy avail [] rate
                 postalService.send(from, Charge_Accepted(plan)))
