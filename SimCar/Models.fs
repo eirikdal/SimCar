@@ -5,6 +5,10 @@
 open Agent
 open System
 open System.Globalization
+open SynchronizationContext
+open MathNet.Numerics.Statistics
+open MathNet.Numerics.Distributions
+
 
 // scalar units
 [<Measure>] type k
@@ -65,13 +69,8 @@ module Battery =
 
 module Energy = 
     let inline toFloat (value : energy) = float value
-    let inline ofFloat (value : float) =
-        if value > 10000000.0 || value < -10000000.0 then
-            raise <| System.ArgumentOutOfRangeException ("value")
-        else
-            LanguagePrimitives.FloatWithMeasure<kWh> (float value)
-    let inline toKilo (value : float<W>) = 
-        LanguagePrimitives.FloatWithMeasure<kWh> ((float value) / 1000.0)
+    let inline ofFloat (value : float) = LanguagePrimitives.FloatWithMeasure<kWh> (float value)
+    let inline toKilo (value : float<W>) = LanguagePrimitives.FloatWithMeasure<kWh> ((float value) / 1000.0)
 
 module Current = 
     let inline toFloat (value : energy) = float value
@@ -97,6 +96,34 @@ type Distribution =
 type Profile = 
     | DistProfile of string * Distribution list
     | FloatProfile of string * Distribution list
+    with 
+    member self.sum(time,profile) = 
+        match profile.dist_type with
+        | Normal ->
+            let n = new Normal(profile.mean, profile.sigma)
+            n.CumulativeDistribution(time) - n.CumulativeDistribution((time-1.0))
+        | LogNormal ->
+            let n = new MathNet.Numerics.Distributions.Gamma(profile.mean, 7.0)
+            n.CumulativeDistribution(time+1.0) - n.CumulativeDistribution((time))
+    // cache the distributions
+    member self.calc(name, (profiles : Distribution list)) : Profile =         
+        let dist_list = 
+            profiles
+            |> List.map (fun p -> { p with dist=(fun i -> self.sum((float i), p)) |> Seq.initInfinite |> Seq.take 96 |> Seq.cache })
+    
+        // calculate the accumulated probability density function of all distributions
+        let prob ({dist=dist}) i = dist |> Seq.nth (i%96)
+        let temp = Seq.initInfinite (fun i -> dist_list |> Seq.fold (fun ac (d : Distribution) -> ac + (prob d i)) 0.0) |> Seq.take 96 |> Array.ofSeq
+
+        probEvent.Trigger [|box temp; box System.EventArgs.Empty|]
+
+        FloatProfile(name, dist_list)
+    member self.float_profile() = 
+        match self with
+        | FloatProfile(dist_name,dist_list) ->
+            self
+        | DistProfile(name,dist_list) ->
+            self.calc(name,dist_list)
 
 type Node<'T> = 
     | Node of (Node<'T> list) * 'T option
@@ -113,6 +140,13 @@ type BrpArguments =
     current : energy;
     children : (string * Status) list; }
 
+type PhevInfo = 
+    | Status of capacity * battery * energy
+
+type PhevStatus = 
+    | Status of int * int
+
+
 type PhevArguments =
     { name : string;
     profile : Profile;
@@ -122,7 +156,24 @@ type PhevArguments =
     rate : energy;
     left : int;
     duration : int;
-    parent : string; }
+    parent : string;
+    intentions : energy list;
+    histogram : int array }
+    with 
+        member self.leave(tick : int, duration : int) : PhevArguments =  
+            self.histogram.[(tick%96)] <- self.histogram.[(tick%96)] + 1
+
+            if self.battery < self.capacity then 
+                syncContext.RaiseDelegateEvent phevBattery (tick%96)
+            syncContext.RaiseDelegateEvent phevLeft (tick%96)
+        
+            { self with left=(tick%96); duration=duration; current=Energy.ofFloat 0.0; }
+        member self.charge() = 
+            match self.intentions with 
+            | rate::t -> { self with current=rate; battery=self.battery+rate; intentions=t }
+            | [] -> raise <| Exception("No charges left")
+        member self.drive() =
+            { self with current=0.0<kWh>; battery=(self.battery - self.rate); duration=self.duration-1 }
 
 type TrfArguments = 
     { name : string; 
@@ -170,9 +221,11 @@ let create_phev name capacity current battery rate profile parent (profiles : Pr
         current=Energy.ofFloat <| Double.Parse(current, CultureInfo.InvariantCulture);
         battery=Battery.ofFloat <| Double.Parse(battery, CultureInfo.InvariantCulture);
         rate=Energy.ofFloat <| Double.Parse(rate, CultureInfo.InvariantCulture);
+        histogram=Array.init (96) (fun i -> 0);
         duration=(-1);
         left=(-1);
-        parent=parent; }
+        parent=parent;
+        intentions=[] }
     Node(List.empty, Some <| PHEV(phev_arg))
 
 let create_powernode name realtime parent = 

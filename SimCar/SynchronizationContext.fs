@@ -1,8 +1,6 @@
 ﻿module SynchronizationContext
 
 open Agent
-open Models
-open Message
 open System.Threading
 
 type SynchronizationContext with 
@@ -24,14 +22,14 @@ let syncContext = SynchronizationContext.CaptureCurrent()
 // F# 
 let canceled      = new Event<System.OperationCanceledException>()
 let error         = new Event<System.Exception>()
-let jobCompleted<'a> = new Event<Agent<Message> * string>()
+//let jobCompleted<'a> = new Event<Agent<Message> * string>()
 let jobDebug = new Event<string>()
 
 let phevEvent     = new Event<string>()
 let brpEvent      = new Event<string>()
 let trfEvent      = new Event<string>()
 let pnodeEvent    = new Event<string>()
-let updateEvent   = new Event<float<kWh>[]>()
+let updateEvent   = new Event<float[]>()
 
 // Delegate Events for cross-language communication
 
@@ -51,3 +49,4 @@ let probReset           = new DelegateEvent<System.EventHandler>()
 
 let phevBattery         = new DelegateEvent<System.EventHandler>()
 let phevStatus          = new DelegateEvent<System.EventHandler>()
+let phevLeft            = new DelegateEvent<System.EventHandler>()

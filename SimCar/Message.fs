@@ -8,7 +8,7 @@ type Message =
     | Charge of string * energy * int * energy
     | Charge_Received
     | Charge_OK of string
-    | Charge_Accepted of energy
+    | Charge_Accepted of energy list
     | Charge_Intentions of string * Message list
     | Completed of string
     | Assign of Agent<Message> * Grid
@@ -26,3 +26,12 @@ type Message =
     | Reset
     | Reply of Message
     | Schedule of (dayahead -> realtime -> Message list -> int -> unit)
+
+let rec reduce_queue queue = 
+    [for msg in queue do 
+        match msg with 
+        | Charge_Intentions(_, msg) ->
+            yield! reduce_queue msg
+        | Charge(_,_,_,_) -> yield! [msg]
+        | Charge_OK(_) ->
+            yield! []]

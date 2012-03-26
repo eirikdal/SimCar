@@ -114,8 +114,8 @@ module Parsing =
 
         parse_profiles stream [] (&rest)
 
-    let parse_powerprofiles () =
-        let files = Directory.GetFiles(data_folder)
+    let parse_powerprofiles (folder) =
+        let files = Directory.GetFiles(folder)
 
         files 
         |> Array.map (fun file -> 
@@ -127,7 +127,7 @@ module Parsing =
         |> List.filter (fun (_,p) -> if p.Length = 2976 then true else false)
 
     
-    let powerprofiles = parse_powerprofiles ()
+    let powerprofiles = parse_powerprofiles (data_folder)
     // 
     // Parsing the powergrid, transformers, power nodes and PHEVs.
     //

@@ -11,87 +11,68 @@ open System.Threading
 open PostalService
 open SynchronizationContext
 
-//let gen charge tick = 
-//    match charge with 
-//    | Charge(_,energy,ttl,rate) ->
-//        Seq.unfold (fun (state, energy, i) -> 
-//                        if (i > 96) then None
-//                        elif energy > 0.0 && i > tick then Some(rate, (state,energy-rate,i+1))
-//                        else Some(0.0, (state, 0.0, i+1))) (0.0, Energy.toFloat energy, 0)
-
-//let sum_arrays (arrays : float array array) = 
-//    let mutable _array = Array.init (96) (fun f -> 0.0)
-//    for i in 0 .. 95 do
-//        for j in 0 .. arrays.Length do
-//            _array.[i] <- _array.[i] + arrays.[j].[i]
-//    _array
-
-// creates an intention graph for each of the PHEVs
-//        let intentions = 
-//            queue.ToArray()
-//            |> Array.map (fun msg -> msg :?> Message)
-//            |> Array.filter (fun msg -> match msg with | ReplyTo(Charge(_,_,_,_),_) -> true | _ -> false)
-//            |> Array.map (fun (ReplyTo(Charge(name,energy,ttl,rate) as charge,reply)) -> 
-//                Array.ofSeq <| gen charge tick)
-//            |> sum_arrays
-//            |> Array.sum
-//
-//module Action = 
-//    let schedule(dayahead, prediction, queue : Queue, tick) =
-//        let intentions = 
-//            queue.ToArray()
-//            |> Array.map (fun msg -> msg :?> Message)
-//            |> Array.filter (fun msg -> match msg with | ReplyTo(Charge(_,_,_,_),_) -> true | _ -> false)
-//            |> Array.sortBy (fun (ReplyTo(Charge(_,_,ttl,_),_)) -> ttl)
-//
-//        let sum_of_intentions = 
-//            intentions
-//            |> Array.fold (fun ac (ReplyTo(Charge(name,energy,ttl,rate),_)) -> ac+energy) 0.0<kWh>
-//
-//        let reserve energy t = 
-//            intentions |> Array.scan (fun balance transactionAmount -> balance + transactionAmount) energy 
-//        let reserve energy i = 
-//            if i > 96 then 
-//                None
-//            elif i > tick && energy > 0.0<kWh> then
-//                let dif = dayahead i - prediction i
-//                Some(dif, (energy-dif,i+1))
-//            else
-//                Some(0.0<kWh>, (energy,i+1))
-//        
-//        Seq.unfold (fun (energy, i) -> reserve energy i) (sum_of_intentions, 0) |> Array.ofSeq
-
 module Action = 
+    let prediction' = FileManager.Parsing.parse_dayahead_file(FileManager.file_prediction)
+
     let reserve ac energy rate from = 
         if ac > 0.0<kWh> && ac > rate then
             let accepted = if energy > rate then rate else energy
-            postalService.send(from, Charge_Accepted(accepted))                
+            postalService.send(from, Charge_Accepted([accepted]))                
             ac - accepted
         else
-            postalService.send(from, Charge_Accepted(0.0<kWh>))
+            postalService.send(from, Charge_Accepted([0.0<kWh>]))
             ac
 
-    let rec reduce_queue queue = 
-        [for msg in queue do 
-            match msg with 
-            | Charge_Intentions(_, msg) ->
-                yield! reduce_queue msg
-            | Charge(_,_,_,_) -> yield! [msg]
-            | Charge_OK(_) ->
-                yield! []]
-//        queue
-//        |> Array.ofList
-//        |> Array.filter (fun msg -> match msg with | ReplyTo(Charge(_,_,_,_),_) -> true | _ -> false)
+    let rec create_plan remaining (avail : (int * energy) list) (plan : (int * energy) list) rate = 
+        if avail.Length > 0 then
+            let (tick, max) = List.max avail
+            let avail' = avail |> List.filter (fun (tick',_) -> if tick = tick' then false else true)
+            
+            let rate' = if remaining > 0.0<kWh> then rate else 0.0<kWh>
+            create_plan (remaining - rate') avail' ((tick,rate')::plan) rate
+        else
+            // for each tick, increase prediction by rate at tick t
+            plan |> List.iter (fun (tick,_) -> prediction'.[tick] <- prediction'.[tick] + (rate |> Energy.toFloat))
+            plan |> List.sortBy (fun (tick,_) -> tick) |> List.unzip |> snd
+
+    let schedule_greedy (dayahead : dayahead) (prediction : realtime) queue tick = 
+        queue
+        |> List.iter 
+            (fun (Charge(from,energy,ttl,rate)) ->
+                let dayahead' = [for i in tick .. ttl do yield dayahead(i)]
+                let pred_test' = [for i in tick .. ttl do yield prediction'.[i]]
+
+                let avail = [for i in tick .. ttl do yield i,(dayahead(i) - (prediction'.[i] |> Energy.ofFloat))]
+
+                if energy > 0.0<kWh> then 
+                    printfn ""
+
+                let plan = create_plan energy avail [] rate
+                postalService.send(from, Charge_Accepted(plan)))
+
+    let schedule_proactive (dayahead : dayahead) (prediction : realtime) queue tick = 
+        let (Charge(_,_,_,T)) = queue |> List.minBy (fun (Charge(_,_,_,rate)) -> rate)
+        let sum_of_int = queue |> List.sumBy (fun (Charge(_,energy,_,_)) -> energy)
+        let difs = [for i in tick .. (96*(1+((tick)/96))-1) do yield (dayahead(i) - prediction(i))] 
+        let sum_difs = List.sum difs
+        let sum_ratio = (sum_of_int) / (List.sum difs)
+        let k = if sum_ratio > 1.0 then 1.0 else sum_ratio
+        let test = dayahead(tick) - prediction(tick)
+        let accepted = k*(dayahead(tick)-prediction(tick))
+        queue 
+        |> List.sortBy (fun (Charge(_,_,ttl,_)) -> ttl)
+        |> List.fold (fun ac (Charge(from,energy,_,rate)) -> reserve ac energy rate from) (accepted)
+        |> ignore
 
     let schedule_reactive (dayahead : dayahead) (prediction : realtime) queue tick = 
         queue
-        |> List.sortBy (fun (Charge(_,_,ttl,_)) -> ttl)
+        |> List.sortBy (fun (Charge(_,_,ttl,_)) -> -ttl)
         |> List.fold (fun ac (Charge(from,energy,_,rate)) -> reserve ac energy rate from) (dayahead (tick) - prediction (tick))
         |> ignore
 
-    let schedule_greedy dayahead prediction queue tick =
-        reduce_queue queue
-        |> List.iter (fun (Charge(from,energy,_,rate)) -> reserve 1.0<kWh> energy rate from |> ignore)
+    let schedule_none dayahead prediction queue tick =
+        Message.reduce_queue queue
+        |> List.iter (fun (Charge(from,energy,_,rate)) -> reserve (Energy.ofFloat infinity) energy rate from |> ignore)
 
 let brp_agent brp schedule = Agent.Start(fun agent ->
     let queue = new Queue() 
@@ -132,7 +113,7 @@ let brp_agent brp schedule = Agent.Start(fun agent ->
 //            printfn "Received charges from %s: %d > %d" from (intentions.Length+1) children.Length
             if intentions.Length + 1 >= children.Length then
                 syncContext.RaiseEvent jobDebug <| "BRP got charges"
-                let messages = (msg :: intentions) |> List.collect (fun x -> match x with | Charge_Intentions(_,msgs) -> msgs) |> Action.reduce_queue
+                let messages = (msg :: intentions) |> List.collect (fun x -> match x with | Charge_Intentions(_,msgs) -> msgs) |> Message.reduce_queue
                 schedule brp_args.dayahead brp_args.realtime messages tick
 //                printfn "Excess energy %f" (Energy.toFloat test)
 //                printfn "BRP got charges"
