@@ -11,7 +11,7 @@ open System.Text.RegularExpressions
 //let folder_of file = sprintf "%s\\%s" (Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName) file
 let file_powerprofiles = "c:\\simcar\simcar\\data\\powerprofiles.txt"
 let file_phevprofiles = "C:\\SimCar\\SimCar\\data\\profiles.txt"
-let file_brp = "C:\\SimCar\\SimCar\\data\\brp.txt"
+let file_brp = "C:\\SimCar\\SimCar\\data\\brp2.txt"
 let file_dayahead = "c:\\simcar\simcar\\data\\dayahead.txt"
 let file_prediction = "c:\\simcar\simcar\\data\\prediction.txt"
 let data_folder = "C:\\SimCar\\SimCar\\data\\powernodes\\"

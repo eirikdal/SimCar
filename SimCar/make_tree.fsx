@@ -52,6 +52,7 @@ let make_grid =
     let profiles = 
         Parsing.powerprofiles
         |> List.map (fun (name, powerlist) -> (name, Array.max powerlist))
+        |> List.filter (fun (_,peak) -> if peak <= 15.0 then true else false)
         |> List.map (fun ((name, peak) as node) -> LOW(name, peak))
         |> List.fold (fun (med,meds) trf -> make_meds med meds trf) (MED(0,0.0,[]),[])
         |> (fun (med,meds) -> med::meds)
@@ -74,7 +75,7 @@ let make_grid =
         | LOW(name,_) -> 
             [yield sprintf "pnode %s %s" name name]
         | PHEV(name) -> 
-            [yield sprintf "phev %s worker 4.0 0.0 4.0 0.5" name]
+            [yield sprintf "phev %s worker 16.0 0.0 16.0 2.5" name]
 
 //    profiles |> List.fold (fun ac (profile, peak) -> append profile ac peak)
 

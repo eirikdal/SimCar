@@ -203,7 +203,7 @@ namespace WinChart
         {
             InitializeComponent();
 
-            const int nSim = 3;
+            const int nSim = 1;
             const int nTicks = 96;
 
             chart1.Titles.Add("Iteration # 0 : Step # 0");
