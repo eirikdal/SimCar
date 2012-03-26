@@ -52,7 +52,7 @@ type SimCar(nIter, nTicksPerDayq) =
     // attach functions to events
     member self.RegisterEvents () = 
         error.Publish.Add(fun e -> postalService.Post(Error(sprintf "%s" e.Message)))
-        jobDebug.Publish.Add(fun str -> printfn "%s" str)
+        //jobDebug.Publish.Add(fun str -> printfn "%s" str)
 
     member self.Init() = 
         postalService.agents <- _agents
@@ -65,7 +65,7 @@ type SimCar(nIter, nTicksPerDayq) =
 
         postalService.send("brp", Dayahead((fun _ -> 0.0<kWh>)))
         postalService.send("brp", Prediction((fun _ -> 0.0<kWh>)))
-        postalService.send("brp", Schedule(BRP.Action.schedule_greedy))
+        postalService.send("brp", Schedule(BRP.Action.schedule_none))
 
         printfn "Computing dayahead"
 //        syncContext.RaiseEvent jobDebug <| "Computing dayahead"
@@ -78,6 +78,7 @@ type SimCar(nIter, nTicksPerDayq) =
 //        |> ignore
 //        syncContext.RaiseEvent jobDebug <| "Dayahead computed"
 //        self.Agents |> Tree.send (Reset) |> ignore
+        
         PHEV.rand <- new System.Random()
         printfn "Dayahead computed"
         

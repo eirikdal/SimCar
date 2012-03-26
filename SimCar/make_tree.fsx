@@ -52,7 +52,7 @@ let make_grid =
     let profiles = 
         Parsing.powerprofiles
         |> List.map (fun (name, powerlist) -> (name, Array.max powerlist))
-        |> List.filter (fun (_,peak) -> if peak <= 15.0 then true else false)
+        |> List.filter (fun (_,peak) -> if peak <= 10.0 then true else false)
         |> List.map (fun ((name, peak) as node) -> LOW(name, peak))
         |> List.fold (fun (med,meds) trf -> make_meds med meds trf) (MED(0,0.0,[]),[])
         |> (fun (med,meds) -> med::meds)

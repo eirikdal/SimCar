@@ -114,7 +114,6 @@ let test_dayahead iter agents =
     let updated_realtime = 
         realtime
         |> Array.map (Tree.foldr update) // right-fold over tree, applying the update function (inorder traversal)
-
     
     let rec shave n rt = 
         syncContext.RaiseDelegateEvent dayaheadProgress rt
@@ -136,16 +135,10 @@ let test_dayahead iter agents =
 // main control flow of the simulator
 let run day agents compute_dayahead =
     let tick n = 
-        syncContext.RaiseEvent jobDebug <| sprintf "Beginning tick %d\n" n
-
-        let test = 
-            agents
-            |> Tree.send (Update(n)) // inform agents that new tick has begun
-            |> Tree.send_reply RequestModel // request model from agents
-            |> Tree.map (fun (ag, msg) -> (ag, Async.RunSynchronously(msg)))
-        
-        syncContext.RaiseEvent jobDebug <| sprintf "Ending tick %d\n" n
-        test
+        agents
+        |> Tree.send (Update(n)) // inform agents that new tick has begun
+        |> Tree.send_reply RequestModel // request model from agents
+        |> Tree.map (fun (ag, msg) -> (ag, Async.RunSynchronously(msg)))
 
     printfn "Simulating day %d" day
     let realtime = Array.init(96) (fun i -> tick ((day*96) + i))

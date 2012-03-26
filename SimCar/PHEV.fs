@@ -11,46 +11,31 @@ open Agent
 open Models
 open PostalService
 open MathNet.Numerics.Distributions
+open MathNet.Numerics.Statistics
 //open Node
 let mutable rand = new System.Random()
 //let syncContext = SynchronizationContext.CaptureCurrent()
 
 module Action = 
-    let sum time profile = 
-        match profile.dist_type with
-        | Normal ->
-            let n = new Normal(profile.mean, profile.sigma)
-            n.CumulativeDistribution(time) - n.CumulativeDistribution((time-1.0))   
-        | LogNormal ->
-            let n = new MathNet.Numerics.Distributions.Gamma(profile.mean, 7.0)
-            n.CumulativeDistribution(time+1.0) - n.CumulativeDistribution((time))
+    let send_intention name parent (phev_args : PhevArguments) ttl =
+        let intention, wait = 
+            if phev_args.duration <= 1 && phev_args.intentions.Length = 0 then
+                Charge(name, Energy.ofFloat (float (phev_args.capacity - phev_args.battery)), ttl, phev_args.rate), true
+            else
+                Charge_OK(name), false
 
-    // cache the distributions
-    let calc name (profiles : Distribution list) : Profile =         
-        let dist_list = 
-            profiles
-            |> List.map (fun p -> { p with dist=(fun i -> sum (float i) p) |> Seq.initInfinite |> Seq.take 96 |> Seq.cache })
-    
-        // calculate the accumulated probability density function of all distributions
-        let prob ({dist=dist}) i = dist |> Seq.nth (i%96)
-        let temp = Seq.initInfinite (fun i -> dist_list |> Seq.fold (fun ac (d : Distribution) -> ac + (prob d i)) 0.0) |> Seq.take 96 |> Array.ofSeq
+        postalService.send(parent, intention)
+        wait
 
-        probEvent.Trigger [|box temp; box System.EventArgs.Empty|]
-
-        FloatProfile(name, dist_list)
-
-    let charge phev_args accepted =
+    let charge (phev_args : PhevArguments) =
         // PHEV stayed home, charge battery if less than full
-        if phev_args.battery < phev_args.capacity then
-            let phevArgs = { phev_args with current=accepted; battery=phev_args.battery+accepted }
-            
-            PHEV(phevArgs)
-        else
-            let phevArgs = { phev_args with current=0.0<kWh> }
-                    
-            PHEV(phevArgs)
+        PHEV(phev_args.charge())
 
-    let leave name dist_list phev_args tick =  
+    let leave name profile (phev_args : PhevArguments) tick =  
+        // If first time running, calculate and cache the distributions
+        let ({ profile=(FloatProfile(_,dist_list)) } as phevArgs) = 
+            { phev_args with profile=phev_args.profile.float_profile() }
+
         let r = rand.NextDouble()
         // try to find a distribution that matches the random number r
         let dist = dist_list |> Seq.tryFind (fun ({dist=dist}) -> r < (Seq.nth (tick%96) dist))
@@ -58,19 +43,31 @@ module Action =
         // if a distribution was found, let the PHEV leave with the corresponding duration of the distribution
         match dist with
         | Some d ->   
-            syncContext.RaiseEvent jobDebug <| sprintf "PHEV %s left with chance %f and probability %f" name r (Seq.nth (tick%96) d.dist) 
-            
-            PHEV({ phev_args with left=(tick%96); duration=d.duration;current=Energy.ofFloat 0.0; })
+            //syncContext.RaiseEvent jobDebug <| sprintf "PHEV %s left with chance %f and probability %f" name r (Seq.nth (tick%96) d.dist) 
+            PHEV(phevArgs.leave(tick, d.duration))
         | None ->
-            PHEV({ phev_args with left=(-1);})
-  
+            PHEV({ phevArgs with left=(-1);})
+
+    let find_ttl (histogram : int array) tick =
+        let tick' = (tick%96)
+        let nbhood = (tick'+36)
+
+        // finding the mode
+        [for i in tick' .. nbhood do yield histogram.[(i%96)]] 
+        |> List.fold (fun ((i, cur), ac) x -> if x > ac then ((i+1,i),x) else ((i+1,cur),ac)) ((0,0),0) 
+        |> fst 
+        |> snd
+        |> (+) tick
+
+
 (* 
  * PHEV: This is the PHEV agent
  *)
 let phev_agent _p name = Agent<Message>.Start(fun agent ->
     let queue = new Queue() 
+    let test = new MathNet.Numerics.Statistics.Histogram()
     
-    let rec loop (PHEV({name=name; parent=parent} as phev_args) as phev) waiting = async {
+    let rec loop (PHEV({ name=name; parent=parent; histogram=histogram } as phev_args) as phev) waiting = async {
         let! (msg : Message) = 
             if not waiting && queue.Count > 0 then
                 async { return queue.Dequeue() :?> Message }
@@ -89,45 +86,25 @@ let phev_agent _p name = Agent<Message>.Start(fun agent ->
         | Model(phev) ->
             return! loop phev waiting
         | Charge_Accepted(accepted) ->
-            return! loop (Action.charge phev_args accepted) false
+            let phevArgs = { phev_args with intentions=accepted }
+            
+            if phevArgs.intentions.Length > 0 then
+                return! loop (Action.charge phevArgs) false
+            else
+                return! loop (PHEV(phevArgs)) false
         | Update(tick) ->
-            if name = "Godel" then
-                syncContext.RaiseDelegateEvent phevBattery phev_args.battery
-            match phev_args.profile with 
-            | FloatProfile(dist_name,dist_list) ->
-                if phev_args.duration <= 0 then
-                    if name = "Godel" then
-                        syncContext.RaiseDelegateEvent phevStatus 0.0
-                    // if PHEV is at home, see if it is time to leave
-                    let intention = Charge(name, Energy.ofFloat (float (phev_args.capacity - phev_args.battery)), 30, phev_args.rate)
-
-                    postalService.send(parent, intention)
-                    
-                    return! loop <| Action.leave name dist_list phev_args tick <| true
+            let ttl = Action.find_ttl histogram tick 
+            let wait_for_reply = Action.send_intention name parent phev_args ttl
+            let phevArgs = 
+                if phev_args.intentions.Length = 0 then
+                    phev_args 
                 else
-                    if name = "Godel" then
-                        syncContext.RaiseDelegateEvent phevStatus 1.0
-                    if phev_args.duration = 1 then
-                        let intention = Charge(name, Energy.ofFloat (float (phev_args.capacity - phev_args.battery)), 30, phev_args.rate)
+                    phev_args.charge()
 
-                        postalService.send(parent, intention)
-
-                        return! loop <| Action.leave name dist_list phev_args tick <| true
-                    else
-                        let intention = Charge_OK(name)
-                        postalService.send(parent, intention)
-
-                        return! loop <| PHEV({ phev_args with current=0.0<kWh>; battery=(phev_args.battery - phev_args.rate); duration=phev_args.duration-1 }) <| false
-
-            | DistProfile(_,dist_list) ->
-                // First time running the distribution profile, calculate and cache the distributions
-                let p = Action.calc name dist_list
-                let intention = Charge_OK(name)
-                        
-                postalService.send(parent, intention)
-                let phevArguments = { phev_args with profile=p }
-
-                return! loop <| PHEV(phevArguments) <| waiting
+            if phevArgs.duration <= 1 then
+                return! loop <| Action.leave name phevArgs.profile phevArgs tick <| wait_for_reply
+            else
+                return! loop <| PHEV(phevArgs.drive()) <| wait_for_reply
         | Reset -> 
             return! loop <| PHEV({ phev_args with battery=phev_args.capacity; duration=(-1) }) <| false
         | _ -> 

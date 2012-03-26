@@ -1,9 +1,13 @@
 ﻿#r "bin/Debug/SimCar.dll"
+#r "C:\SimCar\packages\MathNet.Numerics.2.1.2\lib\Net40\MathNet.Numerics.dll"
+#r "C:\SimCar\packages\MathNet.Numerics.FSharp.2.1.2\lib\Net40\MathNet.Numerics.FSharp.dll"
 
 open System
 open System.IO
 open System.Globalization
 open System.Text.RegularExpressions
+open MathNet
+open MathNet.Numerics.Interpolation
 open FileManager
 
 
@@ -19,10 +23,19 @@ let read_file =
         while not sr.EndOfStream do
             yield sr.ReadLine()
     }
+//
+//let make_day values = 
+//    [for qi in values do 
+//        for i in 1 .. 4 do yield Double.Parse(qi, NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture) / 4.0]
 
 let make_day values = 
-    [for qi in values do 
-        for i in 1 .. 4 do yield Double.Parse(qi, NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture) / 4.0]
+    let v = [for qi in values do yield Double.Parse(qi, NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture)] |> Array.ofList
+    let test = [for i in 0 .. 4 .. 92 do yield float i] |> Array.ofList
+//    printfn "%d %d" v.Length test.Length
+    let test = Algorithms.AkimaSplineInterpolation(test, v)
+//    let test = Interpolate.LinearBetweenPoints(test, v)
+    
+    [for i in 0 .. 95 do yield test.Interpolate(float i)]
 
 let rec parse_powerprofiles stream (values : float list) days customer =
     match (stream : string list) with 
@@ -47,6 +60,8 @@ let rec parse_powerprofiles stream (values : float list) days customer =
 
 let powerprofiles = 
     File.Delete(profile_file)
+    for file in Directory.GetFiles(data_folder) do
+        File.Delete(file)
     let mutable rest = []
     let stream = List.ofSeq read_file
 

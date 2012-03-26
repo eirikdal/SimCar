@@ -35,11 +35,11 @@ type PostalService() =
             
             match msg with 
             | Register(name, from_agent) ->
-                syncContext.RaiseEvent jobCompleted (agent, "Agent registered with postal service")
+//                syncContext.RaiseEvent jobCompleted (agent, "Agent registered with postal service")
 
                 agentdict.Add(name, from_agent)
             | Deregister(name, from_agent) ->
-                syncContext.RaiseEvent jobCompleted (agent, "Agent deregistered from postal service")
+//                syncContext.RaiseEvent jobCompleted (agent, "Agent deregistered from postal service")
 
                 agentdict.Remove(name) |> ignore
 //            | Broadcast(message) ->

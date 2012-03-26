@@ -9,11 +9,16 @@ using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
+using Microsoft.FSharp.Core;
 
 namespace WinChart
 {
     public partial class SimChart : Form
     {
+        const int nSim = 10;
+        const int nTicks = 96;
+        Sim.SimCar tSim = new Sim.SimCar(nSim, nTicks);
+
         private Mutex mut = new Mutex();
         private const int nRealTime = 0;
         private const int nPowerNodes = 1;
@@ -21,8 +26,7 @@ namespace WinChart
         private const int nPhevPDF = 3;
         private const int nDayAhead = 4;
         private const int nPhevStatus = 5;
-        private const int nPhevBattery = 6;        
-        
+        private const int nPhevBattery = 6;
 
         private static string[] series = { "Total", "PowerNodes", "PHEVs", "PHEV PDF", "Dayahead", "PHEV status", "PHEV battery" };
         private static int counter = 0;
@@ -34,6 +38,7 @@ namespace WinChart
         private delegate void resetChartDelegate(int i, int j);
         private delegate void updatePDFDelegate(Double[] chart);
         private delegate void addPointDelegate(int i, Double point);
+        private delegate void updatePointDelegate(int i, int point, Double val);
         
 
         void saveImageControl(string fileName)
@@ -55,7 +60,7 @@ namespace WinChart
                 if (saveImage)
                     chart1.SaveImage(String.Format("C:\\SimCar\\SimCar\\data\\img\\{0}.png", counter++), ChartImageFormat.Png);
                 
-                for (int j = 0; j < 3; j++)
+                for (int j = 0; j < chart1.Series.Count; j++)
                     chart1.Series[j].Points.Clear();
             }
 
@@ -110,11 +115,27 @@ namespace WinChart
             }
         }
 
+        void updatePoint(int i, int point, double val)
+        {
+            if (chart1.InvokeRequired)
+            {
+                chart1.BeginInvoke(new updatePointDelegate(updatePoint), new object[] { i, point, val });
+            }
+            else
+            {
+                if (chart1.Series[i].Points.Count == 0)
+                    for (int j = 0; j < 96; j++)
+                        chart1.Series[i].Points.Add(0);
+                double temp = chart1.Series[i].Points[point].YValues[0];
+                chart1.Series[i].Points[point].SetValueY(temp+val);
+            }
+        }
+
         void resetChart(int from, int to)
         {
             if (chart1.InvokeRequired)
             {
-                chart1.Invoke(new resetChartDelegate(resetChart), new object[] { 0, 3 });
+                chart1.Invoke(new resetChartDelegate(resetChart), new object[] { from, to });
             }
             else
             {
@@ -132,9 +153,10 @@ namespace WinChart
 
         void phevBattery_Changed(object sender, EventArgs e)
         {
-            Double point = (Double) sender;
+            int point = (int) sender;
 
-            addPoint(nPhevBattery, point);
+            updatePoint(nPhevBattery, point, 1.0);
+            //addPoint(nPhevBattery, point);
         }
 
         void prob_Reset(object sender, EventArgs e)
@@ -203,9 +225,6 @@ namespace WinChart
         {
             InitializeComponent();
 
-            const int nSim = 1;
-            const int nTicks = 96;
-
             chart1.Titles.Add("Iteration # 0 : Step # 0");
             chart1.Titles.Add("alpha = 0.3, theta = 0.9");
 
@@ -254,9 +273,7 @@ namespace WinChart
             seriesArray[nPhevBattery].Color = Color.Blue;
             seriesArray[nPhevBattery].BorderWidth = 2;
             seriesArray[nPhevBattery].BorderDashStyle = ChartDashStyle.Solid;
-
-
-            Sim.SimCar tSim = new Sim.SimCar(nSim, nTicks);
+            
             tSim.Init();
             tSim.RegisterEvents();
             tSim.RegisterPhevBattery(phevBattery_Changed);
@@ -270,8 +287,19 @@ namespace WinChart
             //tSim.RegisterDayaheadInit(new EventHandler(dayahead_Init));
             //tSim.RegisterDayaheadStep(new EventHandler(dayahead_Step));
             //tSim.TestDayahead(nSim);
-            tSim.ComputeDayahead(new Microsoft.FSharp.Core.FSharpOption<int>(nSim));
-            tSim.Run(new Microsoft.FSharp.Core.FSharpOption<int>(nSim));
+
+            Thread oThread = new Thread(new ThreadStart(Start));
+            oThread.Start();
+
+            while (!oThread.IsAlive) ;
+
+        }
+
+        public void Start()
+        {
+            tSim.ComputeDayahead(new FSharpOption<int>(nSim+1));
+            resetChart(0,chart1.Series.Count);
+            tSim.Run(new FSharpOption<int>(nSim));
         }
     }
 }
