@@ -2,27 +2,27 @@
   trf node2 1000.0 0.0 {
     pnode 101 5
     pnode 107 5
-	phev vonNeumann worker 1.0 0.0 1.0 0.1
-    phev Turing worker 1.0 0.0 1.0 0.1
+	phev vonNeumann worker 16.0 0.0 16.0 2.5
+    phev Turing worker 16.0 0.0 16.0 2.5
   }
   trf node7 1000.0 0.0 {
     pnode 108 5
   }
-  phev Church1 worker 1.0 0.0 1.0 0.1
-  phev Godel1 housewife 1.0 0.0 1.0 0.1
-  phev Nash1 worker 1.0 0.0 1.0 0.1
-  phev Church2 worker 1.0 0.0 1.0 0.1
-  phev Godel2 housewife 1.0 0.0 1.0 0.1
-  phev Nash2 worker 1.0 0.0 1.0 0.1
-  phev Church3 worker 1.0 0.0 1.0 0.1
-  phev Godel3 housewife 1.0 0.0 1.0 0.1
-  phev Nash3 worker 1.0 0.0 1.0 0.1
-  phev Church4 worker 1.0 0.0 1.0 0.1
-  phev Godel4 housewife 1.0 0.0 1.0 0.1
-  phev Nash4 worker 1.0 0.0 1.0 0.1
-  phev Church6 worker 1.0 0.0 1.0 0.1
-  phev Godel6 housewife 1.0 0.0 1.0 0.1
-  phev Nash6 worker 1.0 0.0 1.0 0.1
+  phev Church1 worker 16.0 0.0 16.0 2.5
+  phev Godel1 worker 16.0 0.0 16.0 2.5
+  phev Nash1 worker 16.0 0.0 16.0 2.5
+  phev Church2 worker 16.0 0.0 16.0 2.5
+  phev Godel2 worker 16.0 0.0 16.0 2.5
+  phev Nash2 worker 16.0 0.0 16.0 2.5
+  phev Church3 worker 16.0 0.0 16.0 2.5
+  phev Godel3 worker 16.0 0.0 16.0 2.5
+  phev Nash3 worker 16.0 0.0 16.0 2.5
+  phev Church4 worker 16.0 0.0 16.0 2.5
+  phev Godel4 worker 16.0 0.0 16.0 2.5
+  phev Nash4 worker 16.0 0.0 16.0 2.5
+  phev Church6 worker 16.0 0.0 16.0 2.5
+  phev Godel6 worker 16.0 0.0 16.0 2.5
+  phev Nash6 worker 16.0 0.0 16.0 2.5
   pnode 111 5
   pnode 112 5
   pnode 12 5
