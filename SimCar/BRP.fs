@@ -108,7 +108,7 @@ let brp_agent brp schedule = Agent.Start(fun agent ->
 //            printfn "Received charges from %s: %d > %d" from (intentions.Length+1) children.Length
             if intentions.Length + 1 >= children.Length then
                 syncContext.RaiseEvent jobDebug <| "BRP got charges"
-                let messages = (msg :: intentions) |> List.collect (fun x -> match x with | Charge_Intentions(_,msgs) -> msgs) |> Message.reduce_queue
+                let messages = (msg :: intentions) |> List.collect (fun x -> match x with | Charge_Intentions(trf,msgs) -> trf,msgs) |> Message.reduce_queue
                 schedule brp_args.dayahead brp_args.realtime messages tick
 //                printfn "Excess energy %f" (Energy.toFloat test)
 //                printfn "BRP got charges"

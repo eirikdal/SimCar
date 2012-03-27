@@ -164,28 +164,23 @@ type PhevArguments =
             self.histogram.[(tick%96)] <- self.histogram.[(tick%96)] + 1
 
             if self.battery < self.capacity && (self.capacity - self.battery) >= self.rate then 
-                syncContext.RaiseDelegateEvent phevBattery (tick%96)
-//
-//                if self.name = "Godel1" then 
-//                    printfn "Godel1 battery error"
-//
-//            if self.name = "Godel1" then 
-//                printfn "Godel1 left"
+                syncContext.RaiseDelegateEvent phevFailed (tick%96)
 
             syncContext.RaiseDelegateEvent phevLeft (tick%96)
         
             { self with left=(tick%96); duration=duration; }
         member self.charge() = 
+            if self.name = "Godel1" then
+                syncContext.RaiseDelegateEvent phevStatus (0.0)
             match self.intentions with 
-            | rate::t ->
-//                if self.name = "Godel1" then 
-//                    printfn "battery %f charging %f" (Energy.toFloat self.battery) (Energy.toFloat rate)
-                { self with current=rate; battery=(self.battery+rate); intentions=t }
+            | rate::t -> { self with current=rate; battery=(self.battery+rate); intentions=t }
             | [] -> raise <| Exception("No charges left")
         member self.drive() =
-//            if self.name = "Godel1" then 
-//                printfn "battery %f discharging %f" (Energy.toFloat self.battery) (Energy.toFloat self.rate)
-            { self with current=0.0<kWh>; battery=(self.battery - self.rate); duration=self.duration-1 }
+            if self.name = "Godel1" then
+                syncContext.RaiseDelegateEvent phevStatus (1.0)
+//            { self with current=0.0<kWh>; battery=(self.battery - self.rate); duration=self.duration-1 }
+            let battery' = if self.battery >= self.rate then self.battery - self.rate else self.battery
+            { self with current=0.0<kWh>; battery=battery'; duration=self.duration-1 }
 
 type TrfArguments = 
     { name : string; 

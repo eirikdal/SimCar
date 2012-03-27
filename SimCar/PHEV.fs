@@ -101,6 +101,9 @@ let phev_agent _p name = Agent<Message>.Start(fun agent ->
                 else
                     phev_args.charge()
 
+            if phevArgs.name = "Godel1" then
+                syncContext.RaiseDelegateEvent phevBattery phevArgs.battery
+
             if phevArgs.duration <= 1 then
                 return! loop <| Action.leave name phevArgs tick <| wait_for_reply
             else

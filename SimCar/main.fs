@@ -20,6 +20,9 @@ type SimCar(nIter, nTicksPerDayq) =
     member self.RegisterPhevStatus (handler) = 
         phevStatus.Publish.AddHandler handler
 
+    member self.RegisterPhevFailed (handler) = 
+        phevFailed.Publish.AddHandler handler
+
     member self.RegisterProb (handler) = 
         probEvent.Publish.AddHandler handler
 
@@ -88,7 +91,7 @@ type SimCar(nIter, nTicksPerDayq) =
 
         postalService.send("brp", Dayahead(FileManager.dayahead()))
         postalService.send("brp", Prediction(FileManager.prediction()))
-        postalService.send("brp", Schedule(BRP.Action.schedule_proactive))
+        postalService.send("brp", Schedule(BRP.Action.schedule_reactive))
 
         printfn "Running simulations"
         [for i in 0 .. (n-1) do run i self.Agents false] |> ignore 

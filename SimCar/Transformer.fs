@@ -35,19 +35,19 @@ let trf_agent trf = Agent.Start(fun agent ->
                 else
                     reply.Reply(Model(trf))
                     return! loop trf []
-        | Charge(from, energy, ttd, _) ->
+        | Charge(_,_,_,_) ->
             if (intentions.Length+1) = children.Length then
 //                printfn "Charge from %s" from 
                 postalService.send(parent, Charge_Intentions(name, (msg :: intentions)))
             return! loop trf (msg :: intentions)
         | Model(trf) -> 
             return! loop trf intentions
-        | Charge_OK(from) as msg -> 
+        | Charge_OK(_) as msg -> 
             if (intentions.Length+1) = children.Length then
 //                printfn "Charge_OK from %s" from 
                 postalService.send(parent, Charge_Intentions(name, (msg :: intentions)))
             return! loop trf (msg :: intentions)
-        | Charge_Intentions(from,msgs) ->
+        | Charge_Intentions(_,_) ->
             if (intentions.Length+1) = children.Length then
 //                printfn "Charge_Intentions from %s" from 
                 postalService.send(parent, Charge_Intentions(name, (msg :: intentions)))
