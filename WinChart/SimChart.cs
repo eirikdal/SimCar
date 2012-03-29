@@ -29,8 +29,13 @@ namespace WinChart
         private const int nPhevStatus = 0;
         private const int nPhevBattery = 1;
 
+        private const int nTrfCapacity = 0;
+        private const int nTrfCurrent = 1;
+        private const int nTrfFiltered = 2;
+
         private static string[] series = { "Total", "PowerNodes", "PHEVs", "Dayahead", "PHEVs left (not fully charged)" };
         private static string[] _seriesPhev = { "PHEV status", "PHEV battery" };
+        private static string[] _seriesTrf = {"Capacity", "Current", "Unfiltered"};
 
         private static int counter = 0;
         private static int nstep = 0;
@@ -163,6 +168,29 @@ namespace WinChart
             }
         }
 
+        void trfCapacity_Changed(object sender, EventArgs e)
+        {
+            Double point = (Double)sender;
+
+            addPoint(chart3, nTrfCapacity, point);
+        }
+
+        void trfCurrent_Changed(object sender, EventArgs e)
+        {
+            Double point = (Double)sender;
+
+            //incrementPoint(chart2, nPhevBattery, point, 1.0);
+            addPoint(chart3, nTrfCurrent, point);
+        }
+
+        void trfFiltered_Changed(object sender, EventArgs e)
+        {
+            Double point = (Double)sender;
+
+            //incrementPoint(chart2, nPhevBattery, point, 1.0);
+            addPoint(chart3, nTrfFiltered, point);
+        }
+
         void phevStatus_Changed(object sender, EventArgs e)
         {
             Double point = (Double) sender;
@@ -211,6 +239,7 @@ namespace WinChart
         {
             updateChart(chart1, nRealTime, (Double[])sender, true, "power");
             resetChart(chart2, 0, 2, true, "phev");
+            resetChart(chart3, 0, 3, true, "trf");
         }
 
         void chart_moving_average_comparison_Changed(object sender, EventArgs e)
@@ -261,6 +290,7 @@ namespace WinChart
         {
             InitializeComponent();
 
+            chart3.Titles.Add("Transformer");
             chart2.Titles.Add("PHEV");
             chart1.Titles.Add("Iteration # 0 : Step # 0");
             //chart1.Titles.Add("alpha = 0.3, theta = 0.9");
@@ -271,16 +301,22 @@ namespace WinChart
             chart1.Series.Add(series[nDayAhead]);
             chart1.Series.Add(series[nPhevPDF]);
 
-            setChartLabels(chart1);
-            setChartLabels(chart2);
-
             //chart1.ChartAreas.Add("ChartArea1");
 
             chart2.Series[0].LegendText = _seriesPhev[nPhevStatus];
             chart2.Series.Add(_seriesPhev[nPhevBattery]);
+
+            chart3.Series[0].LegendText = _seriesTrf[nTrfCapacity];
+            chart3.Series.Add(_seriesTrf[nTrfCurrent]);
+            chart3.Series.Add(_seriesTrf[nTrfFiltered]);
+
+            setChartLabels(chart1);
+            setChartLabels(chart2);
+            setChartLabels(chart3);
             
             Series[] seriesPhev = {chart2.Series[nPhevStatus], chart2.Series[nPhevBattery]};
             Series[] seriesArray = { chart1.Series[nPhevBattery], chart1.Series[nPowerNodes], chart1.Series[nPhev], chart1.Series[nDayAhead], chart1.Series[nPhevPDF] };
+            Series[] seriesTrf = {chart3.Series[nTrfCapacity], chart3.Series[nTrfCurrent], chart3.Series[nTrfFiltered] };
 
             // customize series
             seriesArray[nRealTime].ChartType = SeriesChartType.Line;
@@ -317,6 +353,21 @@ namespace WinChart
             seriesPhev[nPhevBattery].Color = Color.Blue;
             seriesPhev[nPhevBattery].BorderWidth = 2;
             seriesPhev[nPhevBattery].BorderDashStyle = ChartDashStyle.Dash;
+
+            seriesTrf[nTrfCapacity].ChartType = SeriesChartType.StepLine;
+            seriesTrf[nTrfCapacity].Color = Color.Red;
+            seriesTrf[nTrfCapacity].BorderWidth = 2;
+            seriesTrf[nTrfCapacity].BorderDashStyle = ChartDashStyle.Dash;
+
+            seriesTrf[nTrfCurrent].ChartType = SeriesChartType.Line;
+            seriesTrf[nTrfCurrent].Color = Color.Blue;
+            seriesTrf[nTrfCurrent].BorderWidth = 2;
+            seriesTrf[nTrfCurrent].BorderDashStyle = ChartDashStyle.Dash;
+
+            seriesTrf[nTrfFiltered].ChartType = SeriesChartType.Line;
+            seriesTrf[nTrfFiltered].Color = Color.Sienna;
+            seriesTrf[nTrfFiltered].BorderWidth = 2;
+            seriesTrf[nTrfFiltered].BorderDashStyle = ChartDashStyle.Solid;
             
             tSim.Init();
             tSim.RegisterEvents();
@@ -332,6 +383,9 @@ namespace WinChart
             //tSim.RegisterDayaheadInit(new EventHandler(dayahead_Init));
             //tSim.RegisterDayaheadStep(new EventHandler(dayahead_Step));
             //tSim.TestDayahead(nSim);
+            tSim.RegisterTrfCapacity(trfCapacity_Changed);
+            tSim.RegisterTrfCurrent(trfCurrent_Changed);
+            tSim.RegisterTrfFiltered(trfFiltered_Changed);
 
             Thread oThread = new Thread(new ThreadStart(Start));
             oThread.Start();

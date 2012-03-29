@@ -49,6 +49,15 @@ type SimCar(nIter, nTicksPerDayq) =
     member self.RegisterDayaheadInit (handler) =
         dayaheadInit.Publish.AddHandler handler
 
+    member self.RegisterTrfCapacity (handler) = 
+        trfCapacity.Publish.AddHandler handler
+
+    member self.RegisterTrfCurrent (handler) = 
+        trfCurrent.Publish.AddHandler handler
+
+    member self.RegisterTrfFiltered (handler) = 
+        trfFiltered.Publish.AddHandler handler
+
 //    member self.RegisterComputeDayahead () = 
 //        updateEvent.Publish.Add(fun dayahead -> IO.write_to_file <| FileManager.file_dayahead <| Parsing.parse_dayahead (List.ofArray dayahead))
 //    

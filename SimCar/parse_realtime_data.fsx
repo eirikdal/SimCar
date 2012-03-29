@@ -15,7 +15,7 @@ open FileManager
 
 let powerprofile_file = "C:\\SimCar\\SimCar\\data\\buskerud.txt"
 let profile_file = "C:\\SimCar\\SimCar\\data\\powerprofiles.txt"
-let data_folder = "C:\\SimCar\\SimCar\\data\\powernodes\\"
+let data_folder = "C:\\SimCar\\SimCar\\data\\interpol\\"
 
 let read_file = 
     seq {
@@ -24,15 +24,16 @@ let read_file =
             yield sr.ReadLine()
     }
 //
-//let make_day values = 
-//    [for qi in values do 
-//        for i in 1 .. 4 do yield Double.Parse(qi, NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture) / 4.0]
+let make_day' values = 
+    [for qi in values do 
+        for i in 1 .. 4 do yield Double.Parse(qi, NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture)]
 
 let make_day values = 
     let v = [for qi in values do yield Double.Parse(qi, NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture)] |> Array.ofList
-    let test = [for i in 0 .. 4 .. 92 do yield float i] |> Array.ofList
+//    let v = make_day' values |> Array.ofList
+    let test = [for i in 0 .. 4 .. (4*(v.Length-1)) do yield float i] |> Array.ofList
 //    printfn "%d %d" v.Length test.Length
-    let test = Algorithms.AkimaSplineInterpolation(test, v)
+    let test = Algorithms.AkimaSplineInterpolation(test,v)
 //    let test = Interpolate.LinearBetweenPoints(test, v)
     
     [for i in 0 .. 95 do yield test.Interpolate(float i)]

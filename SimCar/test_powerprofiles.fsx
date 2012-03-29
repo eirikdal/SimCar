@@ -25,3 +25,5 @@ let sample = Array.sub (snd profiles.Head) 0 96
 let sample2 = Array.sub (snd profiles_interpol.Head) 0 96
 let test2 = FSharpChart.Combine [FSharpChart.Line (sample);
                                     FSharpChart.Line (sample2)]
+
+//test2.SaveChartAs(img, System.Windows.Forms.DataVisualization.Charting.ChartImageFormat.Png)

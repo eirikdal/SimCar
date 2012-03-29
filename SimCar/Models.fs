@@ -168,18 +168,16 @@ type PhevArguments =
 
             syncContext.RaiseDelegateEvent phevLeft (tick%96)
         
-            { self with left=(tick%96); duration=duration; }
+            { self with left=(tick%96); duration=duration; intentions=[]}
         member self.charge() = 
-            if self.name = "Godel1" then
-                syncContext.RaiseDelegateEvent phevStatus (0.0)
             match self.intentions with 
-            | rate::t -> { self with current=rate; battery=(self.battery+rate); intentions=t }
-            | [] -> raise <| Exception("No charges left")
+            | rate::t -> 
+                let current' = if self.duration <= 0 then rate else 0.0<kWh>
+                { self with current=current'; battery=(self.battery+current'); intentions=t }
+            | [] -> { self with current=0.0<kWh>; battery=self.battery; }
         member self.drive() =
-            if self.name = "Godel1" then
-                syncContext.RaiseDelegateEvent phevStatus (1.0)
 //            { self with current=0.0<kWh>; battery=(self.battery - self.rate); duration=self.duration-1 }
-            let battery' = if self.battery >= self.rate then self.battery - self.rate else self.battery
+            let battery' = if self.battery >= self.rate then self.battery - self.rate else 0.0<kWh>
             { self with current=0.0<kWh>; battery=battery'; duration=self.duration-1 }
 
 type TrfArguments = 
