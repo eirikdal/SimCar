@@ -7,9 +7,9 @@ open Models
 type Message = 
     | Charge of string * energy * int * energy
     | Charge_Received
-    | Charge_OK of string
+    | Charge_OK of string * energy * int
     | Charge_Accepted of energy list
-    | Charge_Intentions of string * Message list
+    | Charge_Intentions of Message list
     | Completed of string
     | Assign of Agent<Message> * Grid
     | Register of string * Agent<Message>
@@ -25,13 +25,12 @@ type Message =
     | Update of int
     | Reset
     | Reply of Message
-    | Schedule of (dayahead -> realtime -> Message list -> int -> unit)
+    | Schedule of (dayahead -> realtime -> (string * Message) list -> int -> unit)
 
 let rec reduce_queue queue = 
     [for msg in queue do 
         match msg with 
-        | Charge_Intentions(_, msg) ->
+        | Charge_Intentions(msg) ->
             yield! reduce_queue msg
-        | Charge(_,_,_,_) -> yield! [msg]
-        | Charge_OK(_) ->
-            yield! []]
+        | Charge(name,_,_,_) -> yield! [name,msg]
+        | Charge_OK(_) -> ()]

@@ -23,22 +23,31 @@ namespace WinChart
         private const int nRealTime = 0;
         private const int nPowerNodes = 1;
         private const int nPhev = 2;
-        private const int nPhevPDF = 3;
-        private const int nDayAhead = 4;
-        private const int nPhevStatus = 5;
-        private const int nPhevBattery = 6;
+        private const int nDayAhead = 3;
+        private const int nPhevPDF = 4;
 
-        private static string[] series = { "Total", "PowerNodes", "PHEVs", "PHEV PDF", "Dayahead", "PHEV status", "PHEV battery" };
+        private const int nPhevStatus = 0;
+        private const int nPhevBattery = 1;
+
+        private const int nTrfCapacity = 0;
+        private const int nTrfCurrent = 1;
+        private const int nTrfFiltered = 2;
+
+        private static string[] series = { "Total", "PowerNodes", "PHEVs", "Dayahead", "PHEVs left (not fully charged)" };
+        private static string[] _seriesPhev = { "PHEV status", "PHEV battery" };
+        private static string[] _seriesTrf = {"Capacity", "Current", "Unfiltered"};
+
         private static int counter = 0;
         private static int nstep = 0;
 
         private delegate void saveImageDelegate(string fileName);
-        private delegate void updateChartDelegate(int i, Double[] chart);
-        private delegate void updateChartSaveImageDelegate(int i, Double[] chart, bool saveImage);
-        private delegate void resetChartDelegate(int i, int j);
+        private delegate void updateChartDelegate(Chart chart, int i, Double[] points);
+        private delegate void updateChartSaveImageDelegate(Chart chart, int i, Double[] points, bool saveImage, String path);
+        private delegate void resetChartDelegate(Chart chart, int i, int j);
+        private delegate void resetChartSaveImageDelegate(Chart chart, int i, int j, bool saveImage, String path);
         private delegate void updatePDFDelegate(Double[] chart);
-        private delegate void addPointDelegate(int i, Double point);
-        private delegate void updatePointDelegate(int i, int point, Double val);
+        private delegate void addPointDelegate(Chart chart, int i, Double point);
+        private delegate void incrementPointDelegate(Chart chart, int i, int point, Double val);
         
 
         void saveImageControl(string fileName)
@@ -47,116 +56,161 @@ namespace WinChart
 
         }
 
-        void updateChart(int i, Double[] chart, bool saveImage)
+        void updateChart(Chart chart, int series, Double[] points, bool saveImage, String path)
         {
-            if (chart1.InvokeRequired)
+            if (chart.InvokeRequired)
             {
-                chart1.Invoke(new updateChartSaveImageDelegate(updateChart), new object[] { i, chart, saveImage });
+                chart.Invoke(new updateChartSaveImageDelegate(updateChart), new object[] { chart, series, points, saveImage, path });
             }
             else
             {
-                updateChart(i, chart);
+                updateChart(chart, series, points);
 
                 if (saveImage)
-                    chart1.SaveImage(String.Format("C:\\SimCar\\SimCar\\data\\img\\{0}.png", counter++), ChartImageFormat.Png);
+                    chart.SaveImage(String.Format("C:\\SimCar\\SimCar\\data\\img\\{0}\\{1}.png", path, counter++), ChartImageFormat.Png);
                 
                 for (int j = 0; j < chart1.Series.Count; j++)
-                    chart1.Series[j].Points.Clear();
+                    chart.Series[j].Points.Clear();
             }
 
         }
 
-        void updateChart(int i, Double[] chart)
+        void updateChart(Chart chart, int i, Double[] points)
         {
-            if (chart1.InvokeRequired)
+            if (chart.InvokeRequired)
             {
-                chart1.Invoke(new updateChartDelegate(updateChart), new object[] { i, chart });
+                chart.Invoke(new updateChartDelegate(updateChart), new object[] { chart, i, points });
             }
             else
             {
-                if (chart1.Series[i].Points.Count > 0)
-                    chart1.Series[i].Points.Clear();
+                if (chart.Series[i].Points.Count > 0)
+                    chart.Series[i].Points.Clear();
 
-                for (int j = 0; j < chart.Length; j++)
-                    chart1.Series[i].Points.Add(chart[j]);
+                for (int j = 0; j < points.Length; j++)
+                    chart.Series[i].Points.Add(points[j]);
             }
         }
 
         void updatePDF(Double[] prob)
         {
-            if (chart1.InvokeRequired)
+            if (chart2.InvokeRequired)
             {
-                chart1.BeginInvoke(new updatePDFDelegate(updatePDF), new object[] { prob });
+                chart2.BeginInvoke(new updatePDFDelegate(updatePDF), new object[] { prob });
             }
             else
             {
                 for (int i = 0; i < prob.Length; i++)
                 {
-                    if (chart1.Series[nPhevPDF].Points.Count <= i)
-                        chart1.Series[nPhevPDF].Points.Add(prob[i]);
+                    if (chart2.Series[nPhevPDF].Points.Count <= i)
+                        chart2.Series[nPhevPDF].Points.Add(prob[i]);
                     else if (prob[i] > chart1.Series[nPhevPDF].Points[i].YValues[0])
-                        chart1.Series[nPhevPDF].Points[i].SetValueY(prob[i]);
+                        chart2.Series[nPhevPDF].Points[i].SetValueY(prob[i]);
                 }
             }
         }
 
-        void addPoint(int i, Double point)
+        void addPoint(Chart chart, int i, Double point)
         {
-            if (chart1.InvokeRequired)
+            if (chart.InvokeRequired)
             {
-                chart1.BeginInvoke(new addPointDelegate(addPoint), new object[] {i, point});
+                chart.BeginInvoke(new addPointDelegate(addPoint), new object[] { chart, i, point });
             }
             else
             {
-                if (chart1.Series[i].Points.Count >= 96)
-                    chart1.Series[i].Points.Clear();
+                if (chart.Series[i].Points.Count >= 96)
+                    chart.Series[i].Points.Clear();
 
-                chart1.Series[i].Points.Add(point);
+                chart.Series[i].Points.Add(point);
             }
         }
 
-        void updatePoint(int i, int point, double val)
+        void incrementPoint(Chart chart, int i, int point, double val)
         {
-            if (chart1.InvokeRequired)
+            if (chart.InvokeRequired)
             {
-                chart1.BeginInvoke(new updatePointDelegate(updatePoint), new object[] { i, point, val });
+                chart.BeginInvoke(new incrementPointDelegate(incrementPoint), new object[] { chart, i, point, val });
             }
             else
             {
-                if (chart1.Series[i].Points.Count == 0)
+                if (chart.Series[i].Points.Count == 0)
                     for (int j = 0; j < 96; j++)
-                        chart1.Series[i].Points.Add(0);
-                double temp = chart1.Series[i].Points[point].YValues[0];
-                chart1.Series[i].Points[point].SetValueY(temp+val);
+                        chart.Series[i].Points.Add(0);
+                double temp = chart.Series[i].Points[point].YValues[0];
+                chart.Series[i].Points[point].SetValueY(temp + 10.0);
             }
         }
 
-        void resetChart(int from, int to)
+        void resetChart(Chart chart, int from, int to, bool saveImage, String path)
         {
-            if (chart1.InvokeRequired)
+            if (chart.InvokeRequired)
             {
-                chart1.Invoke(new resetChartDelegate(resetChart), new object[] { from, to });
+                chart.Invoke(new resetChartSaveImageDelegate(resetChart), new object[] { chart, from, to, saveImage, path });
+            }
+            else
+            {
+                if (saveImage)
+                    chart.SaveImage(String.Format("C:\\SimCar\\SimCar\\data\\img\\{0}\\{1}.png", path, counter++), ChartImageFormat.Png);
+
+                resetChart(chart, from, to);
+            }
+        }
+
+        void resetChart(Chart chart, int from, int to)
+        {
+            if (chart.InvokeRequired)
+            {
+                chart.Invoke(new resetChartDelegate(resetChart), new object[] { chart, from, to });
             }
             else
             {
                 for (int j = from; j < to; j++)
-                    chart1.Series[j].Points.Clear();
+                    chart.Series[j].Points.Clear();
             }
+        }
+
+        void trfCapacity_Changed(object sender, EventArgs e)
+        {
+            Double point = (Double)sender;
+
+            addPoint(chart3, nTrfCapacity, point);
+        }
+
+        void trfCurrent_Changed(object sender, EventArgs e)
+        {
+            Double point = (Double)sender;
+
+            //incrementPoint(chart2, nPhevBattery, point, 1.0);
+            addPoint(chart3, nTrfCurrent, point);
+        }
+
+        void trfFiltered_Changed(object sender, EventArgs e)
+        {
+            Double point = (Double)sender;
+
+            //incrementPoint(chart2, nPhevBattery, point, 1.0);
+            addPoint(chart3, nTrfFiltered, point);
         }
 
         void phevStatus_Changed(object sender, EventArgs e)
         {
             Double point = (Double) sender;
 
-            addPoint(nPhevStatus, point);
+            addPoint(chart2, nPhevStatus, point);
+        }
+
+        void phevFailed_Changed(object sender, EventArgs e)
+        {
+            int point = (int)sender;
+
+            incrementPoint(chart1, nPhevPDF, point, 1.0);
         }
 
         void phevBattery_Changed(object sender, EventArgs e)
         {
-            int point = (int) sender;
+            Double point = (Double) sender;
 
-            updatePoint(nPhevBattery, point, 1.0);
-            //addPoint(nPhevBattery, point);
+            //incrementPoint(chart2, nPhevBattery, point, 1.0);
+            addPoint(chart2, nPhevBattery, point);
         }
 
         void prob_Reset(object sender, EventArgs e)
@@ -173,17 +227,19 @@ namespace WinChart
         
         void phev_Changed(object sender, EventArgs e)
         {
-            updateChart(nPhev, (Double[])sender);
+            updateChart(chart1, nPhev, (Double[])sender);
         }
 
         void pnode_Changed(object sender, EventArgs e)
         {
-            updateChart(nPowerNodes, (Double[])sender);
+            updateChart(chart1, nPowerNodes, (Double[])sender);
         }
 
         void total_Changed(object sender, EventArgs e)
         {
-            updateChart(nRealTime, (Double[])sender, true);
+            updateChart(chart1, nRealTime, (Double[])sender, true, "power");
+            resetChart(chart2, 0, 2, true, "phev");
+            resetChart(chart3, 0, 3, true, "trf");
         }
 
         void chart_moving_average_comparison_Changed(object sender, EventArgs e)
@@ -202,7 +258,7 @@ namespace WinChart
 
             this.chart1.Titles[0].Text = (String.Format("Iteration #{0} : Step # {0}", counter, nstep));
 
-            updateChart(0, chart, true);
+            updateChart(chart1, 0, chart, true, "power");
         }
         void dayahead_Changed(object sender, EventArgs e)
         {
@@ -210,7 +266,7 @@ namespace WinChart
 
             this.chart1.Titles[0].Text = (String.Format("Iteration #{0} : Step # {1}", counter, nstep++));
 
-            updateChart(4, chart);
+            updateChart(chart1, nDayAhead, chart);
         }
 
         void dayahead_Step(object sender, EventArgs e)
@@ -219,24 +275,48 @@ namespace WinChart
 
             this.chart1.Titles[0].Text = (String.Format("Iteration #{0} : Step # {1}", counter, nstep));
 
-            updateChart(2, chart, true);
+            updateChart(chart1, 2, chart, true, "power");
         }
+
+        void setChartLabels(Chart chart)
+        {
+            chart.ChartAreas[0].AxisX.CustomLabels.Add(23, 24, "06:00");
+            chart.ChartAreas[0].AxisX.CustomLabels.Add(47, 48, "12:00");
+            chart.ChartAreas[0].AxisX.CustomLabels.Add(71, 73, "18:00");
+            chart.ChartAreas[0].AxisX.CustomLabels.Add(90, 95, "24:00");
+        }
+
         public SimChart()
         {
             InitializeComponent();
 
+            chart3.Titles.Add("Transformer");
+            chart2.Titles.Add("PHEV");
             chart1.Titles.Add("Iteration # 0 : Step # 0");
-            chart1.Titles.Add("alpha = 0.3, theta = 0.9");
+            //chart1.Titles.Add("alpha = 0.3, theta = 0.9");
 
             chart1.Series[0].LegendText = series[nRealTime];
             chart1.Series.Add(series[nPowerNodes]);
             chart1.Series.Add(series[nPhev]);
-            chart1.Series.Add(series[nPhevPDF]);
             chart1.Series.Add(series[nDayAhead]);
-            chart1.Series.Add(series[nPhevStatus]);
-            chart1.Series.Add(series[nPhevBattery]);
+            chart1.Series.Add(series[nPhevPDF]);
+
+            //chart1.ChartAreas.Add("ChartArea1");
+
+            chart2.Series[0].LegendText = _seriesPhev[nPhevStatus];
+            chart2.Series.Add(_seriesPhev[nPhevBattery]);
+
+            chart3.Series[0].LegendText = _seriesTrf[nTrfCapacity];
+            chart3.Series.Add(_seriesTrf[nTrfCurrent]);
+            chart3.Series.Add(_seriesTrf[nTrfFiltered]);
+
+            setChartLabels(chart1);
+            setChartLabels(chart2);
+            setChartLabels(chart3);
             
-            Series[] seriesArray = { chart1.Series[0], chart1.Series[1], chart1.Series[2], chart1.Series[3], chart1.Series[4], chart1.Series[5], chart1.Series[6] };
+            Series[] seriesPhev = {chart2.Series[nPhevStatus], chart2.Series[nPhevBattery]};
+            Series[] seriesArray = { chart1.Series[nPhevBattery], chart1.Series[nPowerNodes], chart1.Series[nPhev], chart1.Series[nDayAhead], chart1.Series[nPhevPDF] };
+            Series[] seriesTrf = {chart3.Series[nTrfCapacity], chart3.Series[nTrfCurrent], chart3.Series[nTrfFiltered] };
 
             // customize series
             seriesArray[nRealTime].ChartType = SeriesChartType.Line;
@@ -250,11 +330,11 @@ namespace WinChart
             seriesArray[nPowerNodes].BorderDashStyle = ChartDashStyle.Dot;
 
             seriesArray[nPhev].ChartType = SeriesChartType.Line;
-            seriesArray[nPhev].Color = Color.Green;
+            seriesArray[nPhev].Color = Color.Crimson;
             seriesArray[nPhev].BorderWidth = 2;
-            seriesArray[nPhev].BorderDashStyle = ChartDashStyle.Dash;
+            seriesArray[nPhev].BorderDashStyle = ChartDashStyle.Dot;
 
-            seriesArray[nPhevPDF].ChartType = SeriesChartType.Line;
+            seriesArray[nPhevPDF].ChartType = SeriesChartType.Point;
             seriesArray[nPhevPDF].Color = Color.Black;
             seriesArray[nPhevPDF].BorderWidth = 2;
             seriesArray[nPhevPDF].BorderDashStyle = ChartDashStyle.Dash;
@@ -264,15 +344,30 @@ namespace WinChart
             seriesArray[nDayAhead].BorderWidth = 2;
             seriesArray[nDayAhead].BorderDashStyle = ChartDashStyle.Solid;
 
-            seriesArray[nPhevStatus].ChartType = SeriesChartType.Line;
-            seriesArray[nPhevStatus].Color = Color.Red;
-            seriesArray[nPhevStatus].BorderWidth = 2;
-            seriesArray[nPhevStatus].BorderDashStyle = ChartDashStyle.Solid;
+            seriesPhev[nPhevStatus].ChartType = SeriesChartType.StepLine;
+            seriesPhev[nPhevStatus].Color = Color.Red;
+            seriesPhev[nPhevStatus].BorderWidth = 2;
+            seriesPhev[nPhevStatus].BorderDashStyle = ChartDashStyle.Dash;
 
-            seriesArray[nPhevBattery].ChartType = SeriesChartType.Line;
-            seriesArray[nPhevBattery].Color = Color.Blue;
-            seriesArray[nPhevBattery].BorderWidth = 2;
-            seriesArray[nPhevBattery].BorderDashStyle = ChartDashStyle.Solid;
+            seriesPhev[nPhevBattery].ChartType = SeriesChartType.Line;
+            seriesPhev[nPhevBattery].Color = Color.Blue;
+            seriesPhev[nPhevBattery].BorderWidth = 2;
+            seriesPhev[nPhevBattery].BorderDashStyle = ChartDashStyle.Dash;
+
+            seriesTrf[nTrfCapacity].ChartType = SeriesChartType.StepLine;
+            seriesTrf[nTrfCapacity].Color = Color.Red;
+            seriesTrf[nTrfCapacity].BorderWidth = 2;
+            seriesTrf[nTrfCapacity].BorderDashStyle = ChartDashStyle.Dash;
+
+            seriesTrf[nTrfCurrent].ChartType = SeriesChartType.Line;
+            seriesTrf[nTrfCurrent].Color = Color.Blue;
+            seriesTrf[nTrfCurrent].BorderWidth = 2;
+            seriesTrf[nTrfCurrent].BorderDashStyle = ChartDashStyle.Dash;
+
+            seriesTrf[nTrfFiltered].ChartType = SeriesChartType.Line;
+            seriesTrf[nTrfFiltered].Color = Color.Sienna;
+            seriesTrf[nTrfFiltered].BorderWidth = 2;
+            seriesTrf[nTrfFiltered].BorderDashStyle = ChartDashStyle.Solid;
             
             tSim.Init();
             tSim.RegisterEvents();
@@ -281,12 +376,16 @@ namespace WinChart
             tSim.RegisterProgressTotal(total_Changed);
             tSim.RegisterProgressPhev(phev_Changed);
             tSim.RegisterProgressPnode(pnode_Changed);
+            tSim.RegisterPhevFailed(phevFailed_Changed);
             //tSim.RegisterProb(prob_Calc);
             //tSim.RegisterProbReset(prob_Reset);
             tSim.RegisterDayaheadProgress(new EventHandler(dayahead_Changed));
             //tSim.RegisterDayaheadInit(new EventHandler(dayahead_Init));
             //tSim.RegisterDayaheadStep(new EventHandler(dayahead_Step));
             //tSim.TestDayahead(nSim);
+            tSim.RegisterTrfCapacity(trfCapacity_Changed);
+            tSim.RegisterTrfCurrent(trfCurrent_Changed);
+            tSim.RegisterTrfFiltered(trfFiltered_Changed);
 
             Thread oThread = new Thread(new ThreadStart(Start));
             oThread.Start();
@@ -298,7 +397,8 @@ namespace WinChart
         public void Start()
         {
             tSim.ComputeDayahead(new FSharpOption<int>(nSim+1));
-            resetChart(0,chart1.Series.Count);
+            resetChart(chart1, 0, chart1.Series.Count);
+            resetChart(chart2, 0, chart2.Series.Count);
             tSim.Run(new FSharpOption<int>(nSim));
         }
     }

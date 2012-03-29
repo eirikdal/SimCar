@@ -20,7 +20,9 @@ let rec iter iterf node =
     | Leaf(None) ->
         ()
 
-// traverse a tree of models, creating a mirrored tree of agents as we go along
+// Traverse a tree of models, creating a mirrored tree of agents as we go along
+// this function should be avoided as much as possible, and should only be used when
+// a reply needs to be guaranteed. This is because of performance reasons.
 let rec send_reply msg (node : Node<Agent<Message>>) = 
     match node with
     | Node(nodes, Some(leaf)) ->

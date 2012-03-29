@@ -17,14 +17,16 @@ let mutable rand = new System.Random()
 //let syncContext = SynchronizationContext.CaptureCurrent()
 
 module Action = 
-    let send_intention name parent (phev_args : PhevArguments) ttl =
+    let send_intention (phev_args : PhevArguments) ttl =
         let intention, wait = 
-            if phev_args.duration <= 1 && phev_args.intentions.Length = 0 then
-                Charge(name, Energy.ofFloat (float (phev_args.capacity - phev_args.battery)), ttl, phev_args.rate), true
+            if phev_args.intentions.Length = 0 then
+                Charge(phev_args.name, Energy.ofFloat (float (phev_args.capacity - phev_args.battery)), ttl, phev_args.rate), true
             else
-                Charge_OK(name), false
+                match phev_args.intentions with
+                | h::t -> Charge_OK(phev_args.name, h, -1), false
+                | [] -> Charge_OK(phev_args.name, 0.0<kWh>,-1), false
 
-        postalService.send(parent, intention)
+        postalService.send(phev_args.parent, intention)
         wait
 
     let charge (phev_args : PhevArguments) =
@@ -88,23 +90,26 @@ let phev_agent _p name = Agent<Message>.Start(fun agent ->
         | Charge_Accepted(accepted) ->
             let phevArgs = { phev_args with intentions=accepted }
             
-            if phevArgs.intentions.Length > 0 then
-                return! loop (Action.charge phevArgs) false
-            else
-                return! loop (PHEV(phevArgs)) false
+            let wait_for_reply = Action.send_intention phevArgs (-1)
+            
+            return! loop (PHEV(phevArgs)) true
+        | Charge_OK(_,_,_) ->
+            return! loop (Action.charge phev_args) false
         | Update(tick) ->
             let ttl = Action.find_ttl histogram tick 
-            let wait_for_reply = Action.send_intention name parent phev_args ttl
-            let phevArgs = 
-                if phev_args.intentions.Length = 0 then
-                    phev_args 
-                else
-                    phev_args.charge()
+            let wait_for_reply = Action.send_intention phev_args ttl
+            
+            if phev_args.name = "Godel1" then
+                syncContext.RaiseDelegateEvent phevBattery phev_args.battery
+                if phev_args.duration > 0 then
+                    syncContext.RaiseDelegateEvent phevStatus 1.0
+                else 
+                    syncContext.RaiseDelegateEvent phevStatus 0.0
 
-            if phevArgs.duration <= 1 then
-                return! loop <| Action.leave name phevArgs tick <| wait_for_reply
+            if phev_args.duration <= 0 then
+                return! loop <| Action.leave name phev_args tick <| true
             else
-                return! loop <| PHEV(phevArgs.drive()) <| wait_for_reply
+                return! loop <| PHEV(phev_args.drive()) <| true
         | Reset -> 
             return! loop <| PHEV({ phev_args with battery=phev_args.capacity; duration=(-1) }) <| false
         | _ -> 

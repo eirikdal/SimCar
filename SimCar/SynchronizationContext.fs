@@ -50,3 +50,10 @@ let probReset           = new DelegateEvent<System.EventHandler>()
 let phevBattery         = new DelegateEvent<System.EventHandler>()
 let phevStatus          = new DelegateEvent<System.EventHandler>()
 let phevLeft            = new DelegateEvent<System.EventHandler>()
+
+let phevFailed          = new DelegateEvent<System.EventHandler>()
+
+let trfFailed           = new DelegateEvent<System.EventHandler>()
+let trfCapacity         = new DelegateEvent<System.EventHandler>()
+let trfCurrent          = new DelegateEvent<System.EventHandler>()
+let trfFiltered         = new DelegateEvent<System.EventHandler>()

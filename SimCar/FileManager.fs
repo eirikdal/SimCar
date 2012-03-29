@@ -14,7 +14,7 @@ let file_phevprofiles = "C:\\SimCar\\SimCar\\data\\profiles.txt"
 let file_brp = "C:\\SimCar\\SimCar\\data\\brp.txt"
 let file_dayahead = "c:\\simcar\simcar\\data\\dayahead.txt"
 let file_prediction = "c:\\simcar\simcar\\data\\prediction.txt"
-let data_folder = "C:\\SimCar\\SimCar\\data\\powernodes\\"
+let data_folder = "C:\\SimCar\\SimCar\\data\\interpol\\"
 
 module IO =
     let read_file (file : string) = 

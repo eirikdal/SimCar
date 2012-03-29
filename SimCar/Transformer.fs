@@ -12,50 +12,79 @@ open Models
 open PostalService
 
 
+module Action = 
+    let filter energy rem = 
+        if rem < 0.0<kWh> then
+            0.0<kWh>, rem - energy
+        else
+            energy, rem
+
 (* 
     Transformer: This is the transformer agent
 *)
 let trf_agent trf = Agent.Start(fun agent ->
     let queue = new Queue() 
-    let rec loop (Transformer({ name=name; parent=parent; children=children } as trf_args) as trf) (intentions : Message list) = async {
+    let rec loop (Transformer({ name=name; parent=parent; children=children } as trf_args) as trf) (intentions : Message list) (charges : Message list) waiting = async {
+        if intentions.Length >= children.Length then
+            postalService.send(parent, Charge_Intentions(intentions))
+
+            return! loop trf [] charges true
+        else if charges.Length >= children.Length then 
+            // propagate Charge_OK upwards to (potentially) senior trf agents
+            postalService.send(parent, Charge_OK(name,0.0<kWh>,-1))
+
+            let sum_of_charges = charges |> List.sumBy (fun (Charge_OK(_,energy,ttl)) -> energy)
+
+            if name = "node7" then
+                syncContext.RaiseDelegateEvent trfCurrent sum_of_charges
+                syncContext.RaiseDelegateEvent trfCapacity trf_args.capacity
+                
+            let rem = 
+                charges 
+                |> List.sortBy (fun (Charge_OK(_,_,ttl)) -> ttl)
+                |> List.fold (fun ac (Charge_OK(phev,energy,ttl)) -> 
+                    let filtered, remaining = Action.filter energy ac
+                    if not (phev.StartsWith("node")) then
+                        postalService.send(phev, Charge_OK(phev, filtered, ttl))
+                    remaining) (trf_args.capacity - sum_of_charges)
+            
+            if name = "node7" then
+                syncContext.RaiseDelegateEvent trfFiltered (sum_of_charges - rem)
+
+            return! loop trf intentions [] false
+
         let! (msg : Message) = 
-            if (intentions.Length >= children.Length && queue.Count > 0) then
+            if (not waiting && queue.Count > 0) then
                 async { return queue.Dequeue() :?> Message }
             else
                 agent.Receive()
+
         match msg with
         | Update(tick) ->
-            return! loop trf intentions
+            return! loop trf intentions charges true
         | ReplyTo(replyToMsg, reply) ->
             match replyToMsg with
             | RequestModel ->
-                if children.Length > intentions.Length then
+                if waiting then
                     queue.Enqueue(msg)
-                    return! loop trf intentions
+                    return! loop trf intentions charges waiting
                 else
                     reply.Reply(Model(trf))
-                    return! loop trf []
-        | Charge(from, energy, ttd, _) ->
-            if (intentions.Length+1) = children.Length then
-//                printfn "Charge from %s" from 
-                postalService.send(parent, Charge_Intentions(name, (msg :: intentions)))
-            return! loop trf (msg :: intentions)
+                    return! loop trf [] [] false
+        | Charge(from,_,_,_) ->
+            return! loop trf (msg :: intentions) charges waiting
         | Model(trf) -> 
-            return! loop trf intentions
-        | Charge_OK(from) as msg -> 
-            if (intentions.Length+1) = children.Length then
-//                printfn "Charge_OK from %s" from 
-                postalService.send(parent, Charge_Intentions(name, (msg :: intentions)))
-            return! loop trf (msg :: intentions)
-        | Charge_Intentions(from,msgs) ->
-            if (intentions.Length+1) = children.Length then
-//                printfn "Charge_Intentions from %s" from 
-                postalService.send(parent, Charge_Intentions(name, (msg :: intentions)))
-            return! loop trf (msg :: intentions)
+            return! loop trf intentions charges waiting
+        | Charge_OK(from,energy,_) -> 
+//            if name = "node1" then
+//                printfn "%s charges=%d children=%d" from charges.Length children.Length
+            return! loop trf (msg :: intentions) (msg :: charges) waiting
+        | Charge_Intentions(_) ->
+            return! loop trf (msg :: intentions) charges waiting
         | Reset ->
-            return! loop trf intentions
+            return! loop trf intentions charges waiting
         | _ as test ->
             raise (Exception((test.ToString())))
-            return! loop trf intentions
+            return! loop trf intentions charges waiting
     }
-    loop trf [])
+    loop trf [] [] false)
