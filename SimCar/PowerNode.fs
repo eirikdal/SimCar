@@ -33,12 +33,12 @@ let pnode_agent pnode = Agent.Start(fun agent ->
             let current = pnode_args.realtime tick
             postalService.send(parent, Charge_OK(name, current, -1))
 //            printfn "PowerNode %s: Sending charge_ok to %s" name parent
-            return! loop <| PowerNode({ pnode_args with current=current }) <| true
+            return! loop <| pnode <| true
         | Model(pnode) -> 
             return! loop pnode waiting
         | Reset ->
             return! loop <| PowerNode({ pnode_args with current=0.0<kWh>}) <| false
-        | Charge_OK(_,_,_) -> return! loop pnode false
+        | Charge_OK(_,current,_) -> return! loop <| PowerNode({ pnode_args with current=current }) <| false
         | _ -> 
             syncContext.RaiseEvent error <| Exception("Not implemented yet")
 

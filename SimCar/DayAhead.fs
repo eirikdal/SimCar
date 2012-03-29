@@ -31,7 +31,8 @@ let shave(_D : float<kWh>[]) =
         syncContext.RaiseDelegateEvent dayaheadStep (D.Clone())
     
     // target of peak value should be the average value
-    update i x
+//    update i x
+    D.[i] <- w
 
     // continue shaving peaks toward mean while the value of the neighbornode is greater than the value of the updated node.
     // this is done to preserve topology

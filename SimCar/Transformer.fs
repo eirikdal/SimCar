@@ -14,10 +14,10 @@ open PostalService
 
 module Action = 
     let filter energy rem = 
-        if rem < 0.0<kWh> then
-            0.0<kWh>, rem - energy
+        if rem > energy then
+            energy, rem - energy
         else
-            energy, rem
+            0.0<kWh>, rem
 
 (* 
     Transformer: This is the transformer agent
@@ -35,22 +35,20 @@ let trf_agent trf = Agent.Start(fun agent ->
 
             let sum_of_charges = charges |> List.sumBy (fun (Charge_OK(_,energy,ttl)) -> energy)
 
-            if name = "node7" then
-                syncContext.RaiseDelegateEvent trfCurrent sum_of_charges
-                syncContext.RaiseDelegateEvent trfCapacity trf_args.capacity
-                
             let rem = 
                 charges 
                 |> List.sortBy (fun (Charge_OK(_,_,ttl)) -> ttl)
-                |> List.fold (fun ac (Charge_OK(phev,energy,ttl)) -> 
-                    let filtered, remaining = Action.filter energy ac
+                |> List.fold (fun rem (Charge_OK(phev,energy,ttl)) -> 
+                    let filtered, remaining = Action.filter energy rem
                     if not (phev.StartsWith("node")) then
                         postalService.send(phev, Charge_OK(phev, filtered, ttl))
-                    remaining) (trf_args.capacity - sum_of_charges)
+                    remaining) (trf_args.capacity)
             
             if name = "node7" then
-                syncContext.RaiseDelegateEvent trfFiltered (sum_of_charges - rem)
-
+                syncContext.RaiseDelegateEvent trfFiltered (rem)
+                syncContext.RaiseDelegateEvent trfCurrent sum_of_charges
+                syncContext.RaiseDelegateEvent trfCapacity trf_args.capacity
+                
             return! loop trf intentions [] false
 
         let! (msg : Message) = 
