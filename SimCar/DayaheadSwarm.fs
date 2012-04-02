@@ -44,7 +44,7 @@ let mutable agg_dist : float array = (agg_dist'.Clone() :?> float array)
 type Message = 
     | Init of int * int
     | Moved of int * int
-    | Fill of float * AsyncReplyChannel<Message>
+    | Fill of float
     | FillQuery of float * int
     | Utility of int * float
     | RequestChart of AsyncReplyChannel<Message>
@@ -94,18 +94,19 @@ module Swarm =
                             let distance = theta ** (float <| abs(pos-pos'))
                             supervisor.Post(Utility(id, distance*(1.0 / realtime.[pos])))
                             Some(async { return! filling id pos inertia })
-                        | Fill(rate, reply) ->
+                        | Fill(rate) ->
 //                            printfn "Updating realtime with %f at %d" rate pos
                             realtime.[pos] <- realtime.[pos] + rate
                             syncContext.RaiseDelegateEvent dayaheadStep (realtime.Clone())
 
-                            let pos', inertia' = 
-                                if (pos+inertia) < realtime.Length && (pos+inertia > 0) && realtime.[pos+inertia] < realtime.[pos] then
-                                    pos+inertia, inertia
-                                else
-                                    pos, (inertia*(-1))
-                            reply.Reply(Moved(id, pos'))
-                            Some(async { return! filling id pos' inertia' })
+//                            let pos', inertia' = 
+//                                if (pos+inertia) < realtime.Length && (pos+inertia > 0) && realtime.[pos+inertia] < realtime.[pos] then
+//                                    pos+inertia, inertia
+//                                else
+//                                    pos, (inertia*(-1))
+                            
+//                            reply.Reply(Moved(id, pos'))
+                            Some(async { return! moving id pos inertia })
                         | Exit -> Some( async { () } )),10000)
                 and failed id = 
                     agent.Scan((function 
@@ -173,21 +174,36 @@ module Swarm =
                     if agent_responses.Length = ants.Length then 
                         let (Utility(id,_)) = agent_responses |> List.maxBy(function | Utility(_,v) -> v)
                         let rate' = if remaining > rate then rate else rate-remaining 
-                        let (Moved(n,pos')) = ants.[id].PostAndReply(fun reply -> (Fill(rate', reply)))
-                        syncContext.RaiseDelegateEvent dayaheadAnt (agent_pos.Clone() :?> int array, realtime.Clone() :?> float array)
-                        syncContext.RaiseDelegateEvent dayaheadExpected (agg_dist'.Clone() :?> float array)
-                        agent_pos.[n] <- pos'
                         agg_dist'.[pos] <- remaining - rate'
-                        async { return! filling (remaining-rate') pos }
+                        syncContext.RaiseDelegateEvent dayaheadExpected (agg_dist'.Clone() :?> float array)
+                        ants.[id].Post(Fill(rate'))
+
+                        async { return! prep (remaining-rate') pos }
                     else
-                        agent.Scan(function 
-                        | Utility(_,_) as msg -> Some( async { return! waiting remaining (msg :: agent_responses) pos } )
-                        | _ -> None)
-                and idle() = 
-                    agent.Scan(function 
-                        | RequestChart(reply) -> reply.Reply(Chart(realtime)); Some(async {()})
-                        | Exit -> Some(async { () })
-                        | _ -> None)
+                        agent.Scan((function 
+                            | Utility(_,_) as msg -> Some( async { return! waiting remaining (msg :: agent_responses) pos } )
+                            | _ -> None), 10000)
+                and prep remaining pos = agent.Scan((function 
+                    | Moved(ag, pos') ->
+                        let d = agent_pos |> Array.tryFindIndex (fun p -> p <> (int infinity) && p <> agent_pos.[ag] && abs(pos'-p) < 5)
+
+                        match d with
+                        | Some _ -> 
+                            ants.[ag].Post(Occupied)
+                            Some(async { return! prep remaining pos })
+                        | None -> 
+                            agent_pos.[ag] <- pos'
+                            ants.[ag].Post(Accepted)
+
+                            syncContext.RaiseDelegateEvent dayaheadAnt (agent_pos.Clone() :?> int array, realtime.Clone() :?> float array)
+
+                            Some(async { return! filling remaining pos })
+                    | Failed(ag) -> agent_pos.[ag] <- int infinity; Some(async { return! filling remaining pos })
+                    | _ -> None),10000)
+                and idle() = agent.Scan((function 
+                    | RequestChart(reply) -> reply.Reply(Chart(realtime)); Some(async {()})
+                    | Exit -> Some(async { () })
+                    | _ -> None),10000)
                 loop())
         (supervisor, ants)
 
