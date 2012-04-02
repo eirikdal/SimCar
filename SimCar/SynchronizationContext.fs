@@ -42,6 +42,9 @@ let progressPnode       = new DelegateEvent<System.EventHandler>()
 let dayaheadStep       = new DelegateEvent<System.EventHandler>()
 let dayaheadProgress   = new DelegateEvent<System.EventHandler>()
 let dayaheadInit       = new DelegateEvent<System.EventHandler>()
+let dayaheadSupervisor = new DelegateEvent<System.EventHandler>()
+let dayaheadAnt        = new DelegateEvent<System.EventHandler>()
+let dayaheadExpected   = new DelegateEvent<System.EventHandler>()
 
 // EventHandlers for displaying cumulative pdf 
 let probEvent           = new DelegateEvent<System.EventHandler>()

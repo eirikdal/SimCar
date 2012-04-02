@@ -89,8 +89,8 @@ let rec foldr op node : float<kWh> =
     | Leaf(None) -> 
         0.0<kWh>
         
-let rec collect (node : Node<Message>) = 
-    seq<Message> {
+let rec collect node = 
+    seq {
         match node with 
         | Node(nodes, Some(msg)) -> 
             yield! [msg]

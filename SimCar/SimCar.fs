@@ -139,7 +139,9 @@ let run day agents compute_dayahead =
         |> Tree.send (Update(n)) // inform agents that new tick has begun
         |> Tree.send_reply RequestModel // request model from agents
         |> Tree.map (fun (ag, msg) -> (ag, Async.RunSynchronously(msg)))
+
     printfn "Simulating day %d" day
+
     let realtime = Array.init(96) (fun i -> tick ((day*96) + i))
 
     // right-fold over tree, applying the update function (inorder traversal)

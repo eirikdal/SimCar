@@ -13,6 +13,15 @@ open Tree
 type SimCar(nIter, nTicksPerDayq) = 
     let _agents = to_agents <| powergrid()
     member self.Agents = _agents |> Tree.map (fun (name, from) -> from)
+   
+    member self.RegisterDayaheadAnt (handler) =
+        dayaheadAnt.Publish.AddHandler handler
+
+    member self.RegisterDayaheadSupervisor (handler) = 
+        dayaheadSupervisor.Publish.AddHandler handler
+
+    member self.RegisterDayaheadExpected (handler) = 
+        dayaheadExpected.Publish.AddHandler handler
         
     member self.RegisterPhevBattery (handler) = 
         phevBattery.Publish.AddHandler handler
@@ -67,30 +76,40 @@ type SimCar(nIter, nTicksPerDayq) =
         //jobDebug.Publish.Add(fun str -> printfn "%s" str)
 
     member self.Init() = 
+        IO.clear_screenshots()
         postalService.agents <- _agents
 
     member self.ComputeDayahead(?days) = 
         let n = match days with Some d -> d | None -> nIter
 
         IO.clear_dayahead_data()
+        
 //        self.RegisterComputeDayahead()
 
         postalService.send("brp", Dayahead((fun _ -> 0.0<kWh>)))
         postalService.send("brp", Prediction((fun _ -> 0.0<kWh>)))
         postalService.send("brp", Schedule(BRP.Action.schedule_none))
+        
+        let op i node = 
+            match node with
+            | Transformer(_) -> 0.0<kWh>
+            | PHEV(_) -> 0.0<kWh>
+            | PowerNode({ realtime=realtime }) -> realtime(i)
+            | BRP(_) -> 0.0<kWh>
+
+        let calc_power tick = 
+            powergrid()
+            |> Tree.foldl (op tick) (0.0<kWh>)
+
+        let realtime = [for i in 0 .. n*96 do yield Energy.toFloat <| calc_power i] |> Array.ofList
 
         printfn "Computing dayahead"
-//        syncContext.RaiseEvent jobDebug <| "Computing dayahead"
-        [for i in 0 .. (n-1) do run i self.Agents true] |> ignore
-//
-//        Seq.initInfinite (fun day -> run day self.Agents true)
-//        |> Seq.take n 
-//        |> Seq.cache
-//        |> List.ofSeq
-//        |> ignore
-//        syncContext.RaiseEvent jobDebug <| "Dayahead computed"
-        self.Agents |> Tree.send (Reset) |> ignore
-        
+//        [for i in 0 .. (n-1) do run i self.Agents true] |> ignore
+//        self.Agents |> Tree.send (Reset) |> ignore
+//        let prediction = Array.init(n*96) (fun i -> Energy.toFloat <| FileManager.prediction()(i))
+        let dayahead = DayaheadSwarm.dayahead(realtime, n) |> Array.get >> Energy.ofFloat
+        postalService.send("brp", Dayahead(dayahead))
+        postalService.send("brp", Prediction(realtime |> Array.get >> Energy.ofFloat))
         PHEV.rand <- new System.Random()
         printfn "Dayahead computed"
         
@@ -98,8 +117,9 @@ type SimCar(nIter, nTicksPerDayq) =
     member self.Run(?days) = 
         let n = match days with Some d -> d | None -> nIter
 
-        postalService.send("brp", Dayahead(FileManager.dayahead()))
-        postalService.send("brp", Prediction(FileManager.prediction()))
+
+//        postalService.send("brp", Dayahead(FileManager.dayahead()))
+//        postalService.send("brp", Prediction(FileManager.prediction()))
         postalService.send("brp", Schedule(BRP.Action.schedule_reactive))
 
         printfn "Running simulations"

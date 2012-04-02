@@ -15,7 +15,7 @@ namespace WinChart
 {
     public partial class SimChart : Form
     {
-        const int nSim = 10;
+        const int nSim = 1;
         const int nTicks = 96;
         Sim.SimCar tSim = new Sim.SimCar(nSim, nTicks);
 
@@ -33,9 +33,17 @@ namespace WinChart
         private const int nTrfCurrent = 1;
         private const int nTrfFiltered = 2;
 
+        private const int nDayaheadOriginal = 0;
+        private const int nDayaheadPrev = 1;
+        private const int nDayaheadCur = 2;
+        private const int nDayaheadExp = 3;
+        private const int nDayaheadSupervisor = 4;
+        private const int nDayaheadAnts = 5;
+
         private static string[] series = { "Total", "PowerNodes", "PHEVs", "Dayahead", "PHEVs left (not fully charged)" };
         private static string[] _seriesPhev = { "PHEV status", "PHEV battery" };
         private static string[] _seriesTrf = {"Capacity", "Current", "Unfiltered"};
+        private static string[] _seriesDayahead = { "Original", "Dayahead previous", "Dayahead current", "Expected", "Supervisor", "Ants" };
 
         private static int counter = 0;
         private static int nstep = 0;
@@ -48,6 +56,7 @@ namespace WinChart
         private delegate void updatePDFDelegate(Double[] chart);
         private delegate void addPointDelegate(Chart chart, int i, Double point);
         private delegate void incrementPointDelegate(Chart chart, int i, int point, Double val);
+        private delegate void updatePointDelegate(Chart chart, int i, int point, Double val);
         
 
         void saveImageControl(string fileName)
@@ -69,8 +78,8 @@ namespace WinChart
                 if (saveImage)
                     chart.SaveImage(String.Format("C:\\SimCar\\SimCar\\data\\img\\{0}\\{1}.png", path, counter++), ChartImageFormat.Png);
                 
-                for (int j = 0; j < chart1.Series.Count; j++)
-                    chart.Series[j].Points.Clear();
+                //for (int j = 0; j < chart.Series.Count; j++)
+                //    chart.Series[j].Points.Clear();
             }
 
         }
@@ -121,6 +130,28 @@ namespace WinChart
                     chart.Series[i].Points.Clear();
 
                 chart.Series[i].Points.Add(point);
+            }
+        }
+
+        void updatePoint(Chart chart, int i, int point, double val)
+        {
+            if (chart.InvokeRequired)
+            {
+                chart.BeginInvoke(new updatePointDelegate(updatePoint), new object[] { chart, i, point, val });
+            }
+            else
+            {
+                if (chart.Series[i].Points.Count == 0)
+                    for (int j = 0; j < 96; j++)
+                    {
+                        chart.Series[i].Points.Add(0);
+                        chart.Series[i].Points[j].IsEmpty = true;
+                    }
+                if (point > 0 && point < 96)
+                {
+                    chart.Series[i].Points[point].SetValueY(val);
+                    chart.Series[i].Points[point].IsEmpty = false;
+                }
             }
         }
 
@@ -258,7 +289,7 @@ namespace WinChart
 
             this.chart1.Titles[0].Text = (String.Format("Iteration #{0} : Step # {0}", counter, nstep));
 
-            updateChart(chart1, 0, chart, true, "power");
+            updateChart(chartDayahead, nDayaheadOriginal, chart);
         }
         void dayahead_Changed(object sender, EventArgs e)
         {
@@ -273,9 +304,36 @@ namespace WinChart
         {
             Double[] chart = (Double[])sender;
 
-            this.chart1.Titles[0].Text = (String.Format("Iteration #{0} : Step # {1}", counter, nstep));
+            this.chartDayahead.Titles[0].Text = (String.Format("Iteration #{0} : Step # {1}", counter, nstep));
 
-            updateChart(chart1, 2, chart, true, "power");
+            updateChart(chartDayahead, nDayaheadCur, chart);
+        }
+
+        void dayahead_Exp(object sender, EventArgs e)
+        {
+            Double[] chart = (Double[])sender;
+
+            resetChart(chartDayahead, nDayaheadExp, nDayaheadExp);
+            updateChart(chartDayahead, nDayaheadExp, chart, true, "dayahead");
+        }
+
+        void dayahead_Ant(object sender, EventArgs e)
+        {
+            Tuple<int[], Double[]> chart = (Tuple<int[], Double[]>)sender;
+
+            resetChart(chartDayahead, nDayaheadAnts, nDayaheadAnts+1);
+            for (int i=0;i<chart.Item1.Length;i++) {
+                if (chart.Item1[i] > -1)
+                    updatePoint(chartDayahead, nDayaheadAnts, chart.Item1[i], chart.Item2[chart.Item1[i]]);
+            }
+        }
+
+        void dayahead_Supervisor(object sender, EventArgs e)
+        {
+            Double chart = (Double)sender;
+
+            addPoint(chartDayahead, nDayaheadSupervisor, chart);
+            //updateChart(chartDayahead, nDayaheadSupervisor, chart);
         }
 
         void setChartLabels(Chart chart)
@@ -290,6 +348,7 @@ namespace WinChart
         {
             InitializeComponent();
 
+            chartDayahead.Titles.Add("Dayahead");
             chart3.Titles.Add("Transformer");
             chart2.Titles.Add("PHEV");
             chart1.Titles.Add("Iteration # 0 : Step # 0");
@@ -310,13 +369,22 @@ namespace WinChart
             chart3.Series.Add(_seriesTrf[nTrfCurrent]);
             chart3.Series.Add(_seriesTrf[nTrfFiltered]);
 
+            chartDayahead.Series[0].LegendText = _seriesDayahead[nDayaheadOriginal];
+            chartDayahead.Series.Add(_seriesDayahead[nDayaheadPrev]);
+            chartDayahead.Series.Add(_seriesDayahead[nDayaheadCur]);
+            chartDayahead.Series.Add(_seriesDayahead[nDayaheadExp]);
+            chartDayahead.Series.Add(_seriesDayahead[nDayaheadSupervisor]);
+            chartDayahead.Series.Add(_seriesDayahead[nDayaheadAnts]);
+
             setChartLabels(chart1);
             setChartLabels(chart2);
             setChartLabels(chart3);
+            setChartLabels(chartDayahead);
             
             Series[] seriesPhev = {chart2.Series[nPhevStatus], chart2.Series[nPhevBattery]};
             Series[] seriesArray = { chart1.Series[nPhevBattery], chart1.Series[nPowerNodes], chart1.Series[nPhev], chart1.Series[nDayAhead], chart1.Series[nPhevPDF] };
             Series[] seriesTrf = {chart3.Series[nTrfCapacity], chart3.Series[nTrfCurrent], chart3.Series[nTrfFiltered] };
+            Series[] seriesDayahead = { chartDayahead.Series[nDayaheadOriginal], chartDayahead.Series[nDayaheadPrev], chartDayahead.Series[nDayaheadCur], chartDayahead.Series[nDayaheadExp], chartDayahead.Series[nDayaheadSupervisor], chartDayahead.Series[nDayaheadAnts] };
 
             // customize series
             seriesArray[nRealTime].ChartType = SeriesChartType.Line;
@@ -368,7 +436,37 @@ namespace WinChart
             seriesTrf[nTrfFiltered].Color = Color.Sienna;
             seriesTrf[nTrfFiltered].BorderWidth = 2;
             seriesTrf[nTrfFiltered].BorderDashStyle = ChartDashStyle.Solid;
-            
+
+            seriesDayahead[nDayaheadOriginal].ChartType = SeriesChartType.Line;
+            seriesDayahead[nDayaheadOriginal].Color = Color.Sienna;
+            seriesDayahead[nDayaheadOriginal].BorderWidth = 2;
+            seriesDayahead[nDayaheadOriginal].BorderDashStyle = ChartDashStyle.Solid;
+
+            seriesDayahead[nDayaheadPrev].ChartType = SeriesChartType.Line;
+            seriesDayahead[nDayaheadPrev].Color = Color.Blue;
+            seriesDayahead[nDayaheadPrev].BorderWidth = 2;
+            seriesDayahead[nDayaheadPrev].BorderDashStyle = ChartDashStyle.Solid;
+
+            seriesDayahead[nDayaheadCur].ChartType = SeriesChartType.Line;
+            seriesDayahead[nDayaheadCur].Color = Color.Red;
+            seriesDayahead[nDayaheadCur].BorderWidth = 2;
+            seriesDayahead[nDayaheadCur].BorderDashStyle = ChartDashStyle.Solid;
+
+            seriesDayahead[nDayaheadExp].ChartType = SeriesChartType.Line;
+            seriesDayahead[nDayaheadExp].Color = Color.Green;
+            seriesDayahead[nDayaheadExp].BorderWidth = 2;
+            seriesDayahead[nDayaheadExp].BorderDashStyle = ChartDashStyle.Solid;
+
+            seriesDayahead[nDayaheadSupervisor].ChartType = SeriesChartType.Point;
+            seriesDayahead[nDayaheadSupervisor].Color = Color.Black;
+            seriesDayahead[nDayaheadSupervisor].BorderWidth = 2;
+            seriesDayahead[nDayaheadSupervisor].BorderDashStyle = ChartDashStyle.Solid;
+
+            seriesDayahead[nDayaheadAnts].ChartType = SeriesChartType.Point;
+            seriesDayahead[nDayaheadAnts].Color = Color.Black;
+            seriesDayahead[nDayaheadAnts].BorderWidth = 2;
+            seriesDayahead[nDayaheadAnts].BorderDashStyle = ChartDashStyle.Solid;
+
             tSim.Init();
             tSim.RegisterEvents();
             tSim.RegisterPhevBattery(phevBattery_Changed);
@@ -380,8 +478,11 @@ namespace WinChart
             //tSim.RegisterProb(prob_Calc);
             //tSim.RegisterProbReset(prob_Reset);
             tSim.RegisterDayaheadProgress(new EventHandler(dayahead_Changed));
-            //tSim.RegisterDayaheadInit(new EventHandler(dayahead_Init));
-            //tSim.RegisterDayaheadStep(new EventHandler(dayahead_Step));
+            tSim.RegisterDayaheadInit(new EventHandler(dayahead_Init));
+            tSim.RegisterDayaheadStep(new EventHandler(dayahead_Step));
+            tSim.RegisterDayaheadExpected(new EventHandler(dayahead_Exp));
+            tSim.RegisterDayaheadSupervisor(new EventHandler(dayahead_Supervisor));
+            tSim.RegisterDayaheadAnt(new EventHandler(dayahead_Ant));
             //tSim.TestDayahead(nSim);
             tSim.RegisterTrfCapacity(trfCapacity_Changed);
             tSim.RegisterTrfCurrent(trfCurrent_Changed);

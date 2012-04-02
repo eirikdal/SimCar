@@ -15,6 +15,7 @@ let file_brp = "C:\\SimCar\\SimCar\\data\\brp.txt"
 let file_dayahead = "c:\\simcar\simcar\\data\\dayahead.txt"
 let file_prediction = "c:\\simcar\simcar\\data\\prediction.txt"
 let data_folder = "C:\\SimCar\\SimCar\\data\\interpol\\"
+let screen_folder = "C:\\SimCar\\SimCar\\data\\img\\"
 
 module IO =
     let read_file (file : string) = 
@@ -49,6 +50,15 @@ module IO =
     let clear_dayahead_data () = 
         File.Delete (file_prediction)
         File.Delete (file_dayahead)
+
+    let clear_screenshots () = 
+        let clear_subfolder folder =    
+            for file in Directory.GetFiles(folder) do
+                File.Delete(file)
+        clear_subfolder <| screen_folder + "dayahead"
+        clear_subfolder <| screen_folder + "phev"
+        clear_subfolder <| screen_folder + "power"
+        clear_subfolder <| screen_folder + "trf"
 
 module Regex = 
     let (|Integer|_|) (str: string) =

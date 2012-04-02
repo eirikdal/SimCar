@@ -124,7 +124,40 @@ type Profile =
             self
         | DistProfile(name,dist_list) ->
             self.calc(name,dist_list)
+    member self.to_float() = 
+        let sum2 list1 list2 = 
+            list1 |> List.map2 (fun sum t -> if (sum+t) < 1.0 then sum+t else 1.0) list2
+        let sumn list = list |> List.fold (fun ac dist -> sum2 ac (List.ofSeq dist.dist)) (List.init (96) (fun _ -> 0.0))
+        match self with 
+        | FloatProfile(_, dist_list) -> 
+            sumn dist_list
+        | DistProfile(name,dist_list) ->
+            self.calc(name,dist_list).to_float()
+    member self.to_exp_float(rate) =
+        match self with 
+        | FloatProfile(_,dist_list) ->
+            let calc_for_dist (dist : Distribution) = 
+                let dist' = dist.dist |> Array.ofSeq
+                let duration = dist.duration
+                // calculate expected load
+                let windows_of_expected_trips = Seq.init (96+(duration-1)) (fun i -> (i,0.0)) |> Seq.windowed (duration) |> Array.ofSeq
 
+                let v = Array.init (96) (fun _ -> 0.0)
+                
+                let windows_of_expected = 
+                    windows_of_expected_trips 
+                    |> Array.mapi (fun i window -> window |> Array.map (fun (i',_) -> if i < 96 then (i', rate * dist'.[i]) else (i', 0.0)))
+                
+                Array.init (96) (fun i ->
+                    windows_of_expected
+                    |> Array.fold (fun ac window -> 
+                        ac + (window |> Array.fold (fun ac' (i', rate') -> if i = i' then ac'+rate' else ac') 0.0)) 0.0)
+                |> List.ofArray
+
+            let dist_with_exp = dist_list |> List.map (fun dist -> calc_for_dist dist)
+            dist_with_exp
+        | DistProfile(name,dist_list) ->
+            self.calc(name,dist_list).to_exp_float(rate)
 type Node<'T> = 
     | Node of (Node<'T> list) * 'T option
     | Leaf of 'T option
