@@ -62,6 +62,7 @@ let rate = 1.25
 
 module Swarm = 
     let init (realtime : float array) = 
+        let rand = new System.Random()
         let rec ants = 
             [for i in 0 .. num_agents do 
                 yield Agent<Message>.Start(fun agent ->
@@ -81,8 +82,8 @@ module Swarm =
                     agent.Scan((function 
                         | Occupied -> 
                             if (pos+inertia) >= realtime.Length || (pos+inertia) < 0 then
-                                supervisor.Post(Failed(n))
-                                Some(async { return! failed n })
+//                                supervisor.Post(Failed(n))
+                                Some(async { return! moving n (rand.Next(0,95)) (rand.Next(-1,1)) })
                             else
                                 Some(async { return! moving n (pos+inertia) inertia })
                         | Accepted -> 
@@ -185,7 +186,7 @@ module Swarm =
                             | _ -> None), 10000)
                 and prep remaining pos = agent.Scan((function 
                     | Moved(ag, pos') ->
-                        let d = agent_pos |> Array.tryFindIndex (fun p -> p <> (int infinity) && p <> agent_pos.[ag] && abs(pos'-p) < 5)
+                        let d = agent_pos |> Array.tryFindIndex (fun p -> p <> (int infinity) && p <> agent_pos.[ag] && abs(pos'-p) < 2)
 
                         match d with
                         | Some _ -> 
