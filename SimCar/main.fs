@@ -107,7 +107,11 @@ type SimCar(nIter, nTicksPerDayq) =
 //        [for i in 0 .. (n-1) do run i self.Agents true] |> ignore
 //        self.Agents |> Tree.send (Reset) |> ignore
 //        let prediction = Array.init(n*96) (fun i -> Energy.toFloat <| FileManager.prediction()(i))
-        let dayahead = DayaheadSwarm.dayahead(realtime, n) 
+
+//        Swarm alternative:
+//        let dayahead = DayaheadSwarm.dayahead(realtime, n) 
+
+        let dayahead = DayaheadExp.Algorithm.distribute realtime n |> Array.ofList
         postalService.send("brp", Dayahead(dayahead |> Array.get >> Energy.ofFloat))
         postalService.send("brp", Prediction(realtime |> Array.get >> Energy.ofFloat))
 
