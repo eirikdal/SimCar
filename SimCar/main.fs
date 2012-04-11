@@ -107,9 +107,13 @@ type SimCar(nIter, nTicksPerDayq) =
 //        [for i in 0 .. (n-1) do run i self.Agents true] |> ignore
 //        self.Agents |> Tree.send (Reset) |> ignore
 //        let prediction = Array.init(n*96) (fun i -> Energy.toFloat <| FileManager.prediction()(i))
-        let dayahead = DayaheadSwarm.dayahead(realtime, n) |> Array.get >> Energy.ofFloat
-        postalService.send("brp", Dayahead(dayahead))
+        let dayahead = DayaheadSwarm.dayahead(realtime, n) 
+        postalService.send("brp", Dayahead(dayahead |> Array.get >> Energy.ofFloat))
         postalService.send("brp", Prediction(realtime |> Array.get >> Energy.ofFloat))
+
+//        IO.write_doubles <| FileManager.file_prediction <| Parsing.parse_dayahead (List.ofArray pnodes)
+        IO.write_doubles <| FileManager.file_dayahead <| (List.ofArray dayahead)
+
         PHEV.rand <- new System.Random()
         printfn "Dayahead computed"
         
@@ -118,7 +122,7 @@ type SimCar(nIter, nTicksPerDayq) =
         let n = match days with Some d -> d | None -> nIter
 
 
-//        postalService.send("brp", Dayahead(FileManager.dayahead()))
+        postalService.send("brp", Dayahead(FileManager.dayahead()))
 //        postalService.send("brp", Prediction(FileManager.prediction()))
         postalService.send("brp", Schedule(BRP.Action.schedule_reactive))
 

@@ -152,6 +152,7 @@ let run day agents compute_dayahead =
     let pnodes = 
         realtime
         |> Array.map (Tree.foldr fold_pnodes)
+
 //    let moving_dayahead = 
 //        updated_realtime
 //        |> moving_average

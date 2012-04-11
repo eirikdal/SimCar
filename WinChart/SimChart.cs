@@ -15,7 +15,7 @@ namespace WinChart
 {
     public partial class SimChart : Form
     {
-        const int nSim = 1;
+        const int nSim = 29;
         const int nTicks = 96;
         Sim.SimCar tSim = new Sim.SimCar(nSim, nTicks);
 
@@ -271,6 +271,7 @@ namespace WinChart
             updateChart(chart1, nRealTime, (Double[])sender, true, "power");
             resetChart(chart2, 0, 2, true, "phev");
             resetChart(chart3, 0, 3, true, "trf");
+            resetChart(chart1, nPhevPDF, nPhevPDF+1);
         }
 
         void chart_moving_average_comparison_Changed(object sender, EventArgs e)
@@ -382,7 +383,7 @@ namespace WinChart
             setChartLabels(chartDayahead);
             
             Series[] seriesPhev = {chart2.Series[nPhevStatus], chart2.Series[nPhevBattery]};
-            Series[] seriesArray = { chart1.Series[nPhevBattery], chart1.Series[nPowerNodes], chart1.Series[nPhev], chart1.Series[nDayAhead], chart1.Series[nPhevPDF] };
+            Series[] seriesArray = { chart1.Series[nRealTime], chart1.Series[nPowerNodes], chart1.Series[nPhev], chart1.Series[nDayAhead], chart1.Series[nPhevPDF] };
             Series[] seriesTrf = {chart3.Series[nTrfCapacity], chart3.Series[nTrfCurrent], chart3.Series[nTrfFiltered] };
             Series[] seriesDayahead = { chartDayahead.Series[nDayaheadOriginal], chartDayahead.Series[nDayaheadPrev], chartDayahead.Series[nDayaheadCur], chartDayahead.Series[nDayaheadExp], chartDayahead.Series[nDayaheadSupervisor], chartDayahead.Series[nDayaheadAnts] };
 
@@ -478,10 +479,10 @@ namespace WinChart
             //tSim.RegisterProb(prob_Calc);
             //tSim.RegisterProbReset(prob_Reset);
             tSim.RegisterDayaheadProgress(new EventHandler(dayahead_Changed));
-            tSim.RegisterDayaheadInit(new EventHandler(dayahead_Init));
-            tSim.RegisterDayaheadStep(new EventHandler(dayahead_Step));
-            tSim.RegisterDayaheadExpected(new EventHandler(dayahead_Exp));
-            tSim.RegisterDayaheadSupervisor(new EventHandler(dayahead_Supervisor));
+            //tSim.RegisterDayaheadInit(new EventHandler(dayahead_Init));
+            //tSim.RegisterDayaheadStep(new EventHandler(dayahead_Step));
+            //tSim.RegisterDayaheadExpected(new EventHandler(dayahead_Exp));
+            //tSim.RegisterDayaheadSupervisor(new EventHandler(dayahead_Supervisor));
             tSim.RegisterDayaheadAnt(new EventHandler(dayahead_Ant));
             //tSim.TestDayahead(nSim);
             tSim.RegisterTrfCapacity(trfCapacity_Changed);

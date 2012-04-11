@@ -139,23 +139,23 @@ type Profile =
             let calc_for_dist (dist : Distribution) = 
                 let dist' = dist.dist |> Array.ofSeq
                 let duration = dist.duration
-                // calculate expected load
-                let windows_of_expected_trips = Seq.init (96+(duration-1)) (fun i -> (i,0.0)) |> Seq.windowed (duration) |> Array.ofSeq
-
-                let v = Array.init (96) (fun _ -> 0.0)
-                
+                // create 96 windows of size duration, where the index of each window reflects the ending time of a (potential) trip
+                // (windows are offset by duration to reflect the expected load from a PHEV that is coming back)
+                let windows_of_expected_trips = Seq.init (96+(duration-1)) (fun i -> (i+duration,0.0)) |> Seq.windowed (duration) |> Array.ofSeq
+                // for each window, calculate the load in tick i' (=i+duration) as the prob that the PHEV left at time i times the charging rate
                 let windows_of_expected = 
                     windows_of_expected_trips 
-                    |> Array.mapi (fun i window -> window |> Array.map (fun (i',_) -> if i < 96 then (i', rate * dist'.[i]) else (i', 0.0)))
+                    |> Array.mapi (fun i window -> window |> Array.map (fun (i',_) -> (i', rate * dist'.[i%96])))
                 
                 Array.init (96) (fun i ->
                     windows_of_expected
                     |> Array.fold (fun ac window -> 
-                        ac + (window |> Array.fold (fun ac' (i', rate') -> if i = i' then ac'+rate' else ac') 0.0)) 0.0)
+                        ac + (window |> Array.fold (fun ac' (i', rate') -> if (i%96) = (i'%96) then ac'+rate' else ac') 0.0)) 0.0)
                 |> List.ofArray
 
-            let dist_with_exp = dist_list |> List.map (fun dist -> calc_for_dist dist)
-            dist_with_exp
+            dist_list 
+            |> List.map (fun dist -> calc_for_dist dist)
+            |> List.sumn
         | DistProfile(name,dist_list) ->
             self.calc(name,dist_list).to_exp_float(rate)
 type Node<'T> = 
