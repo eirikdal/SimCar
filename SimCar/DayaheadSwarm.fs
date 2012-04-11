@@ -15,9 +15,6 @@ let interpol_folder = "C:\\SimCar\\SimCar\\data\\interpol\\"
 
 let profiles_interpol = Parsing.parse_powerprofiles(interpol_folder)
 
-let map2 op list1 list2 = list1 |> List.map2 (fun sum t -> if (op sum t) < 1.0 then sum+t else 1.0) list2
-let sum2 (list1 : float list) (list2 : float list) = list1 |> List.map2 (fun sum t -> sum+t) list2
-let sumn list = list |> List.fold (fun ac dist -> sum2 ac dist) (List.init (96) (fun _ -> 0.0))
 
 let powergrid = 
     FileManager.powergrid()
@@ -25,7 +22,7 @@ let powergrid =
 let collect_exp node = 
     match node with
     | Transformer(_) -> []
-    | PHEV(phev_args) as node -> phev_args.profile.to_exp_float(2.5)
+    | PHEV(phev_args) as node -> phev_args.profile.to_exp_float(Energy.toFloat <| phev_args.rate)
     | PowerNode(_) -> []
     | BRP(_) -> []
 
@@ -35,8 +32,7 @@ let mutable agg_dist' =
     |> Tree.collect
     |> List.ofSeq
     |> List.filter (fun x -> if x.Length = 0 then false else true)
-    |> List.map (fun dist -> sumn dist)
-    |> sumn
+    |> List.sumn
     |> Array.ofList
 
 let mutable agg_dist : float array = (agg_dist'.Clone() :?> float array)
@@ -55,7 +51,7 @@ type Message =
     | Exit
 
 let num_agents = 95
-let theta = 0.999
+let theta = 0.98
 let sum_agg_dist = agg_dist |> Array.sum
 
 let rate = 1.25

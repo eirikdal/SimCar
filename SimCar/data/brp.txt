@@ -1,11 +1,11 @@
-﻿trf node1 10.0 0.0 {
-  trf node2 10.0 0.0 {
+﻿trf node1 1000.0 0.0 {
+  trf node2 100.0 0.0 {
     pnode 101 5
     pnode 107 5
     phev Godel3 worker 16.0 0.0 16.0 2.5
     phev Godel4 worker 16.0 0.0 16.0 2.5
   }
-  trf node7 10.0 0.0 {
+  trf node7 100.0 0.0 {
     pnode 108 5
     phev Godel1 worker 16.0 0.0 16.0 2.5
     phev Godel5 worker 16.0 0.0 16.0 2.5
