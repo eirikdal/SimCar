@@ -26,16 +26,16 @@ let rec iter iterf node =
 let rec send_reply msg (node : Node<Agent<Message>>) = 
     match node with
     | Node(nodes, Some(leaf)) ->
-        let res = leaf.PostAndAsyncReply((fun replyChannel -> ReplyTo(msg, replyChannel)), 50000)
-        Node(List.map (fun n -> send_reply msg n) nodes, Some (leaf, res))
+        let list = List.map (fun n -> send_reply msg n) nodes
+        let res = leaf.PostAndReply((fun replyChannel -> ReplyTo(msg, replyChannel)), 5000)
+        Node(list, Some (leaf, res))
     | Node(nodes, None) -> 
         Node(List.map (fun n -> send_reply msg n) nodes, None)
     | Leaf(Some(leaf)) ->
-        let res = leaf.PostAndAsyncReply((fun replyChannel -> ReplyTo(msg, replyChannel)), 50000)
+        let res = leaf.PostAndReply((fun replyChannel -> ReplyTo(msg, replyChannel)), 5000)
         Leaf(Some <| (leaf, res))
     | Leaf(None) ->
         Leaf(None)
-
 
 // traverse a tree of models, creating a mirrored tree of agents as we go along
 let rec send msg (node : Node<Agent<Message>>) = 
@@ -48,6 +48,19 @@ let rec send msg (node : Node<Agent<Message>>) =
     | Leaf(Some(leaf)) ->
         let res = leaf.Post(msg)
         Leaf(Some <| leaf)
+    | Leaf(None) ->
+        Leaf(None)
+
+let rec mapBack mapf node = 
+    match node with
+    | Node(nodes, Some(leaf)) ->
+        let list = List.map (fun n -> mapBack mapf n) nodes
+        let res = mapf leaf
+        Node(list, Some(res))
+    | Leaf(Some(leaf)) ->
+        Leaf(Some(mapf leaf))
+    | Node(nodes, None) ->
+        Node(List.map (fun n -> mapBack mapf n) nodes, None)
     | Leaf(None) ->
         Leaf(None)
 
@@ -89,16 +102,21 @@ let rec foldr op node : float<kWh> =
     | Leaf(None) -> 
         0.0<kWh>
         
+//let post_reply msg (leaf : Agent<Message>) = leaf.PostAndReply((fun replyChannel -> ReplyTo(msg, replyChannel)), 100000)
+
 let rec collect node = 
     seq {
         match node with 
-        | Node(nodes, Some(msg)) -> 
-            yield! [msg]
+        | Node(nodes, Some(leaf)) -> 
+            yield! [leaf]
             for n in nodes do yield! collect n
         | Node(nodes, none) ->
             for n in nodes do yield! collect n
-        | Leaf(Some(msg)) ->
-            yield! [msg]
+        | Leaf(Some(leaf)) ->
+            yield! [leaf]
         | Leaf(None) ->
             ()
     }
+
+//let rec collect msg node = 
+//    fetch msg node 

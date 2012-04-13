@@ -108,12 +108,13 @@ let brp_agent brp schedule = Agent.Start(fun agent ->
                 let messages' = (msg :: intentions) |> Message.reduce_queue
                 schedule brp_args.dayahead brp_args.realtime messages' tick
 
-                return! loop brp (msg :: intentions) schedule tick waiting
+                return! loop brp [] schedule tick false
             else
                 return! loop brp (msg :: intentions) schedule tick waiting
         | Reset -> return! loop brp intentions schedule tick waiting
         | Charge_OK(_,_,_) ->
-            return! loop brp intentions schedule tick false
+//            return! loop brp intentions schedule tick false
+            return! loop brp (msg :: intentions) schedule tick waiting
         | _ -> 
             syncContext.RaiseEvent error <| Exception("BRP: Not implemented yet")
 

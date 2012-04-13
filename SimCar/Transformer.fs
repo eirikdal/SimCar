@@ -25,7 +25,7 @@ module Action =
 let trf_agent trf = Agent.Start(fun agent ->
     let queue = new Queue() 
     let rec loop (Transformer({ name=name; parent=parent; children=children } as trf_args) as trf) (intentions : Message list) (charges : Message list) waiting = async {
-        if intentions.Length >= children.Length then
+        if intentions.Length >= children.Length && children.Length > charges.Length then
             postalService.send(parent, Charge_Intentions(intentions))
 
             return! loop trf [] charges true
@@ -35,21 +35,33 @@ let trf_agent trf = Agent.Start(fun agent ->
 
             let sum_of_charges = charges |> List.sumBy (fun (Charge_OK(_,energy,ttl)) -> energy)
 
+            let test =
+                children 
+                |> List.map (fun (child,_) -> charges |> List.exists (fun (Charge_OK(name,_,_)) -> child=name)) 
+                |> List.forall (fun x -> x)
+
+            if not test then 
+                raise <| Exception("hell")
+
             let rem = 
                 charges 
                 |> List.sortBy (fun (Charge_OK(_,_,ttl)) -> ttl)
-                |> List.fold (fun rem (Charge_OK(phev,energy,ttl)) -> 
-                    let filtered, remaining = Action.filter energy rem
-                    if not (phev.StartsWith("node")) then
-                        postalService.send(phev, Charge_OK(phev, filtered, ttl))
-                    remaining) (trf_args.capacity)
+                |> List.fold (fun rem (Charge_OK(name,energy,ttl)) ->     
+                    if not (name.StartsWith("med") || name.StartsWith("high")) then
+                        let filtered, remaining = Action.filter energy rem
+                        if name = "med_29" then
+                            raise <| Exception("hell")
+                        postalService.send(name, Charge_OK(name, filtered, ttl))
+                        remaining
+                    else 
+                        rem) (trf_args.capacity)
             
-            if name = "node7" then
+            if name = "med_29" then
                 syncContext.RaiseDelegateEvent trfFiltered (rem)
                 syncContext.RaiseDelegateEvent trfCurrent sum_of_charges
                 syncContext.RaiseDelegateEvent trfCapacity trf_args.capacity
                 
-            return! loop trf intentions [] false
+            return! loop trf [] [] false
 
         let! (msg : Message) = 
             if (not waiting && queue.Count > 0) then
@@ -74,8 +86,6 @@ let trf_agent trf = Agent.Start(fun agent ->
         | Model(trf) -> 
             return! loop trf intentions charges waiting
         | Charge_OK(from,energy,_) -> 
-//            if name = "node1" then
-//                printfn "%s charges=%d children=%d" from charges.Length children.Length
             return! loop trf (msg :: intentions) (msg :: charges) waiting
         | Charge_Intentions(_) ->
             return! loop trf (msg :: intentions) charges waiting
