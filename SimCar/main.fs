@@ -86,9 +86,9 @@ type SimCar(nIter, nTicksPerDayq) =
         
 //        self.RegisterComputeDayahead()
 
-        postalService.send("brp", Dayahead((fun _ -> 0.0<kWh>)))
-        postalService.send("brp", Prediction((fun _ -> 0.0<kWh>)))
-        postalService.send("brp", Schedule(BRP.Action.schedule_none))
+//        postalService.send("brp", Dayahead((fun _ -> 0.0<kWh>)))
+//        postalService.send("brp", Prediction((fun _ -> 0.0<kWh>)))
+//        postalService.send("brp", Schedule(BRP.Action.schedule_none))
         
         let op i node = 
             match node with
@@ -112,6 +112,7 @@ type SimCar(nIter, nTicksPerDayq) =
 //        let dayahead = DayaheadSwarm.dayahead(realtime, n) 
 
         let dayahead = DayaheadExp.Algorithm.distribute realtime n |> Array.ofList
+//        printfn "sum of dayahead %f" <| Array.sum dayahead
         postalService.send("brp", Dayahead(dayahead |> Array.get >> Energy.ofFloat))
         postalService.send("brp", Prediction(realtime |> Array.get >> Energy.ofFloat))
 
@@ -132,11 +133,6 @@ type SimCar(nIter, nTicksPerDayq) =
 
         printfn "Running simulations"
         [for i in 0 .. (n-1) do run i self.Agents false] |> ignore 
-//        Seq.initInfinite (fun day -> run day self.Agents false)
-//        |> Seq.take n
-//        |> Seq.cache
-//        |> List.ofSeq
-//        |> ignore
         printfn "Finished simulations"
 
     member self.TestDayahead(n) = 

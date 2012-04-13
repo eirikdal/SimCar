@@ -92,14 +92,14 @@ let phev_agent _p name = Agent<Message>.Start(fun agent ->
             
             let wait_for_reply = Action.send_intention phevArgs (-1)
             
-            return! loop (PHEV(phevArgs)) true
+            return! loop (PHEV(phevArgs)) wait_for_reply
         | Charge_OK(_,_,_) ->
             return! loop (Action.charge phev_args) false
         | Update(tick) ->
             let ttl = Action.find_ttl histogram tick 
             let wait_for_reply = Action.send_intention phev_args ttl
             
-            if phev_args.name = "Godel1" then
+            if phev_args.name = "phev_192" then
                 syncContext.RaiseDelegateEvent phevBattery phev_args.battery
                 if phev_args.duration > 0 then
                     syncContext.RaiseDelegateEvent phevStatus 1.0

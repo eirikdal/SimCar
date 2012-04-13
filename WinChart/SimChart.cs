@@ -15,7 +15,7 @@ namespace WinChart
 {
     public partial class SimChart : Form
     {
-        const int nSim = 29;
+        const int nSim = 10;
         const int nTicks = 96;
         Sim.SimCar tSim = new Sim.SimCar(nSim, nTicks);
 
@@ -418,7 +418,7 @@ namespace WinChart
             seriesPhev[nPhevStatus].BorderWidth = 2;
             seriesPhev[nPhevStatus].BorderDashStyle = ChartDashStyle.Dash;
 
-            seriesPhev[nPhevBattery].ChartType = SeriesChartType.Line;
+            seriesPhev[nPhevBattery].ChartType = SeriesChartType.StepLine;
             seriesPhev[nPhevBattery].Color = Color.Blue;
             seriesPhev[nPhevBattery].BorderWidth = 2;
             seriesPhev[nPhevBattery].BorderDashStyle = ChartDashStyle.Dash;
@@ -479,10 +479,10 @@ namespace WinChart
             //tSim.RegisterProb(prob_Calc);
             //tSim.RegisterProbReset(prob_Reset);
             tSim.RegisterDayaheadProgress(new EventHandler(dayahead_Changed));
-            //tSim.RegisterDayaheadInit(new EventHandler(dayahead_Init));
-            //tSim.RegisterDayaheadStep(new EventHandler(dayahead_Step));
-            //tSim.RegisterDayaheadExpected(new EventHandler(dayahead_Exp));
-            //tSim.RegisterDayaheadSupervisor(new EventHandler(dayahead_Supervisor));
+            tSim.RegisterDayaheadInit(new EventHandler(dayahead_Init));
+            tSim.RegisterDayaheadStep(new EventHandler(dayahead_Step));
+            tSim.RegisterDayaheadExpected(new EventHandler(dayahead_Exp));
+            tSim.RegisterDayaheadSupervisor(new EventHandler(dayahead_Supervisor));
             tSim.RegisterDayaheadAnt(new EventHandler(dayahead_Ant));
             //tSim.TestDayahead(nSim);
             tSim.RegisterTrfCapacity(trfCapacity_Changed);
@@ -498,7 +498,7 @@ namespace WinChart
 
         public void Start()
         {
-            tSim.ComputeDayahead(new FSharpOption<int>(nSim+1));
+            tSim.ComputeDayahead(new FSharpOption<int>(nSim + 1));
             resetChart(chart1, 0, chart1.Series.Count);
             resetChart(chart2, 0, chart2.Series.Count);
             tSim.Run(new FSharpOption<int>(nSim));

@@ -21,7 +21,7 @@ let powergrid =
 let collect_exp node = 
     match node with
     | Transformer(_) -> []
-    | PHEV(phev_args) as node -> phev_args.profile.to_exp_float(2.5)
+    | PHEV(phev_args) as node -> phev_args.profile.to_exp_float(1.25, 32.0)
     | PowerNode(_) -> []
     | BRP(_) -> []
 

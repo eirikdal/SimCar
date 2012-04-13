@@ -21,7 +21,7 @@ let powergrid =
 let collect_exp node = 
     match node with
     | Transformer(_) -> []
-    | PHEV(phev_args) as node -> phev_args.profile.to_exp_float(Energy.toFloat <| phev_args.rate)
+    | PHEV(phev_args) as node -> phev_args.profile.to_exp_float(Energy.toFloat <| phev_args.rate, Energy.toFloat <| phev_args.capacity)
     | PowerNode(_) -> []
     | BRP(_) -> []
 
@@ -38,6 +38,7 @@ let rate = 1.25
 
 module Algorithm = 
     let distribute realtime days = 
+        printfn "sum of agg_dist %f" (Array.sum agg_dist')
         let theta = 0.995
         let util pos' (day:float array) (pos,x) = 
             let distance = theta ** (float <| abs(pos-pos'))

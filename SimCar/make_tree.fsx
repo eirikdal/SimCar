@@ -16,7 +16,8 @@ let med_watt = 7.2*8.0;
 
 let transformer_ampere  = [8.; 8.; 8.] |> List.map (fun x -> Current.ofFloat x)
 let transformer_voltage = [Voltage.ofFloat 0.240; Voltage.ofFloat 7.2; Voltage.ofFloat 155.0]
-let trf_cap = List.map2 (fun x y -> Energy.toKilo (x * y)) transformer_ampere transformer_voltage
+//let trf_cap = List.map2 (fun (x : float<A>) (y : float<V>) -> Energy.toKilo (x * y)) transformer_ampere transformer_voltage
+let trf_cap = [8.<A>*0.24<V>; 8.<A>*7.2<V>]
 
 type Transformer = 
     | LOW of string * float
@@ -73,7 +74,7 @@ let make_grid =
             let test = str::([for node in children do yield! test node])
             List.append test ["}"]
         | LOW(name,_) -> 
-            [yield sprintf "pnode %s %s" name name]
+            [yield sprintf "pnode node_%s %s" name name]
         | PHEV(name) -> 
             [yield sprintf "phev %s worker 16.0 0.0 16.0 2.5" name]
 

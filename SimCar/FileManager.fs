@@ -159,7 +159,7 @@ module Parsing =
                 children <- name :: children
                 parse_powergrid t (node::nodes) (&rest) (&children) parent
             | [|"pnode";name;realtime|] ->
-                let realtime = (List.tryFind (fun (n, s) -> n = name) powerprofiles)
+                let realtime = (List.tryFind (fun (n, s) -> n = realtime) powerprofiles)
                 match realtime with
                 | None -> raise <| IOException(sprintf "Could not find powernode with name %s in powerprofiles.txt" name)
                 | Some realtime ->

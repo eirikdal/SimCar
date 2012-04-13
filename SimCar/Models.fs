@@ -125,15 +125,15 @@ type Profile =
         | DistProfile(name,dist_list) ->
             self.calc(name,dist_list)
     member self.to_float() = 
-        let sum2 list1 list2 = 
-            list1 |> List.map2 (fun sum t -> if (sum+t) < 1.0 then sum+t else 1.0) list2
+        let sum2 list1 list2 : float list = List.map2 (fun x y -> x+y) list1 list2
+//            list1 |> List.map2 (fun sum t -> if (sum+t) < 1.0 then sum+t else 1.0) list2
         let sumn list = list |> List.fold (fun ac dist -> sum2 ac (List.ofSeq dist.dist)) (List.init (96) (fun _ -> 0.0))
         match self with 
         | FloatProfile(_, dist_list) -> 
             sumn dist_list
         | DistProfile(name,dist_list) ->
             self.calc(name,dist_list).to_float()
-    member self.to_exp_float(rate) =
+    member self.to_exp_float(rate, capacity) =
         match self with 
         | FloatProfile(_,dist_list) ->
             let calc_for_dist (dist : Distribution) = 
@@ -142,10 +142,18 @@ type Profile =
                 // create 96 windows of size duration, where the index of each window reflects the ending time of a (potential) trip
                 // (windows are offset by duration to reflect the expected load from a PHEV that is coming back)
                 let windows_of_expected_trips = Seq.init (96+(duration-1)) (fun i -> (i+duration,0.0)) |> Seq.windowed (duration) |> Array.ofSeq
+
                 // for each window, calculate the load in tick i' (=i+duration) as the prob that the PHEV left at time i times the charging rate
                 let windows_of_expected = 
                     windows_of_expected_trips 
-                    |> Array.mapi (fun i window -> window |> Array.map (fun (i',_) -> (i', rate * dist'.[i%96])))
+                    |> Array.mapi (fun i window -> 
+                        window 
+                        |> Array.scan (fun (ac,(_,_)) (i',_) -> 
+                            if ac > rate then 
+                                (ac-rate, (i', rate * dist'.[i%96]))
+                            else
+                                (ac-(rate-ac), (i', 0.0))) (capacity, (0,0.0))
+                        |> Array.map snd)
                 
                 Array.init (96) (fun i ->
                     windows_of_expected
@@ -153,11 +161,14 @@ type Profile =
                         ac + (window |> Array.fold (fun ac' (i', rate') -> if (i%96) = (i'%96) then ac'+rate' else ac') 0.0)) 0.0)
                 |> List.ofArray
 
-            dist_list 
-            |> List.map (fun dist -> calc_for_dist dist)
-            |> List.sumn
+            let test = 
+                dist_list 
+                |> List.map (fun dist -> calc_for_dist dist)
+                |> List.sumn
+//            printfn "%A" test
+            test
         | DistProfile(name,dist_list) ->
-            self.calc(name,dist_list).to_exp_float(rate)
+            self.calc(name,dist_list).to_exp_float(rate, capacity)
 type Node<'T> = 
     | Node of (Node<'T> list) * 'T option
     | Leaf of 'T option
