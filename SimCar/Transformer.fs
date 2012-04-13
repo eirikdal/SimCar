@@ -25,7 +25,7 @@ module Action =
 let trf_agent trf = Agent.Start(fun agent ->
     let queue = new Queue() 
     let rec loop (Transformer({ name=name; parent=parent; children=children } as trf_args) as trf) (intentions : Message list) (charges : Message list) waiting = async {
-        if intentions.Length >= children.Length && charges.Length <> children.Length then
+        if intentions.Length >= children.Length && children.Length > charges.Length then
             postalService.send(parent, Charge_Intentions(intentions))
 
             return! loop trf [] charges true
@@ -35,12 +35,22 @@ let trf_agent trf = Agent.Start(fun agent ->
 
             let sum_of_charges = charges |> List.sumBy (fun (Charge_OK(_,energy,ttl)) -> energy)
 
+            let test =
+                children 
+                |> List.map (fun (child,_) -> charges |> List.exists (fun (Charge_OK(name,_,_)) -> child=name)) 
+                |> List.forall (fun x -> x)
+
+            if not test then 
+                raise <| Exception("hell")
+
             let rem = 
                 charges 
                 |> List.sortBy (fun (Charge_OK(_,_,ttl)) -> ttl)
                 |> List.fold (fun rem (Charge_OK(name,energy,ttl)) ->     
-                    if not (name.StartsWith("node") && name.StartsWith("med") && name.StartsWith("high")) then
+                    if not (name.StartsWith("med") || name.StartsWith("high")) then
                         let filtered, remaining = Action.filter energy rem
+                        if name = "med_29" then
+                            raise <| Exception("hell")
                         postalService.send(name, Charge_OK(name, filtered, ttl))
                         remaining
                     else 
