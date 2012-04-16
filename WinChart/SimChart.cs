@@ -393,8 +393,8 @@ namespace WinChart
             seriesArray[nRealTime].BorderWidth = 2;
             seriesArray[nRealTime].BorderDashStyle = ChartDashStyle.Solid;
 
-            seriesArray[nPowerNodes].ChartType = SeriesChartType.Line;
-            seriesArray[nPowerNodes].Color = Color.Blue;
+            seriesArray[nPowerNodes].ChartType = SeriesChartType.Column;
+            seriesArray[nPowerNodes].Color = Color.Aqua;
             seriesArray[nPowerNodes].BorderWidth = 2;
             seriesArray[nPowerNodes].BorderDashStyle = ChartDashStyle.Dot;
 
