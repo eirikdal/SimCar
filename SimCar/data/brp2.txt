@@ -6,15 +6,15 @@ pnode node_117 117
 pnode node_115 115
 pnode node_112 112
 pnode node_111 111
-phev phev_111 worker 16.0 0.0 16.0 2.5
 pnode node_108 108
+phev phev_108 worker 16.0 0.0 16.0 2.5
 pnode node_107 107
 pnode node_101 101
 }
 trf med_1 57.600000 0.000000 {
 pnode node_192 192
-phev phev_192 worker 16.0 0.0 16.0 2.5
 pnode node_185 185
+phev phev_185 worker 16.0 0.0 16.0 2.5
 pnode node_18 18
 pnode node_170 170
 pnode node_169 169
@@ -23,49 +23,44 @@ pnode node_154 154
 pnode node_148 148
 pnode node_136 136
 pnode node_135 135
+phev phev_135 worker 16.0 0.0 16.0 2.5
 pnode node_13 13
 }
 trf med_2 57.600000 0.000000 {
 pnode node_262 262
 pnode node_260 260
-phev phev_260 worker 16.0 0.0 16.0 2.5
 pnode node_240 240
 pnode node_237 237
+phev phev_237 worker 16.0 0.0 16.0 2.5
 pnode node_232 232
+phev phev_232 worker 16.0 0.0 16.0 2.5
 pnode node_226 226
 pnode node_225 225
 pnode node_223 223
+phev phev_223 worker 16.0 0.0 16.0 2.5
 pnode node_210 210
 pnode node_198 198
 }
 trf med_3 57.600000 0.000000 {
 pnode node_2763 2763
 pnode node_2761 2761
-phev phev_2761 worker 16.0 0.0 16.0 2.5
 pnode node_2760 2760
-phev phev_2760 worker 16.0 0.0 16.0 2.5
 pnode node_2759 2759
-phev phev_2759 worker 16.0 0.0 16.0 2.5
 pnode node_2758 2758
 pnode node_275 275
-phev phev_275 worker 16.0 0.0 16.0 2.5
 pnode node_272 272
 pnode node_264 264
 pnode node_263 263
+phev phev_263 worker 16.0 0.0 16.0 2.5
 }
 trf med_4 57.600000 0.000000 {
 pnode node_2777 2777
-phev phev_2777 worker 16.0 0.0 16.0 2.5
 pnode node_2776 2776
-phev phev_2776 worker 16.0 0.0 16.0 2.5
 pnode node_2773 2773
-phev phev_2773 worker 16.0 0.0 16.0 2.5
 pnode node_2770 2770
-phev phev_2770 worker 16.0 0.0 16.0 2.5
 pnode node_277 277
 pnode node_2769 2769
 pnode node_2767 2767
-phev phev_2767 worker 16.0 0.0 16.0 2.5
 pnode node_2765 2765
 }
 trf med_5 57.600000 0.000000 {
@@ -75,7 +70,6 @@ pnode node_2799 2799
 pnode node_2797 2797
 pnode node_2795 2795
 pnode node_2790 2790
-phev phev_2790 worker 16.0 0.0 16.0 2.5
 pnode node_2789 2789
 pnode node_2781 2781
 pnode node_2778 2778
@@ -87,17 +81,18 @@ pnode node_2811 2811
 pnode node_2810 2810
 pnode node_2809 2809
 pnode node_2808 2808
+phev phev_2808 worker 16.0 0.0 16.0 2.5
 pnode node_2807 2807
 pnode node_2806 2806
 pnode node_2803 2803
 pnode node_2802 2802
 pnode node_2801 2801
 pnode node_2800 2800
-phev phev_2800 worker 16.0 0.0 16.0 2.5
 }
 trf med_7 57.600000 0.000000 {
 pnode node_2829 2829
 pnode node_2827 2827
+phev phev_2827 worker 16.0 0.0 16.0 2.5
 pnode node_2824 2824
 pnode node_2823 2823
 pnode node_2822 2822
@@ -105,26 +100,25 @@ pnode node_2821 2821
 pnode node_2819 2819
 pnode node_2818 2818
 pnode node_2814 2814
+phev phev_2814 worker 16.0 0.0 16.0 2.5
 }
 trf med_8 57.600000 0.000000 {
 pnode node_2846 2846
 pnode node_2844 2844
+phev phev_2844 worker 16.0 0.0 16.0 2.5
 pnode node_2843 2843
+phev phev_2843 worker 16.0 0.0 16.0 2.5
 pnode node_2842 2842
-phev phev_2842 worker 16.0 0.0 16.0 2.5
 pnode node_2841 2841
 pnode node_2840 2840
 pnode node_2839 2839
 pnode node_2838 2838
 pnode node_2833 2833
-phev phev_2833 worker 16.0 0.0 16.0 2.5
 pnode node_2832 2832
 }
 trf med_9 57.600000 0.000000 {
 pnode node_2856 2856
-phev phev_2856 worker 16.0 0.0 16.0 2.5
 pnode node_2855 2855
-phev phev_2855 worker 16.0 0.0 16.0 2.5
 pnode node_2854 2854
 pnode node_2853 2853
 pnode node_2852 2852
@@ -143,10 +137,10 @@ pnode node_2861 2861
 pnode node_2860 2860
 pnode node_2859 2859
 pnode node_2857 2857
+phev phev_2857 worker 16.0 0.0 16.0 2.5
 }
 trf med_11 57.600000 0.000000 {
 pnode node_288 288
-phev phev_288 worker 16.0 0.0 16.0 2.5
 pnode node_2879 2879
 pnode node_2878 2878
 pnode node_2872 2872
@@ -163,47 +157,44 @@ pnode node_2896 2896
 pnode node_2895 2895
 pnode node_2894 2894
 pnode node_2893 2893
-phev phev_2893 worker 16.0 0.0 16.0 2.5
 pnode node_2891 2891
 pnode node_289 289
+phev phev_289 worker 16.0 0.0 16.0 2.5
 pnode node_2887 2887
-phev phev_2887 worker 16.0 0.0 16.0 2.5
 pnode node_2885 2885
-phev phev_2885 worker 16.0 0.0 16.0 2.5
 pnode node_2884 2884
 pnode node_2883 2883
+phev phev_2883 worker 16.0 0.0 16.0 2.5
 }
 trf med_13 57.600000 0.000000 {
 pnode node_2915 2915
-phev phev_2915 worker 16.0 0.0 16.0 2.5
 pnode node_2913 2913
+phev phev_2913 worker 16.0 0.0 16.0 2.5
 pnode node_2912 2912
 pnode node_291 291
+phev phev_291 worker 16.0 0.0 16.0 2.5
 pnode node_2907 2907
-phev phev_2907 worker 16.0 0.0 16.0 2.5
 pnode node_2904 2904
 pnode node_2903 2903
 pnode node_2902 2902
 pnode node_2901 2901
-phev phev_2901 worker 16.0 0.0 16.0 2.5
 pnode node_2900 2900
 }
 trf med_14 57.600000 0.000000 {
 pnode node_2924 2924
 pnode node_2923 2923
-phev phev_2923 worker 16.0 0.0 16.0 2.5
 pnode node_2922 2922
+phev phev_2922 worker 16.0 0.0 16.0 2.5
 pnode node_2921 2921
+phev phev_2921 worker 16.0 0.0 16.0 2.5
 pnode node_292 292
-phev phev_292 worker 16.0 0.0 16.0 2.5
 pnode node_2919 2919
 pnode node_2918 2918
-phev phev_2918 worker 16.0 0.0 16.0 2.5
 pnode node_2917 2917
+phev phev_2917 worker 16.0 0.0 16.0 2.5
 }
 trf med_15 57.600000 0.000000 {
 pnode node_2932 2932
-phev phev_2932 worker 16.0 0.0 16.0 2.5
 pnode node_2931 2931
 pnode node_2930 2930
 pnode node_293 293
@@ -211,22 +202,18 @@ pnode node_2929 2929
 pnode node_2928 2928
 pnode node_2927 2927
 pnode node_2926 2926
-phev phev_2926 worker 16.0 0.0 16.0 2.5
 pnode node_2925 2925
 }
 trf med_16 57.600000 0.000000 {
 pnode node_2943 2943
-phev phev_2943 worker 16.0 0.0 16.0 2.5
 pnode node_2941 2941
 pnode node_2940 2940
 pnode node_2939 2939
-phev phev_2939 worker 16.0 0.0 16.0 2.5
 pnode node_2937 2937
-phev phev_2937 worker 16.0 0.0 16.0 2.5
 pnode node_2936 2936
-phev phev_2936 worker 16.0 0.0 16.0 2.5
 pnode node_2935 2935
 pnode node_2934 2934
+phev phev_2934 worker 16.0 0.0 16.0 2.5
 pnode node_2933 2933
 }
 trf med_17 57.600000 0.000000 {
@@ -234,51 +221,54 @@ pnode node_2959 2959
 pnode node_2958 2958
 pnode node_2957 2957
 pnode node_2956 2956
+phev phev_2956 worker 16.0 0.0 16.0 2.5
 pnode node_2949 2949
 pnode node_2947 2947
 pnode node_2945 2945
 pnode node_2944 2944
-phev phev_2944 worker 16.0 0.0 16.0 2.5
 }
 trf med_18 57.600000 0.000000 {
 pnode node_2980 2980
 pnode node_2979 2979
+phev phev_2979 worker 16.0 0.0 16.0 2.5
 pnode node_2974 2974
 pnode node_2973 2973
 pnode node_2972 2972
+phev phev_2972 worker 16.0 0.0 16.0 2.5
 pnode node_2968 2968
+phev phev_2968 worker 16.0 0.0 16.0 2.5
 pnode node_2967 2967
 pnode node_2966 2966
 phev phev_2966 worker 16.0 0.0 16.0 2.5
 pnode node_2963 2963
 phev phev_2963 worker 16.0 0.0 16.0 2.5
 pnode node_2962 2962
+phev phev_2962 worker 16.0 0.0 16.0 2.5
 pnode node_2961 2961
 }
 trf med_19 57.600000 0.000000 {
 pnode node_2998 2998
 pnode node_2995 2995
 pnode node_2994 2994
+phev phev_2994 worker 16.0 0.0 16.0 2.5
 pnode node_2993 2993
-phev phev_2993 worker 16.0 0.0 16.0 2.5
 pnode node_2992 2992
 pnode node_2991 2991
+phev phev_2991 worker 16.0 0.0 16.0 2.5
 pnode node_2986 2986
-phev phev_2986 worker 16.0 0.0 16.0 2.5
 pnode node_2985 2985
 pnode node_2982 2982
+phev phev_2982 worker 16.0 0.0 16.0 2.5
 }
 trf med_20 57.600000 0.000000 {
 pnode node_3013 3013
+phev phev_3013 worker 16.0 0.0 16.0 2.5
 pnode node_3012 3012
-phev phev_3012 worker 16.0 0.0 16.0 2.5
 pnode node_3008 3008
-phev phev_3008 worker 16.0 0.0 16.0 2.5
 pnode node_3007 3007
 pnode node_3006 3006
 pnode node_3005 3005
 pnode node_3003 3003
-phev phev_3003 worker 16.0 0.0 16.0 2.5
 pnode node_3001 3001
 phev phev_3001 worker 16.0 0.0 16.0 2.5
 pnode node_3000 3000
@@ -288,8 +278,8 @@ pnode node_3025 3025
 pnode node_3024 3024
 pnode node_3023 3023
 pnode node_3022 3022
-phev phev_3022 worker 16.0 0.0 16.0 2.5
 pnode node_3021 3021
+phev phev_3021 worker 16.0 0.0 16.0 2.5
 pnode node_3018 3018
 pnode node_3017 3017
 pnode node_3016 3016
@@ -298,14 +288,15 @@ trf med_22 57.600000 0.000000 {
 pnode node_304 304
 pnode node_3039 3039
 pnode node_3037 3037
+phev phev_3037 worker 16.0 0.0 16.0 2.5
 pnode node_3036 3036
 pnode node_3035 3035
 pnode node_3033 3033
 pnode node_3032 3032
+phev phev_3032 worker 16.0 0.0 16.0 2.5
 pnode node_3030 3030
 pnode node_303 303
 pnode node_3028 3028
-phev phev_3028 worker 16.0 0.0 16.0 2.5
 }
 trf med_23 57.600000 0.000000 {
 pnode node_3057 3057
@@ -318,52 +309,50 @@ pnode node_3049 3049
 pnode node_3048 3048
 pnode node_3047 3047
 pnode node_3041 3041
-phev phev_3041 worker 16.0 0.0 16.0 2.5
 }
 trf med_24 57.600000 0.000000 {
 pnode node_3068 3068
 pnode node_3067 3067
 pnode node_3066 3066
 pnode node_3065 3065
-phev phev_3065 worker 16.0 0.0 16.0 2.5
 pnode node_3063 3063
-phev phev_3063 worker 16.0 0.0 16.0 2.5
 pnode node_3062 3062
 phev phev_3062 worker 16.0 0.0 16.0 2.5
 pnode node_3059 3059
 pnode node_3058 3058
+phev phev_3058 worker 16.0 0.0 16.0 2.5
 }
 trf med_25 57.600000 0.000000 {
 pnode node_3077 3077
 pnode node_3076 3076
 pnode node_3075 3075
-phev phev_3075 worker 16.0 0.0 16.0 2.5
 pnode node_3074 3074
+phev phev_3074 worker 16.0 0.0 16.0 2.5
 pnode node_3073 3073
 pnode node_3072 3072
+phev phev_3072 worker 16.0 0.0 16.0 2.5
 pnode node_3070 3070
 pnode node_307 307
 pnode node_3069 3069
 }
 trf med_26 57.600000 0.000000 {
 pnode node_3085 3085
-phev phev_3085 worker 16.0 0.0 16.0 2.5
 pnode node_3084 3084
 pnode node_3083 3083
-phev phev_3083 worker 16.0 0.0 16.0 2.5
 pnode node_3082 3082
 pnode node_3081 3081
-phev phev_3081 worker 16.0 0.0 16.0 2.5
 pnode node_3080 3080
 pnode node_3079 3079
 pnode node_3078 3078
-phev phev_3078 worker 16.0 0.0 16.0 2.5
 }
 trf med_27 57.600000 0.000000 {
 pnode node_3105 3105
+phev phev_3105 worker 16.0 0.0 16.0 2.5
 pnode node_3104 3104
 pnode node_3103 3103
+phev phev_3103 worker 16.0 0.0 16.0 2.5
 pnode node_3102 3102
+phev phev_3102 worker 16.0 0.0 16.0 2.5
 pnode node_3101 3101
 pnode node_3095 3095
 pnode node_3094 3094
@@ -374,7 +363,6 @@ pnode node_3086 3086
 }
 trf med_28 57.600000 0.000000 {
 pnode node_3120 3120
-phev phev_3120 worker 16.0 0.0 16.0 2.5
 pnode node_3118 3118
 pnode node_3115 3115
 pnode node_3114 3114
@@ -383,22 +371,24 @@ pnode node_3110 3110
 pnode node_311 311
 pnode node_3108 3108
 pnode node_3107 3107
+phev phev_3107 worker 16.0 0.0 16.0 2.5
 }
 trf med_29 57.600000 0.000000 {
 pnode node_3135 3135
 pnode node_3131 3131
+phev phev_3131 worker 16.0 0.0 16.0 2.5
 pnode node_313 313
 pnode node_3129 3129
 pnode node_3128 3128
 pnode node_3127 3127
 pnode node_3125 3125
 pnode node_3123 3123
+phev phev_3123 worker 16.0 0.0 16.0 2.5
 pnode node_3121 3121
 }
 trf med_30 57.600000 0.000000 {
 pnode node_3147 3147
 pnode node_3146 3146
-phev phev_3146 worker 16.0 0.0 16.0 2.5
 pnode node_3145 3145
 pnode node_3144 3144
 phev phev_3144 worker 16.0 0.0 16.0 2.5
@@ -406,21 +396,19 @@ pnode node_3143 3143
 pnode node_3142 3142
 phev phev_3142 worker 16.0 0.0 16.0 2.5
 pnode node_3139 3139
-phev phev_3139 worker 16.0 0.0 16.0 2.5
 pnode node_3138 3138
 }
 trf med_31 57.600000 0.000000 {
 pnode node_3157 3157
-phev phev_3157 worker 16.0 0.0 16.0 2.5
 pnode node_3156 3156
-phev phev_3156 worker 16.0 0.0 16.0 2.5
 pnode node_3154 3154
-phev phev_3154 worker 16.0 0.0 16.0 2.5
 pnode node_3153 3153
+phev phev_3153 worker 16.0 0.0 16.0 2.5
 pnode node_3152 3152
-phev phev_3152 worker 16.0 0.0 16.0 2.5
 pnode node_3150 3150
+phev phev_3150 worker 16.0 0.0 16.0 2.5
 pnode node_315 315
+phev phev_315 worker 16.0 0.0 16.0 2.5
 pnode node_3148 3148
 }
 trf med_32 57.600000 0.000000 {
@@ -432,11 +420,266 @@ pnode node_3169 3169
 pnode node_3168 3168
 pnode node_3167 3167
 pnode node_3165 3165
+phev phev_3165 worker 16.0 0.0 16.0 2.5
 pnode node_3161 3161
 phev phev_3161 worker 16.0 0.0 16.0 2.5
 pnode node_3160 3160
+phev phev_3160 worker 16.0 0.0 16.0 2.5
 pnode node_316 316
 pnode node_3159 3159
-phev phev_3159 worker 16.0 0.0 16.0 2.5
+}
+}
+trf high_4 1240.000000 0.000000 {
+trf med_33 57.600000 0.000000 {
+pnode node_3187 3187
+pnode node_3186 3186
+phev phev_3186 worker 16.0 0.0 16.0 2.5
+pnode node_3185 3185
+pnode node_3184 3184
+pnode node_3182 3182
+pnode node_3181 3181
+phev phev_3181 worker 16.0 0.0 16.0 2.5
+pnode node_3179 3179
+pnode node_3178 3178
+pnode node_3177 3177
+pnode node_3174 3174
+}
+trf med_34 57.600000 0.000000 {
+pnode node_3195 3195
+pnode node_3193 3193
+pnode node_3192 3192
+pnode node_3190 3190
+phev phev_3190 worker 16.0 0.0 16.0 2.5
+pnode node_319 319
+pnode node_3189 3189
+pnode node_3188 3188
+}
+trf med_35 57.600000 0.000000 {
+pnode node_3211 3211
+pnode node_3210 3210
+pnode node_3206 3206
+pnode node_3205 3205
+pnode node_3203 3203
+pnode node_3201 3201
+pnode node_3199 3199
+pnode node_3196 3196
+}
+trf med_36 57.600000 0.000000 {
+pnode node_3223 3223
+pnode node_3222 3222
+pnode node_3218 3218
+pnode node_3217 3217
+phev phev_3217 worker 16.0 0.0 16.0 2.5
+pnode node_3216 3216
+pnode node_3215 3215
+pnode node_3213 3213
+pnode node_3212 3212
+}
+trf med_37 57.600000 0.000000 {
+pnode node_3244 3244
+pnode node_3243 3243
+pnode node_3241 3241
+pnode node_3240 3240
+pnode node_3239 3239
+pnode node_3238 3238
+phev phev_3238 worker 16.0 0.0 16.0 2.5
+pnode node_3237 3237
+phev phev_3237 worker 16.0 0.0 16.0 2.5
+pnode node_3226 3226
+phev phev_3226 worker 16.0 0.0 16.0 2.5
+}
+trf med_38 57.600000 0.000000 {
+pnode node_3271 3271
+pnode node_3270 3270
+phev phev_3270 worker 16.0 0.0 16.0 2.5
+pnode node_3261 3261
+pnode node_326 326
+pnode node_3258 3258
+phev phev_3258 worker 16.0 0.0 16.0 2.5
+pnode node_3255 3255
+pnode node_3250 3250
+pnode node_3245 3245
+}
+trf med_39 57.600000 0.000000 {
+pnode node_3296 3296
+pnode node_3295 3295
+pnode node_3292 3292
+pnode node_3291 3291
+phev phev_3291 worker 16.0 0.0 16.0 2.5
+pnode node_3287 3287
+pnode node_3286 3286
+pnode node_3285 3285
+phev phev_3285 worker 16.0 0.0 16.0 2.5
+pnode node_3277 3277
+pnode node_3276 3276
+phev phev_3276 worker 16.0 0.0 16.0 2.5
+}
+trf med_40 57.600000 0.000000 {
+pnode node_3309 3309
+pnode node_3307 3307
+pnode node_3306 3306
+phev phev_3306 worker 16.0 0.0 16.0 2.5
+pnode node_3303 3303
+pnode node_3300 3300
+pnode node_3298 3298
+pnode node_3297 3297
+}
+trf med_41 57.600000 0.000000 {
+pnode node_3332 3332
+pnode node_3331 3331
+phev phev_3331 worker 16.0 0.0 16.0 2.5
+pnode node_3330 3330
+pnode node_3326 3326
+pnode node_3324 3324
+phev phev_3324 worker 16.0 0.0 16.0 2.5
+pnode node_3323 3323
+pnode node_3322 3322
+pnode node_3321 3321
+}
+trf med_42 57.600000 0.000000 {
+pnode node_3358 3358
+pnode node_3356 3356
+pnode node_3354 3354
+pnode node_3353 3353
+pnode node_3352 3352
+pnode node_3351 3351
+pnode node_3346 3346
+pnode node_3344 3344
+pnode node_3333 3333
+}
+trf med_43 57.600000 0.000000 {
+pnode node_3369 3369
+pnode node_3367 3367
+phev phev_3367 worker 16.0 0.0 16.0 2.5
+pnode node_3366 3366
+pnode node_3364 3364
+pnode node_3363 3363
+pnode node_3362 3362
+pnode node_3361 3361
+pnode node_3359 3359
+}
+trf med_44 57.600000 0.000000 {
+pnode node_3412 3412
+pnode node_3402 3402
+pnode node_3397 3397
+phev phev_3397 worker 16.0 0.0 16.0 2.5
+pnode node_3396 3396
+pnode node_3390 3390
+pnode node_3380 3380
+pnode node_3376 3376
+pnode node_3372 3372
+phev phev_3372 worker 16.0 0.0 16.0 2.5
+}
+trf med_45 57.600000 0.000000 {
+pnode node_346 346
+pnode node_3435 3435
+pnode node_3434 3434
+pnode node_3433 3433
+pnode node_3429 3429
+pnode node_3416 3416
+pnode node_3415 3415
+phev phev_3415 worker 16.0 0.0 16.0 2.5
+pnode node_3414 3414
+pnode node_3413 3413
+phev phev_3413 worker 16.0 0.0 16.0 2.5
+}
+trf med_46 57.600000 0.000000 {
+pnode node_3506 3506
+phev phev_3506 worker 16.0 0.0 16.0 2.5
+pnode node_3505 3505
+phev phev_3505 worker 16.0 0.0 16.0 2.5
+pnode node_350 350
+pnode node_3488 3488
+pnode node_3487 3487
+phev phev_3487 worker 16.0 0.0 16.0 2.5
+pnode node_3486 3486
+pnode node_3485 3485
+phev phev_3485 worker 16.0 0.0 16.0 2.5
+}
+trf med_47 57.600000 0.000000 {
+pnode node_3535 3535
+pnode node_352 352
+pnode node_3514 3514
+pnode node_3513 3513
+pnode node_3512 3512
+pnode node_3511 3511
+pnode node_3510 3510
+pnode node_3509 3509
+}
+trf med_48 57.600000 0.000000 {
+pnode node_356 356
+phev phev_356 worker 16.0 0.0 16.0 2.5
+pnode node_3558 3558
+pnode node_3557 3557
+pnode node_3555 3555
+pnode node_3552 3552
+phev phev_3552 worker 16.0 0.0 16.0 2.5
+pnode node_3551 3551
+pnode node_3548 3548
+phev phev_3548 worker 16.0 0.0 16.0 2.5
+pnode node_3547 3547
+pnode node_3546 3546
+pnode node_3544 3544
+}
+trf med_49 57.600000 0.000000 {
+pnode node_3584 3584
+pnode node_358 358
+pnode node_3578 3578
+phev phev_3578 worker 16.0 0.0 16.0 2.5
+pnode node_3576 3576
+phev phev_3576 worker 16.0 0.0 16.0 2.5
+pnode node_3573 3573
+pnode node_3570 3570
+phev phev_3570 worker 16.0 0.0 16.0 2.5
+pnode node_3564 3564
+pnode node_3563 3563
+pnode node_3560 3560
+}
+trf med_50 57.600000 0.000000 {
+pnode node_3600 3600
+pnode node_3598 3598
+pnode node_3597 3597
+pnode node_3596 3596
+pnode node_3591 3591
+pnode node_3590 3590
+pnode node_3588 3588
+phev phev_3588 worker 16.0 0.0 16.0 2.5
+pnode node_3586 3586
+pnode node_3585 3585
+}
+trf med_51 57.600000 0.000000 {
+pnode node_3608 3608
+pnode node_3607 3607
+pnode node_3606 3606
+pnode node_3605 3605
+pnode node_3604 3604
+phev phev_3604 worker 16.0 0.0 16.0 2.5
+pnode node_3603 3603
+pnode node_3602 3602
+pnode node_3601 3601
+}
+trf med_52 57.600000 0.000000 {
+pnode node_3618 3618
+pnode node_3617 3617
+pnode node_3615 3615
+pnode node_3614 3614
+pnode node_3613 3613
+pnode node_3611 3611
+pnode node_3610 3610
+pnode node_361 361
+pnode node_3609 3609
+}
+trf med_53 57.600000 0.000000 {
+pnode node_3630 3630
+pnode node_3629 3629
+pnode node_3628 3628
+pnode node_3627 3627
+pnode node_3626 3626
+pnode node_3625 3625
+phev phev_3625 worker 16.0 0.0 16.0 2.5
+pnode node_3624 3624
+pnode node_3623 3623
+pnode node_3622 3622
+pnode node_3621 3621
 }
 }
