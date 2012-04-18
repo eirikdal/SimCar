@@ -131,6 +131,10 @@ let test_dayahead iter agents =
 //    syncContext.RaiseDelegateEvent progressPnode updated_realtime      
 //    syncContext.RaiseDelegateEvent progressTotal moving_dayahead
     // Raise events
+let kill agents = 
+    agents
+    |> Tree.send (Kill)
+    |> ignore
 
 // main control flow of the simulator
 let run day agents compute_dayahead =

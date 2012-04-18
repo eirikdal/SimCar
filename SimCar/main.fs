@@ -13,6 +13,8 @@ open Tree
 type SimCar(nIter, nTicksPerDayq) = 
     let _agents = to_agents <| powergrid()
     member self.Agents = _agents |> Tree.map (fun (name, from) -> from)
+    
+    member self.PostalService = postalService
    
     member self.RegisterDayaheadAnt (handler) =
         dayaheadAnt.Publish.AddHandler handler
@@ -38,8 +40,6 @@ type SimCar(nIter, nTicksPerDayq) =
     member self.RegisterProbReset (handler) = 
         probReset.Publish.AddHandler handler
 
-    member self.PostalService = postalService
-    
     member self.RegisterProgressTotal (handler) = 
         progressTotal.Publish.AddHandler handler
 
@@ -65,6 +65,57 @@ type SimCar(nIter, nTicksPerDayq) =
         trfCurrent.Publish.AddHandler handler
 
     member self.RegisterTrfFiltered (handler) = 
+        trfFiltered.Publish.AddHandler handler
+   
+    member self.UnregisterDayaheadAnt (handler) =
+        dayaheadAnt.Publish.AddHandler handler
+
+    member self.UnregisterDayaheadSupervisor (handler) = 
+        dayaheadSupervisor.Publish.AddHandler handler
+
+    member self.UnregisterDayaheadExpected (handler) = 
+        dayaheadExpected.Publish.AddHandler handler
+        
+    member self.UnregisterPhevBattery (handler) = 
+        phevBattery.Publish.AddHandler handler
+
+    member self.UnregisterPhevStatus (handler) = 
+        phevStatus.Publish.AddHandler handler
+
+    member self.UnregisterPhevFailed (handler) = 
+        phevFailed.Publish.AddHandler handler
+
+    member self.UnregisterProb (handler) = 
+        probEvent.Publish.AddHandler handler
+
+    member self.UnregisterProbReset (handler) = 
+        probReset.Publish.AddHandler handler
+
+    member self.UnregisterProgressTotal (handler) = 
+        progressTotal.Publish.AddHandler handler
+
+    member self.UnregisterProgressPhev (handler) = 
+        progressPhev.Publish.AddHandler handler
+
+    member self.UnregisterProgressPnode (handler) = 
+        progressPnode.Publish.AddHandler handler
+
+    member self.UnregisterDayaheadStep (handler) = 
+        dayaheadStep.Publish.AddHandler handler
+
+    member self.UnregisterDayaheadProgress (handler) =
+        dayaheadProgress.Publish.AddHandler handler
+
+    member self.UnregisterDayaheadInit (handler) =
+        dayaheadInit.Publish.AddHandler handler
+
+    member self.UnregisterTrfCapacity (handler) = 
+        trfCapacity.Publish.AddHandler handler
+
+    member self.UnregisterTrfCurrent (handler) = 
+        trfCurrent.Publish.AddHandler handler
+
+    member self.UnregisterTrfFiltered (handler) = 
         trfFiltered.Publish.AddHandler handler
 
 //    member self.RegisterComputeDayahead () = 
@@ -101,20 +152,20 @@ type SimCar(nIter, nTicksPerDayq) =
 
         printfn "Computing dayahead"
 // Pre-compute alternative:
-        postalService.send("brp", Dayahead((fun _ -> 0.0<kWh>)))
-        postalService.send("brp", Prediction((fun _ -> 0.0<kWh>)))
-        postalService.send("brp", Schedule(BRP.Action.schedule_none))
-
-        [for i in 0 .. (n-1) do run i self.Agents true] |> ignore
-        self.Agents |> Tree.send (Reset) |> ignore
-        let dayahead = Array.init(n*96) (fun i -> Energy.toFloat <| FileManager.prediction()(i))
+//        postalService.send("brp", Dayahead((fun _ -> 0.0<kWh>)))
+//        postalService.send("brp", Prediction((fun _ -> 0.0<kWh>)))
+//        postalService.send("brp", Schedule(BRP.Action.schedule_none))
+//
+//        [for i in 0 .. (n-1) do run i self.Agents true] |> ignore
+//        self.Agents |> Tree.send (Reset) |> ignore
+//        let dayahead = Array.init(n*96) (fun i -> Energy.toFloat <| FileManager.prediction()(i))
 
 // Swarm alternative:
 //        let dayahead = DayaheadSwarm.dayahead(realtime, n) 
 
 // Non-swarm alternative:
-//        let dayahead = DayaheadExp.Algorithm.distribute realtime n |> Array.ofList
-//        printfn "sum of dayahead %f" <| Array.sum dayahead
+        let dayahead = DayaheadExp.Algorithm.distribute realtime n |> Array.ofList
+        printfn "sum of dayahead %f" <| Array.sum dayahead
         postalService.send("brp", Dayahead(dayahead |> Array.get >> Energy.ofFloat))
         postalService.send("brp", Prediction(realtime |> Array.get >> Energy.ofFloat))
 
@@ -136,6 +187,7 @@ type SimCar(nIter, nTicksPerDayq) =
         printfn "Running simulations"
         [for i in 0 .. (n-1) do run i self.Agents false] |> ignore 
         printfn "Finished simulations"
+        kill self.Agents
 
     member self.TestDayahead(n) = 
         test_dayahead n self.Agents

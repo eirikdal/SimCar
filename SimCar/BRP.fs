@@ -71,6 +71,7 @@ module Action =
 
 let brp_agent brp schedule = Agent.Start(fun agent ->
     let queue = new Queue() 
+    
     let rec loop (BRP({ children=children; } as brp_args) as brp) (intentions : Message list) schedule (tick : int) waiting = async {
         let! (msg : Message) = 
             if (not waiting && queue.Count > 0) then
@@ -115,9 +116,9 @@ let brp_agent brp schedule = Agent.Start(fun agent ->
         | Charge_OK(_,_,_) ->
 //            return! loop brp intentions schedule tick false
             return! loop brp (msg :: intentions) schedule tick waiting
+        | Kill ->
+            printfn "Agent %s: Exiting.." "BRP"
         | _ -> 
-            syncContext.RaiseEvent error <| Exception("BRP: Not implemented yet")
-
-        return! loop brp intentions schedule tick waiting}    
+            syncContext.RaiseEvent error <| Exception("BRP: Not implemented yet") }    
 
     loop brp [] schedule 0 false)
