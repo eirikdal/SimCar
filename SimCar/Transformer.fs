@@ -11,7 +11,6 @@ open Agent
 open Models
 open PostalService
 
-
 module Action = 
     let filter energy rem = 
         if rem > energy then

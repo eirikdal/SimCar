@@ -85,10 +85,6 @@ type SimCar(nIter, nTicksPerDayq) =
         IO.clear_dayahead_data()
         
 //        self.RegisterComputeDayahead()
-
-//        postalService.send("brp", Dayahead((fun _ -> 0.0<kWh>)))
-//        postalService.send("brp", Prediction((fun _ -> 0.0<kWh>)))
-//        postalService.send("brp", Schedule(BRP.Action.schedule_none))
         
         let op i node = 
             match node with
@@ -104,14 +100,20 @@ type SimCar(nIter, nTicksPerDayq) =
         let realtime = [for i in 0 .. n*96 do yield Energy.toFloat <| calc_power i] |> Array.ofList
 
         printfn "Computing dayahead"
-//        [for i in 0 .. (n-1) do run i self.Agents true] |> ignore
-//        self.Agents |> Tree.send (Reset) |> ignore
-//        let prediction = Array.init(n*96) (fun i -> Energy.toFloat <| FileManager.prediction()(i))
+// Pre-compute alternative:
+        postalService.send("brp", Dayahead((fun _ -> 0.0<kWh>)))
+        postalService.send("brp", Prediction((fun _ -> 0.0<kWh>)))
+        postalService.send("brp", Schedule(BRP.Action.schedule_none))
 
-//        Swarm alternative:
+        [for i in 0 .. (n-1) do run i self.Agents true] |> ignore
+        self.Agents |> Tree.send (Reset) |> ignore
+        let dayahead = Array.init(n*96) (fun i -> Energy.toFloat <| FileManager.prediction()(i))
+
+// Swarm alternative:
 //        let dayahead = DayaheadSwarm.dayahead(realtime, n) 
 
-        let dayahead = DayaheadExp.Algorithm.distribute realtime n |> Array.ofList
+// Non-swarm alternative:
+//        let dayahead = DayaheadExp.Algorithm.distribute realtime n |> Array.ofList
 //        printfn "sum of dayahead %f" <| Array.sum dayahead
         postalService.send("brp", Dayahead(dayahead |> Array.get >> Energy.ofFloat))
         postalService.send("brp", Prediction(realtime |> Array.get >> Energy.ofFloat))

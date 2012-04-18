@@ -15,7 +15,7 @@ namespace WinChart
 {
     public partial class SimChart : Form
     {
-        const int nSim = 10;
+        const int nSim = 1;
         const int nTicks = 96;
         Sim.SimCar tSim = new Sim.SimCar(nSim, nTicks);
 

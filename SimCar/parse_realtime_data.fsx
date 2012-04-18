@@ -10,10 +10,9 @@ open MathNet
 open MathNet.Numerics.Interpolation
 open FileManager
 
-
 #nowarn "25"
 
-let powerprofile_file = "C:\\SimCar\\SimCar\\data\\buskerud.txt"
+let powerprofile_file = "C:\\SimCar\\SimCar\\data\\raw.txt"
 let profile_file = "C:\\SimCar\\SimCar\\data\\powerprofiles.txt"
 let data_folder = "C:\\SimCar\\SimCar\\data\\interpol\\"
 
@@ -60,7 +59,7 @@ let rec parse_powerprofiles stream (values : float list) days customer =
     | _ -> ()
 
 let powerprofiles = 
-    File.Delete(profile_file)
+//    File.Delete(profile_file)
     for file in Directory.GetFiles(data_folder) do
         File.Delete(file)
     let mutable rest = []
