@@ -35,23 +35,22 @@ type PostalService() =
             
             match msg with 
             | Register(name, from_agent) ->
-//                syncContext.RaiseEvent jobCompleted (agent, "Agent registered with postal service")
-
                 agentdict.Add(name, from_agent)
+                return! loop()
             | Deregister(name, from_agent) ->
-//                syncContext.RaiseEvent jobCompleted (agent, "Agent deregistered from postal service")
-
                 agentdict.Remove(name) |> ignore
-//            | Broadcast(message) ->
-//                agents |> List.iter (fun agent -> agent.Post(message))
+                return! loop()
+            | Kill -> printfn "PostalService: Exiting.."
             | Completed(message) ->
                 printfn "%s" message
+
+                return! loop()
             | Error(message) ->
                 printfn "Error: %s" message
+                return! loop()
             | _ ->
                 syncContext.RaiseEvent error <| Exception("PostalService: Not implemented yet")
 
-            return! loop()
         }
         loop())
 

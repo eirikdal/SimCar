@@ -6,12 +6,12 @@ open SynchronizationContext
 
 let dist x x' = abs(x - x')
 let mutable S = 0.0<kWh>
-let alpha = 0.2
-let theta = 0.9
+//let alpha = 0.3 
+//let theta = 0.95
 
 // BEST: alpha = 0.3, theta = 0.5-0-9?
 
-let shave(_D : float<kWh>[]) = 
+let shave alpha theta (_D : float<kWh>[]) = 
     let D = Array.copy _D
 
     S <- 0.0<kWh>
@@ -31,8 +31,8 @@ let shave(_D : float<kWh>[]) =
         syncContext.RaiseDelegateEvent dayaheadStep (D.Clone())
     
     // target of peak value should be the average value
-//    update i x
-    D.[i] <- w
+    update i x
+//    D.[i] <- w
 
     // continue shaving peaks toward mean while the value of the neighbornode is greater than the value of the updated node.
     // this is done to preserve topology

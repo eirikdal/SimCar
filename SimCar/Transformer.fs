@@ -11,7 +11,6 @@ open Agent
 open Models
 open PostalService
 
-
 module Action = 
     let filter energy rem = 
         if rem > energy then
@@ -40,17 +39,12 @@ let trf_agent trf = Agent.Start(fun agent ->
                 |> List.map (fun (child,_) -> charges |> List.exists (fun (Charge_OK(name,_,_)) -> child=name)) 
                 |> List.forall (fun x -> x)
 
-            if not test then 
-                raise <| Exception("hell")
-
             let rem = 
                 charges 
                 |> List.sortBy (fun (Charge_OK(_,_,ttl)) -> ttl)
                 |> List.fold (fun rem (Charge_OK(name,energy,ttl)) ->     
                     if not (name.StartsWith("med") || name.StartsWith("high")) then
                         let filtered, remaining = Action.filter energy rem
-                        if name = "med_29" then
-                            raise <| Exception("hell")
                         postalService.send(name, Charge_OK(name, filtered, ttl))
                         remaining
                     else 
@@ -62,37 +56,39 @@ let trf_agent trf = Agent.Start(fun agent ->
                 syncContext.RaiseDelegateEvent trfCapacity trf_args.capacity
                 
             return! loop trf [] [] false
-
-        let! (msg : Message) = 
-            if (not waiting && queue.Count > 0) then
-                async { return queue.Dequeue() :?> Message }
-            else
-                agent.Receive()
-
-        match msg with
-        | Update(tick) ->
-            return! loop trf intentions charges true
-        | ReplyTo(replyToMsg, reply) ->
-            match replyToMsg with
-            | RequestModel ->
-                if waiting then
-                    queue.Enqueue(msg)
-                    return! loop trf intentions charges waiting
+        else
+            let! (msg : Message) = 
+                if (not waiting && queue.Count > 0) then
+                    async { return queue.Dequeue() :?> Message }
                 else
-                    reply.Reply(Model(trf))
-                    return! loop trf [] [] false
-        | Charge(from,_,_,_) ->
-            return! loop trf (msg :: intentions) charges waiting
-        | Model(trf) -> 
-            return! loop trf intentions charges waiting
-        | Charge_OK(from,energy,_) -> 
-            return! loop trf (msg :: intentions) (msg :: charges) waiting
-        | Charge_Intentions(_) ->
-            return! loop trf (msg :: intentions) charges waiting
-        | Reset ->
-            return! loop trf intentions charges waiting
-        | _ as test ->
-            raise (Exception((test.ToString())))
-            return! loop trf intentions charges waiting
+                    agent.Receive()
+
+            match msg with
+            | Update(tick) ->
+                return! loop trf intentions charges true
+            | ReplyTo(replyToMsg, reply) ->
+                match replyToMsg with
+                | RequestModel ->
+                    if waiting then
+                        queue.Enqueue(msg)
+                        return! loop trf intentions charges waiting
+                    else
+                        reply.Reply(Model(trf))
+                        return! loop trf [] [] false
+            | Charge(from,_,_,_) ->
+                return! loop trf (msg :: intentions) charges waiting
+            | Model(trf) -> 
+                return! loop trf intentions charges waiting
+            | Charge_OK(from,energy,_) -> 
+                return! loop trf (msg :: intentions) (msg :: charges) waiting
+            | Charge_Intentions(_) ->
+                return! loop trf (msg :: intentions) charges waiting
+            | Reset ->
+                return! loop trf intentions charges waiting
+            | Kill ->
+                printfn "Agent %s: Exiting.." name
+            | _ as test ->
+                raise (Exception((test.ToString())))
+                return! loop trf intentions charges waiting
     }
     loop trf [] [] false)

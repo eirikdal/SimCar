@@ -10,9 +10,20 @@ open System
 open Models
 open Tree
 
+type Method = 
+    | Swarm
+    | Shaving
+    | Distribute
+
+type Contribution =
+    | Expected
+    | Simulated
+
 type SimCar(nIter, nTicksPerDayq) = 
     let _agents = to_agents <| powergrid()
     member self.Agents = _agents |> Tree.map (fun (name, from) -> from)
+    
+    member self.PostalService = postalService
    
     member self.RegisterDayaheadAnt (handler) =
         dayaheadAnt.Publish.AddHandler handler
@@ -38,8 +49,6 @@ type SimCar(nIter, nTicksPerDayq) =
     member self.RegisterProbReset (handler) = 
         probReset.Publish.AddHandler handler
 
-    member self.PostalService = postalService
-    
     member self.RegisterProgressTotal (handler) = 
         progressTotal.Publish.AddHandler handler
 
@@ -79,16 +88,12 @@ type SimCar(nIter, nTicksPerDayq) =
         IO.clear_screenshots()
         postalService.agents <- _agents
 
-    member self.ComputeDayahead(?days) = 
+    member self.ComputeDayahead(?days, ?dayahead, ?baseline) = 
         let n = match days with Some d -> d | None -> nIter
 
         IO.clear_dayahead_data()
         
 //        self.RegisterComputeDayahead()
-
-//        postalService.send("brp", Dayahead((fun _ -> 0.0<kWh>)))
-//        postalService.send("brp", Prediction((fun _ -> 0.0<kWh>)))
-//        postalService.send("brp", Schedule(BRP.Action.schedule_none))
         
         let op i node = 
             match node with
@@ -101,23 +106,53 @@ type SimCar(nIter, nTicksPerDayq) =
             powergrid()
             |> Tree.foldl (op tick) (0.0<kWh>)
 
-        let realtime = [for i in 0 .. n*96 do yield Energy.toFloat <| calc_power i] |> Array.ofList
+        let realtime = [for i in 0 .. n*96 do yield calc_power i] |> Array.ofList
 
         printfn "Computing dayahead"
-//        [for i in 0 .. (n-1) do run i self.Agents true] |> ignore
-//        self.Agents |> Tree.send (Reset) |> ignore
-//        let prediction = Array.init(n*96) (fun i -> Energy.toFloat <| FileManager.prediction()(i))
+        
+        let phev_contribution = 
+             match baseline with
+             | None | Some Expected -> 
+                Tree.phev_expected
+             | Some Simulated -> 
+                [for i in 0 .. (n-1) do run i self.Agents true] |> ignore
+                self.Agents |> Tree.send (Reset) |> ignore
+                Array.init(n*96) (fun i -> FileManager.dayahead()(i))
 
-//        Swarm alternative:
-//        let dayahead = DayaheadSwarm.dayahead(realtime, n) 
-
-        let dayahead = DayaheadExp.Algorithm.distribute realtime n |> Array.ofList
+        let dayahead = 
+            match dayahead with
+            | None | Some Shaving ->
+// Pre-compute alternative:
+                postalService.send("brp", Dayahead((fun _ -> 0.0<kWh>)))
+                postalService.send("brp", Prediction((fun _ -> 0.0<kWh>)))
+                postalService.send("brp", Schedule(BRP.Action.schedule_none))
+                
+                [|for i in 0 .. (n-1) do
+                    let _from,_to = (i*96),(i*96)+96
+                    let day = Array.sub realtime _from 96
+                    let phev = 
+                        match baseline with 
+                        | None | Some Expected ->
+                            Tree.phev_expected
+                        | Some Simulated ->
+                            Array.sub phev_contribution _from 96
+            
+                    let realtime_updated =                 
+                        Array.sum2 phev day
+                        |> DayAhead.shave 0.3 0.95
+                    yield! realtime_updated|]
+            | Some Swarm ->
+// Swarm alternative:
+                DayaheadSwarm.dayahead(realtime, n) 
+            | Some Distributed ->
+// Non-swarm alternative:
+                DayaheadExp.Algorithm.distribute phev_contribution realtime n |> Array.ofList
 //        printfn "sum of dayahead %f" <| Array.sum dayahead
-        postalService.send("brp", Dayahead(dayahead |> Array.get >> Energy.ofFloat))
-        postalService.send("brp", Prediction(realtime |> Array.get >> Energy.ofFloat))
+        postalService.send("brp", Dayahead(dayahead |> Array.get))
+        postalService.send("brp", Prediction(realtime |> Array.get))
 
 //        IO.write_doubles <| FileManager.file_prediction <| Parsing.parse_dayahead (List.ofArray pnodes)
-        IO.write_doubles <| FileManager.file_dayahead <| (List.ofArray dayahead)
+//        IO.write_doubles <| FileManager.file_dayahead <| (dayahead |> List.ofArray |> List.map Energy.toFloat)
 
         PHEV.rand <- new System.Random()
         printfn "Dayahead computed"
@@ -134,6 +169,7 @@ type SimCar(nIter, nTicksPerDayq) =
         printfn "Running simulations"
         [for i in 0 .. (n-1) do run i self.Agents false] |> ignore 
         printfn "Finished simulations"
+        kill self.Agents
 
     member self.TestDayahead(n) = 
         test_dayahead n self.Agents

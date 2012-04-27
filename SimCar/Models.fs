@@ -103,7 +103,9 @@ type Profile =
             let n = new Normal(profile.mean, profile.sigma)
             n.CumulativeDistribution(time) - n.CumulativeDistribution((time-1.0))
         | LogNormal ->
-            let n = new MathNet.Numerics.Distributions.Gamma(profile.mean, 7.0)
+            let mu = log (profile.mean**2.0/sqrt(profile.sigma+profile.mean**2.0))
+            let sigma = sqrt (log(profile.sigma/(profile.mean**2.0)+1.0))
+            let n = new MathNet.Numerics.Distributions.LogNormal(mu, sigma)
             n.CumulativeDistribution(time+1.0) - n.CumulativeDistribution((time))
     // cache the distributions
     member self.calc(name, (profiles : Distribution list)) : Profile =         
@@ -133,7 +135,7 @@ type Profile =
             sumn dist_list
         | DistProfile(name,dist_list) ->
             self.calc(name,dist_list).to_float()
-    member self.to_exp_float(rate, capacity) =
+    member self.to_exp_float(rate : float<kWh>, capacity) : float<kWh> list =
         match self with 
         | FloatProfile(_,dist_list) ->
             let calc_for_dist (dist : Distribution) = 
@@ -152,13 +154,13 @@ type Profile =
                             if ac > rate then 
                                 (ac-rate, (i', rate * dist'.[i%96]))
                             else
-                                (ac-(rate-ac), (i', 0.0))) (capacity, (0,0.0))
+                                (ac-(rate-ac), (i', 0.0<kWh>))) (capacity, (0,0.0<kWh>))
                         |> Array.map snd)
                 
                 Array.init (96) (fun i ->
                     windows_of_expected
                     |> Array.fold (fun ac window -> 
-                        ac + (window |> Array.fold (fun ac' (i', rate') -> if (i%96) = (i'%96) then ac'+rate' else ac') 0.0)) 0.0)
+                        ac + (window |> Array.fold (fun ac' (i', rate') -> if (i%96) = (i'%96) then ac'+rate' else ac') 0.0<kWh>)) 0.0<kWh>)
                 |> List.ofArray
 
             let test = 
@@ -298,7 +300,7 @@ let create_brp name nodes dayahead children =
 let create_distribution str_type mean sigma duration =
     let dist_type = 
         match str_type with
-        | "gauss" -> Normal
+        | "gauss" | "normal" -> Normal
         | "lognormal" -> LogNormal
         | _ -> raise <| Exception("Undefined distribution")
 

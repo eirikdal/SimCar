@@ -174,7 +174,7 @@ module Parsing =
         | _ -> nodes
 
     let parse_dayahead_file (file) = read_doubles(file)
-    
+
 let dayahead() = Parsing.parse_dayahead_file(file_dayahead) |> Array.get >> Energy.ofFloat
 
 let prediction() = Parsing.parse_dayahead_file(file_prediction) |> Array.get >> Energy.ofFloat
@@ -185,3 +185,4 @@ let powergrid() =
     let stream = IO.read_file file_brp
 
     create_brp "brp" (Parsing.parse_powergrid stream [] (&rest) (&children) "brp") (fun n -> 0.0<kWh>) (children)
+

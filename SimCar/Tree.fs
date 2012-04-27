@@ -20,37 +20,7 @@ let rec iter iterf node =
     | Leaf(None) ->
         ()
 
-// Traverse a tree of models, creating a mirrored tree of agents as we go along
-// this function should be avoided as much as possible, and should only be used when
-// a reply needs to be guaranteed. This is because of performance reasons.
-let rec send_reply msg (node : Node<Agent<Message>>) = 
-    match node with
-    | Node(nodes, Some(leaf)) ->
-        let list = List.map (fun n -> send_reply msg n) nodes
-        let res = leaf.PostAndAsyncReply((fun replyChannel -> ReplyTo(msg, replyChannel)), 5000)
-        Node(list, Some (leaf, res))
-    | Node(nodes, None) -> 
-        Node(List.map (fun n -> send_reply msg n) nodes, None)
-    | Leaf(Some(leaf)) ->
-        let res = leaf.PostAndAsyncReply((fun replyChannel -> ReplyTo(msg, replyChannel)), 5000)
-        Leaf(Some <| (leaf, res))
-    | Leaf(None) ->
-        Leaf(None)
-
-// traverse a tree of models, creating a mirrored tree of agents as we go along
-let rec send msg (node : Node<Agent<Message>>) = 
-    match node with
-    | Node(nodes, Some(leaf)) ->
-        let res = leaf.Post(msg)
-        Node(List.map (fun n -> send msg n) nodes, Some <| leaf)
-    | Node(nodes, None) -> 
-        Node(List.map (fun n -> send msg n) nodes, None)
-    | Leaf(Some(leaf)) ->
-        let res = leaf.Post(msg)
-        Leaf(Some <| leaf)
-    | Leaf(None) ->
-        Leaf(None)
-
+// mapBack function mapf to each node in the tree
 let rec mapBack mapf node = 
     match node with
     | Node(nodes, Some(leaf)) ->
@@ -64,6 +34,7 @@ let rec mapBack mapf node =
     | Leaf(None) ->
         Leaf(None)
 
+// map function mapf to each node in the tree
 let rec map mapf node = 
     match node with
     | Node(nodes, Some(leaf)) ->
@@ -73,6 +44,39 @@ let rec map mapf node =
         Leaf(Some(mapf leaf))
     | Node(nodes, None) ->
         Node(List.map (fun n -> map mapf n) nodes, None)
+    | Leaf(None) ->
+        Leaf(None)
+
+// traverse a tree of agents, return an isomorphic tree of (agent,message) pairs
+let send_reply msg node = 
+    let rec send_reply msg (node : Node<Agent<Message>>) = 
+        match node with
+        | Node(nodes, Some(leaf)) ->
+            let list = List.map (fun n -> send_reply msg n) nodes 
+            let res = leaf.PostAndAsyncReply((fun replyChannel -> ReplyTo(msg, replyChannel)))
+            Node(list, Some (leaf, res))
+        | Node(nodes, None) -> 
+            Node(List.map (fun n -> send_reply msg n) nodes, None)
+        | Leaf(Some(leaf)) ->
+            let res = leaf.PostAndAsyncReply((fun replyChannel -> ReplyTo(msg, replyChannel)))
+            Leaf(Some <| (leaf, res))
+        | Leaf(None) ->
+            Leaf(None)
+
+    send_reply msg node
+    |> mapBack (fun (ag, msg) -> (ag, Async.RunSynchronously(msg)))
+
+// traverse a tree of models, return an isomorphic tree of agents
+let rec send msg (node : Node<Agent<Message>>) = 
+    match node with
+    | Node(nodes, Some(leaf)) ->
+        let res = leaf.Post(msg)
+        Node(List.map (fun n -> send msg n) nodes, Some <| leaf)
+    | Node(nodes, None) -> 
+        Node(List.map (fun n -> send msg n) nodes, None)
+    | Leaf(Some(leaf)) ->
+        let res = leaf.Post(msg)
+        Leaf(Some <| leaf)
     | Leaf(None) ->
         Leaf(None)
 
@@ -104,6 +108,7 @@ let rec foldr op node : float<kWh> =
         
 //let post_reply msg (leaf : Agent<Message>) = leaf.PostAndReply((fun replyChannel -> ReplyTo(msg, replyChannel)), 100000)
 
+// traverse tree, return a sequence of the leaves
 let rec collect node = 
     seq {
         match node with 
@@ -118,5 +123,18 @@ let rec collect node =
             ()
     }
 
-//let rec collect msg node = 
-//    fetch msg node 
+let collect_exp node = 
+    match node with
+    | Transformer(_) -> []
+    | PHEV(phev_args) as node -> phev_args.profile.to_exp_float(phev_args.rate, phev_args.capacity)
+    | PowerNode(_) -> []
+    | BRP(_) -> []
+
+let phev_expected = 
+    FileManager.powergrid()
+    |> map collect_exp 
+    |> collect
+    |> List.ofSeq
+    |> List.filter (fun x -> if x.Length = 0 then false else true)
+    |> List.sumn
+    |> Array.ofList

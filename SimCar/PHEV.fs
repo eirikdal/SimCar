@@ -99,7 +99,7 @@ let phev_agent _p name = Agent<Message>.Start(fun agent ->
             let ttl = Action.find_ttl histogram tick 
             let wait_for_reply = Action.send_intention phev_args ttl
             
-            if phev_args.name = "phev_192" then
+            if phev_args.name = "phev_827" then
                 syncContext.RaiseDelegateEvent phevBattery phev_args.battery
                 if phev_args.duration > 0 then
                     syncContext.RaiseDelegateEvent phevStatus 1.0
@@ -112,14 +112,10 @@ let phev_agent _p name = Agent<Message>.Start(fun agent ->
                 return! loop <| PHEV(phev_args.drive()) <| true
         | Reset -> 
             return! loop <| PHEV({ phev_args with battery=phev_args.capacity; duration=(-1) }) <| false
+        | Kill ->
+            printfn "Agent %s: Exiting.." name
         | _ -> 
             syncContext.RaiseEvent error <| Exception("PHEV: Not implemented yet")
 
-            return! loop phev waiting
-        
-        return! loop phev waiting } 
-    and waiting() = async {
-        ()
-    }
-
+            return! loop phev waiting }
     loop _p false)
