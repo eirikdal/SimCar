@@ -100,14 +100,9 @@ let moving_average (array : float<kWh> array) =
 
 let test_dayahead iter agents = 
     let tick n = 
-        syncContext.RaiseEvent jobDebug <| sprintf "Beginning tick %d\n" n
-        let test = 
-            agents
-            |> Tree.send (Update(n)) // inform agents that new tick has begun
-        syncContext.RaiseEvent jobDebug <| sprintf "Ending tick %d\n" n
-        test
+        agents
+        |> Tree.send (Update(n)) // inform agents that new tick has begun
         |> Tree.send_reply RequestModel // request model from agents
-//        |> Tree.map (fun (ag, msg) -> (ag, Async.RunSynchronously(msg)))
 
     let realtime = Array.init(96) (fun i -> tick i)
 
@@ -118,7 +113,7 @@ let test_dayahead iter agents =
     let rec shave n rt = 
         syncContext.RaiseDelegateEvent dayaheadProgress rt
         if n > 0 then 
-            shave (n-1) (rt |> DayAhead.shave)
+            shave (n-1) (rt |> DayAhead.shave 0.3 0.95)
 
     shave iter updated_realtime
 //
@@ -142,7 +137,6 @@ let run day agents compute_dayahead =
         agents
         |> Tree.send (Update(n)) // inform agents that new tick has begun
         |> Tree.send_reply RequestModel // request model from agents
-//        |> Tree.mapBack (fun (ag, msg) -> (ag, Async.RunSynchronously(msg)))
 
     printfn "Simulating day %d" day
 
@@ -157,26 +151,21 @@ let run day agents compute_dayahead =
         realtime
         |> Array.map (Tree.foldr fold_pnodes)
 
+    let phevs = 
+        realtime
+        |> Array.map (Tree.foldr fold_phevs)
+
 //    let moving_dayahead = 
 //        updated_realtime
 //        |> moving_average
 //        |> Array.ofSeq
     
     if compute_dayahead then
-        let dayahead = 
-            updated_realtime
-            |> DayAhead.shave
-
         IO.write_doubles <| FileManager.file_prediction <| Parsing.parse_dayahead (List.ofArray pnodes)
-        IO.write_doubles <| FileManager.file_dayahead <| Parsing.parse_dayahead (List.ofArray dayahead)
+        IO.write_doubles <| FileManager.file_dayahead <| Parsing.parse_dayahead (List.ofArray phevs)
 //        syncContext.RaiseEvent updateEvent <| dayahead
     else
-        let phevs = 
-            realtime
-            |> Array.map (Tree.foldr fold_phevs)
-            |> Array.map (fun x -> Energy.toFloat(x))
-
-        printfn "sum of phevs %f" <| Array.sum phevs
+        printfn "sum of phevs %f" <| (phevs |> Array.map Energy.toFloat |> Array.sum)
 
         let (Model(BRP( { dayahead=dayahead }))) = postalService.send_reply("brp", RequestDayahead)
 

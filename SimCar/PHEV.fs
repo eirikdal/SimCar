@@ -99,7 +99,7 @@ let phev_agent _p name = Agent<Message>.Start(fun agent ->
             let ttl = Action.find_ttl histogram tick 
             let wait_for_reply = Action.send_intention phev_args ttl
             
-            if phev_args.name = "phev_192" then
+            if phev_args.name = "phev_827" then
                 syncContext.RaiseDelegateEvent phevBattery phev_args.battery
                 if phev_args.duration > 0 then
                     syncContext.RaiseDelegateEvent phevStatus 1.0

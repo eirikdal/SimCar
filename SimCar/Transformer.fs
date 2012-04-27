@@ -39,17 +39,12 @@ let trf_agent trf = Agent.Start(fun agent ->
                 |> List.map (fun (child,_) -> charges |> List.exists (fun (Charge_OK(name,_,_)) -> child=name)) 
                 |> List.forall (fun x -> x)
 
-            if not test then 
-                raise <| Exception("hell")
-
             let rem = 
                 charges 
                 |> List.sortBy (fun (Charge_OK(_,_,ttl)) -> ttl)
                 |> List.fold (fun rem (Charge_OK(name,energy,ttl)) ->     
                     if not (name.StartsWith("med") || name.StartsWith("high")) then
                         let filtered, remaining = Action.filter energy rem
-                        if name = "med_29" then
-                            raise <| Exception("hell")
                         postalService.send(name, Charge_OK(name, filtered, ttl))
                         remaining
                     else 
