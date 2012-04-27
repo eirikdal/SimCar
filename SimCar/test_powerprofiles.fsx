@@ -25,6 +25,12 @@ let sample2 = Array.sub (snd profiles_interpol.Head) 0 96
 //let test2 = FSharpChart.Combine [FSharpChart.Line (sample);
 //                                    FSharpChart.Line (sample2)]
 
-FSharpChart.Line(take 100 profiles) |> ignore
+let test = Tree.phev_expected
+let test2 = take 1000 profiles_interpol |> Array.map Models.Energy.ofFloat
+let test3 = Array.sum2 test test2
+let test4 = DayAhead.shave 0.3 0.95 test3
+
+FSharpChart.Line test3
+FSharpChart.Line test4
 
 //test2.SaveChartAs(img, System.Windows.Forms.DataVisualization.Charting.ChartImageFormat.Png)

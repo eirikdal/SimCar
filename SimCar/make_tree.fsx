@@ -25,7 +25,7 @@ type Transformer =
     | HIGH of int * float * Transformer list
     | PHEV of string
 
-let phev_ratio = 0.2
+let phev_ratio = 0.15
 
 let rand = new System.Random()
 
@@ -76,7 +76,10 @@ let make_grid =
         | LOW(name,_) -> 
             [yield sprintf "pnode node_%s %s" name name]
         | PHEV(name) -> 
-            [yield sprintf "phev %s worker 16.0 0.0 16.0 2.5" name]
+            if rand.NextDouble() < 0.2 then 
+                [yield sprintf "phev %s housewife 16.0 0.0 16.0 2.5" name]
+            else
+                [yield sprintf "phev %s worker 16.0 0.0 16.0 2.5" name]
 
 //    profiles |> List.fold (fun ac (profile, peak) -> append profile ac peak)
 
