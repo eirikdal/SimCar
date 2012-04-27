@@ -76,10 +76,10 @@ let make_grid =
         | LOW(name,_) -> 
             [yield sprintf "pnode node_%s %s" name name]
         | PHEV(name) -> 
-            if rand.NextDouble() < 0.2 then 
-                [yield sprintf "phev %s housewife 16.0 0.0 16.0 2.5" name]
-            else
-                [yield sprintf "phev %s worker 16.0 0.0 16.0 2.5" name]
+//            if rand.NextDouble() < 0.2 then 
+//                [yield sprintf "phev %s housewife 16.0 0.0 16.0 2.5" name]
+//            else
+            [yield sprintf "phev %s worker 16.0 0.0 16.0 2.5" name]
 
 //    profiles |> List.fold (fun ac (profile, peak) -> append profile ac peak)
 
