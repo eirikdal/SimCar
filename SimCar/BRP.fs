@@ -114,7 +114,6 @@ let brp_agent brp schedule = Agent.Start(fun agent ->
                 return! loop brp (msg :: intentions) schedule tick waiting
         | Reset -> return! loop brp intentions schedule tick waiting
         | Charge_OK(_,_,_) ->
-//            return! loop brp intentions schedule tick false
             return! loop brp (msg :: intentions) schedule tick waiting
         | Kill ->
             printfn "Agent %s: Exiting.." "BRP"
