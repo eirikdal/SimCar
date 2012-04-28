@@ -12,7 +12,7 @@ namespace WinChart
         const int nSim = 10;
         const int nTicks = 96;
         Sim.SimCar tSim = new Sim.SimCar(nSim, nTicks);
-
+        
         private Mutex mut = new Mutex();
         private const int nRealTime = 0;
         private const int nPowerNodes = 1;
