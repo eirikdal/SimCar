@@ -6,7 +6,7 @@ open Agent
 open Message
 open Models
 open System
-open System.Collections
+open System.Collections.Generic
 open System.Threading
 open PostalService
 open SynchronizationContext
@@ -70,12 +70,12 @@ module Action =
         |> List.iter (fun (trf,Charge(from,energy,_,rate)) -> reserve (Energy.ofFloat infinity) energy rate from trf |> ignore)
 
 let brp_agent brp schedule = Agent.Start(fun agent ->
-    let queue = new Queue() 
+    let queue = new Queue<Message>() 
     
     let rec loop (BRP({ children=children; } as brp_args) as brp) (intentions : Message list) schedule (tick : int) waiting = async {
         let! (msg : Message) = 
             if (not waiting && queue.Count > 0) then
-                async { return queue.Dequeue() :?> Message }
+                async { return queue.Dequeue() }
             else
                 agent.Receive()
 
