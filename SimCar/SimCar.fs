@@ -21,28 +21,28 @@ open System.Windows
 
 let mutable schedule = BRP.Action.schedule_greedy
 // make the right kind of agent for a given node
-let make_agent name node = 
+let model_to_agent name node = 
     match node with
     | Transformer(_) ->
-        (name, trf_agent node)
+        (name, Agent.Centralized.create_trf_agent node)
     | PHEV(_) ->
-        (name, phev_agent node name)
+        (name, Agent.Centralized.create_phev_agent node name)
     | PowerNode(_) ->
-        (name, pnode_agent node)
+        (name, Agent.Centralized.create_pnode_agent node)
     | BRP(_) ->
-        (name, brp_agent node schedule)
+        (name, Agent.Centralized.create_brp_agent node schedule)
 
 // traverse a tree of models, creating a mirrored tree of agents as we go along
 let rec to_agents node = 
     match node with
     | Node(nodes, Some(Transformer({name=name}) as trf)) ->
-        Node(List.map (fun n -> to_agents n) nodes, Some <| make_agent name trf)
+        Node(List.map (fun n -> to_agents n) nodes, Some <| model_to_agent name trf)
     | Node(nodes, Some(PowerNode({name=name}) as pnode)) ->
-        Leaf(Some <| make_agent name pnode)
+        Leaf(Some <| model_to_agent name pnode)
     | Node(nodes, Some(PHEV({name=name}) as phev)) ->
-        Leaf(Some <| make_agent name phev)
+        Leaf(Some <| model_to_agent name phev)
     | Node(nodes, Some(BRP({name=name}) as brp)) ->
-        Node(List.map (fun n -> to_agents n) nodes, Some <| make_agent name brp)
+        Node(List.map (fun n -> to_agents n) nodes, Some <| model_to_agent name brp)
 
 // for testing purposes
 let print_grid message =

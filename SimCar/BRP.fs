@@ -69,55 +69,110 @@ module Action =
         queue
         |> List.iter (fun (trf,Charge(from,energy,_,rate)) -> reserve (Energy.ofFloat infinity) energy rate from trf |> ignore)
 
-let brp_agent brp schedule = Agent.Start(fun agent ->
-    let queue = new Queue<Message>() 
+module Agent =
+    module Centralized = 
+        let create_brp_agent brp schedule = Agent.Start(fun agent ->
+            let queue = new Queue<Message>() 
     
-    let rec loop (BRP({ children=children; } as brp_args) as brp) (intentions : Message list) schedule (tick : int) waiting = async {
-        let! (msg : Message) = 
-            if (not waiting && queue.Count > 0) then
-                async { return queue.Dequeue() }
-            else
-                agent.Receive()
+            let rec loop (BRP({ children=children; } as brp_args) as brp) (intentions : Message list) schedule (tick : int) waiting = async {
+                let! (msg : Message) = 
+                    if (not waiting && queue.Count > 0) then
+                        async { return queue.Dequeue() }
+                    else
+                        agent.Receive()
 
-        match msg with
-        | ReplyTo(replyToMsg, reply) ->
-            match replyToMsg with
-            | RequestModel ->
-                if waiting then
-                    queue.Enqueue(msg)
+                match msg with
+                | ReplyTo(replyToMsg, reply) ->
+                    match replyToMsg with
+                    | RequestModel ->
+                        if waiting then
+                            queue.Enqueue(msg)
+                            return! loop brp intentions schedule tick waiting
+                        else
+                            syncContext.RaiseEvent jobDebug <| "BRP responding to RequestModel"
+                            reply.Reply(Model(brp))
+                            return! loop brp [] schedule tick false
+                    | RequestDayahead ->
+                        reply.Reply(Model(brp))
+                        return! loop brp [] schedule tick waiting
+                | Update(tick) -> 
+                    return! loop brp [] schedule tick true
+                | Dayahead(dayahead) ->
+                    return! loop <| BRP({ brp_args with dayahead=dayahead }) <| intentions <| schedule <| tick <| waiting
+                | Prediction(realtime) ->
+                    return! loop <| BRP({ brp_args with realtime=realtime }) <| intentions <| schedule <| tick <| waiting
+                | Schedule(schedule) ->
                     return! loop brp intentions schedule tick waiting
-                else
-                    syncContext.RaiseEvent jobDebug <| "BRP responding to RequestModel"
-                    reply.Reply(Model(brp))
-                    return! loop brp [] schedule tick false
-            | RequestDayahead ->
-                reply.Reply(Model(brp))
-                return! loop brp [] schedule tick waiting
-        | Update(tick) -> 
-            return! loop brp [] schedule tick true
-        | Dayahead(dayahead) ->
-            return! loop <| BRP({ brp_args with dayahead=dayahead }) <| intentions <| schedule <| tick <| waiting
-        | Prediction(realtime) ->
-            return! loop <| BRP({ brp_args with realtime=realtime }) <| intentions <| schedule <| tick <| waiting
-        | Schedule(schedule) ->
-            return! loop brp intentions schedule tick waiting
-        | Model(brp) -> 
-            return! loop brp intentions schedule tick waiting
-        | Charge_Intentions(messages) -> 
-            if intentions.Length + 1 >= children.Length then
-                syncContext.RaiseEvent jobDebug <| "BRP got charges"
-                let messages' = (msg :: intentions) |> Message.reduce_queue
-                schedule brp_args.dayahead brp_args.realtime messages' tick
+                | Model(brp) -> 
+                    return! loop brp intentions schedule tick waiting
+                | Charge_Intentions(messages) -> 
+                    if intentions.Length + 1 >= children.Length then
+                        syncContext.RaiseEvent jobDebug <| "BRP got charges"
+                        let messages' = (msg :: intentions) |> Message.reduce_queue
+                        schedule brp_args.dayahead brp_args.realtime messages' tick
 
-                return! loop brp [] schedule tick false
-            else
-                return! loop brp (msg :: intentions) schedule tick waiting
-        | Reset -> return! loop brp intentions schedule tick waiting
-        | Charge_OK(_,_,_) ->
-            return! loop brp (msg :: intentions) schedule tick waiting
-        | Kill ->
-            printfn "Agent %s: Exiting.." "BRP"
-        | _ -> 
-            syncContext.RaiseEvent error <| Exception("BRP: Not implemented yet") }    
+                        return! loop brp [] schedule tick false
+                    else
+                        return! loop brp (msg :: intentions) schedule tick waiting
+                | Reset -> return! loop brp intentions schedule tick waiting
+                | Charge_OK(_,_,_) ->
+                    return! loop brp (msg :: intentions) schedule tick waiting
+                | Kill ->
+                    printfn "Agent %s: Exiting.." "BRP"
+                | _ -> 
+                    syncContext.RaiseEvent error <| Exception("BRP: Not implemented yet") }    
 
-    loop brp [] schedule 0 false)
+            loop brp [] schedule 0 false)
+    module Decentralized = 
+        let brp_agent brp schedule = Agent.Start(fun agent ->
+            let queue = new Queue<Message>() 
+    
+            let rec loop (BRP({ children=children; } as brp_args) as brp) (intentions : Message list) schedule (tick : int) waiting = async {
+                let! (msg : Message) = 
+                    if (not waiting && queue.Count > 0) then
+                        async { return queue.Dequeue() }
+                    else
+                        agent.Receive()
+
+                match msg with
+                | ReplyTo(replyToMsg, reply) ->
+                    match replyToMsg with
+                    | RequestModel ->
+                        if waiting then
+                            queue.Enqueue(msg)
+                            return! loop brp intentions schedule tick waiting
+                        else
+                            syncContext.RaiseEvent jobDebug <| "BRP responding to RequestModel"
+                            reply.Reply(Model(brp))
+                            return! loop brp [] schedule tick false
+                    | RequestDayahead ->
+                        reply.Reply(Model(brp))
+                        return! loop brp [] schedule tick waiting
+                | Update(tick) -> 
+                    return! loop brp [] schedule tick true
+                | Dayahead(dayahead) ->
+                    return! loop <| BRP({ brp_args with dayahead=dayahead }) <| intentions <| schedule <| tick <| waiting
+                | Prediction(realtime) ->
+                    return! loop <| BRP({ brp_args with realtime=realtime }) <| intentions <| schedule <| tick <| waiting
+                | Schedule(schedule) ->
+                    return! loop brp intentions schedule tick waiting
+                | Model(brp) -> 
+                    return! loop brp intentions schedule tick waiting
+                | Charge_Intentions(messages) -> 
+                    if intentions.Length + 1 >= children.Length then
+                        syncContext.RaiseEvent jobDebug <| "BRP got charges"
+                        let messages' = (msg :: intentions) |> Message.reduce_queue
+                        schedule brp_args.dayahead brp_args.realtime messages' tick
+
+                        return! loop brp [] schedule tick false
+                    else
+                        return! loop brp (msg :: intentions) schedule tick waiting
+                | Reset -> return! loop brp intentions schedule tick waiting
+                | Charge_OK(_,_,_) ->
+                    return! loop brp (msg :: intentions) schedule tick waiting
+                | Kill ->
+                    printfn "Agent %s: Exiting.." "BRP"
+                | _ -> 
+                    syncContext.RaiseEvent error <| Exception("BRP: Not implemented yet") }    
+
+            loop brp [] schedule 0 false)

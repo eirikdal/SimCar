@@ -13,9 +13,8 @@ open FileManager
 let rate = 1.25<kWh>
 
 module Algorithm = 
-    let distribute (phev_expected:float<kWh> array) realtime days = 
+    let distribute (phev_expected:float<kWh> array) realtime theta days = 
 //        printfn "sum of PHEV expected %f" (Array.sum phev_expected)
-        let theta = 0.95
         let util pos' (day:float<kWh> array) (pos,x) = 
             let distance = theta ** (float <| abs(pos-pos'))
             distance*(1.0<kWh> / day.[pos])

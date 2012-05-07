@@ -1,5 +1,7 @@
 ﻿module Message
 
+#nowarn "25"
+
 open System
 open Agent
 open Models

@@ -3,7 +3,7 @@
 #nowarn "25"
 
 open System
-open System.Collections
+open System.Collections.Generic
 open System.Threading
 open SynchronizationContext
 open Message
@@ -62,60 +62,114 @@ module Action =
         |> (+) tick
 
 
-(* 
- * PHEV: This is the PHEV agent
- *)
-let phev_agent _p name = Agent<Message>.Start(fun agent ->
-    let queue = new Queue() 
-    let test = new MathNet.Numerics.Statistics.Histogram()
+module Agent = 
+    module Centralized = 
+        let create_phev_agent _p name = Agent<Message>.Start(fun agent ->
+            let queue = new Queue<Message>() 
+            let test = new MathNet.Numerics.Statistics.Histogram()
     
-    let rec loop (PHEV({ name=name; parent=parent; histogram=histogram } as phev_args) as phev) waiting = async {
-        let! (msg : Message) = 
-            if not waiting && queue.Count > 0 then
-                async { return queue.Dequeue() :?> Message }
-            else
-                agent.Receive()
-        match msg with
-        | ReplyTo(replyToMsg, reply) ->
-            match replyToMsg with
-            | RequestModel ->
-                if not waiting then
-                    reply.Reply(Model(phev))
-                    return! loop phev false
-                else
-                    queue.Enqueue(msg)
+            let rec loop (PHEV({ name=name; parent=parent; histogram=histogram } as phev_args) as phev) waiting = async {
+                let! (msg : Message) = 
+                    if not waiting && queue.Count > 0 then
+                        async { return queue.Dequeue() }
+                    else
+                        agent.Receive()
+                match msg with
+                | ReplyTo(replyToMsg, reply) ->
+                    match replyToMsg with
+                    | RequestModel ->
+                        if not waiting then
+                            reply.Reply(Model(phev))
+                            return! loop phev false
+                        else
+                            queue.Enqueue(msg)
+                            return! loop phev waiting
+                | Model(phev) ->
                     return! loop phev waiting
-        | Model(phev) ->
-            return! loop phev waiting
-        | Charge_Accepted(accepted) ->
-            let phevArgs = { phev_args with intentions=accepted }
+                | Charge_Accepted(accepted) ->
+                    let phevArgs = { phev_args with intentions=accepted }
             
-            let wait_for_reply = Action.send_intention phevArgs (-1)
+                    let wait_for_reply = Action.send_intention phevArgs (-1)
             
-            return! loop (PHEV(phevArgs)) wait_for_reply
-        | Charge_OK(_,_,_) ->
-            return! loop (Action.charge phev_args) false
-        | Update(tick) ->
-            let ttl = Action.find_ttl histogram tick 
-            let wait_for_reply = Action.send_intention phev_args ttl
+                    return! loop (PHEV(phevArgs)) wait_for_reply
+                | Charge_OK(_,_,_) ->
+                    return! loop (Action.charge phev_args) false
+                | Update(tick) ->
+                    let ttl = Action.find_ttl histogram tick 
+                    let wait_for_reply = Action.send_intention phev_args ttl
             
-            if phev_args.name = "phev_827" then
-                syncContext.RaiseDelegateEvent phevBattery phev_args.battery
-                if phev_args.duration > 0 then
-                    syncContext.RaiseDelegateEvent phevStatus 1.0
-                else 
-                    syncContext.RaiseDelegateEvent phevStatus 0.0
+                    if phev_args.name = "phev_827" then
+                        syncContext.RaiseDelegateEvent phevBattery phev_args.battery
+                        if phev_args.duration > 0 then
+                            syncContext.RaiseDelegateEvent phevStatus 1.0
+                        else 
+                            syncContext.RaiseDelegateEvent phevStatus 0.0
 
-            if phev_args.duration <= 0 then
-                return! loop <| Action.leave name phev_args tick <| true
-            else
-                return! loop <| PHEV(phev_args.drive()) <| true
-        | Reset -> 
-            return! loop <| PHEV({ phev_args with battery=phev_args.capacity; duration=(-1) }) <| false
-        | Kill ->
-            printfn "Agent %s: Exiting.." name
-        | _ -> 
-            syncContext.RaiseEvent error <| Exception("PHEV: Not implemented yet")
+                    if phev_args.duration <= 0 then
+                        return! loop <| Action.leave name phev_args tick <| true
+                    else
+                        return! loop <| PHEV(phev_args.drive()) <| true
+                | Reset -> 
+                    return! loop <| PHEV({ phev_args with battery=phev_args.capacity; duration=(-1) }) <| false
+                | Kill ->
+                    printfn "Agent %s: Exiting.." name
+                | _ -> 
+                    syncContext.RaiseEvent error <| Exception("PHEV: Not implemented yet")
 
-            return! loop phev waiting }
-    loop _p false)
+                    return! loop phev waiting }
+            loop _p false)
+    module Decentralized = 
+        let create_phev_agent _p name = Agent<Message>.Start(fun agent ->
+            let queue = new Queue<Message>() 
+            let test = new MathNet.Numerics.Statistics.Histogram()
+    
+            let rec loop (PHEV({ name=name; parent=parent; histogram=histogram } as phev_args) as phev) waiting = async {
+                let! (msg : Message) = 
+                    if not waiting && queue.Count > 0 then
+                        async { return queue.Dequeue() }
+                    else
+                        agent.Receive()
+                match msg with
+                | ReplyTo(replyToMsg, reply) ->
+                    match replyToMsg with
+                    | RequestModel ->
+                        if not waiting then
+                            reply.Reply(Model(phev))
+                            return! loop phev false
+                        else
+                            queue.Enqueue(msg)
+                            return! loop phev waiting
+                | Model(phev) ->
+                    return! loop phev waiting
+                | Charge_Accepted(accepted) ->
+                    let phevArgs = { phev_args with intentions=accepted }
+            
+                    let wait_for_reply = Action.send_intention phevArgs (-1)
+            
+                    return! loop (PHEV(phevArgs)) wait_for_reply
+                | Charge_OK(_,_,_) ->
+                    return! loop (Action.charge phev_args) false
+                | Update(tick) ->
+                    let ttl = Action.find_ttl histogram tick 
+                    let wait_for_reply = Action.create_intention phev_args ttl
+            
+                    if phev_args.name = "phev_827" then
+                        syncContext.RaiseDelegateEvent phevBattery phev_args.battery
+                        if phev_args.duration > 0 then
+                            syncContext.RaiseDelegateEvent phevStatus 1.0
+                        else 
+                            syncContext.RaiseDelegateEvent phevStatus 0.0
+
+                    if phev_args.duration <= 0 then
+                        return! loop <| Action.leave name phev_args tick <| true
+                    else
+                        return! loop <| PHEV(phev_args.drive()) <| true
+                | Reset -> 
+                    return! loop <| PHEV({ phev_args with battery=phev_args.capacity; duration=(-1) }) <| false
+                | Kill ->
+                    printfn "Agent %s: Exiting.." name
+                | _ -> 
+                    syncContext.RaiseEvent error <| Exception("PHEV: Not implemented yet")
+
+                    return! loop phev waiting }
+            loop _p false)

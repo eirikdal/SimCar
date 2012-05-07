@@ -1,12 +1,12 @@
 ﻿module Sim
 
-open System.Drawing
+open System
+//open System.Drawing
 open SimCar
 open SynchronizationContext
 open Message
 open PostalService
 open FileManager
-open System
 open Models
 open Tree
 
@@ -146,7 +146,7 @@ type SimCar(nIter, nTicksPerDayq) =
                 DayaheadSwarm.dayahead(realtime, n) 
             | Some Distributed ->
 // Non-swarm alternative:
-                DayaheadExp.Algorithm.distribute phev_contribution realtime n |> Array.ofList
+                DayaheadExp.Algorithm.distribute phev_contribution realtime 0.95 n |> Array.ofList
 //        printfn "sum of dayahead %f" <| Array.sum dayahead
         postalService.send("brp", Dayahead(dayahead |> Array.get))
         postalService.send("brp", Prediction(realtime |> Array.get))
@@ -162,7 +162,7 @@ type SimCar(nIter, nTicksPerDayq) =
         let n = match days with Some d -> d | None -> nIter
 
 
-        postalService.send("brp", Dayahead(FileManager.dayahead()))
+//        postalService.send("brp", Dayahead(FileManager.dayahead()))
 //        postalService.send("brp", Prediction(FileManager.prediction()))
         postalService.send("brp", Schedule(BRP.Action.schedule_reactive))
 
