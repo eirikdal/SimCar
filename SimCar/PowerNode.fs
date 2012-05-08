@@ -40,11 +40,13 @@ module Agent =
                     return! loop pnode waiting
                 | Reset ->
                     return! loop <| PowerNode({ pnode_args with current=0.0<kWh>}) <| false
-                | Charge_OK(_,current,_) -> return! loop <| PowerNode({ pnode_args with current=current }) <| false
+                | Charge_OK(_,current,_) -> 
+                    return! loop <| PowerNode({ pnode_args with current=current }) <| false
                 | Kill ->
                     printfn "Agent %s: Exiting.." name
                 | _ -> 
                     syncContext.RaiseEvent error <| Exception("Not implemented yet")
+                    return! loop pnode waiting
             }
 
             loop pnode false)
@@ -82,6 +84,8 @@ module Agent =
                     printfn "Agent %s: Exiting.." name
                 | _ -> 
                     syncContext.RaiseEvent error <| Exception("Not implemented yet")
+
+                    return! loop pnode waiting
             }
 
             loop pnode false)

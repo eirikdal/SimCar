@@ -13,6 +13,27 @@ open FileManager
 let rate = 1.25<kWh>
 
 module Algorithm = 
+    let rand = new Random()
+    let distribute_random phev_expected realtime days = 
+        let dist (day : float<kWh> array) : float<kWh> array = 
+            let rec fill idx left =
+                if left > rate then 
+                    let i = rand.Next(0,96)
+                    day.[i] <- day.[i] + rate
+                    fill idx (left-rate)
+                else
+                    let idx = rand.Next(0,96)
+                    day.[idx] <- day.[idx] + (rate - (rate-left))
+                    day.[idx]
+                  
+            phev_expected |> Array.mapi fill
+        [for i in 0 .. (days-1) do
+            let _from,_to = (i*96),(i*96)+96
+            let mutable day = Array.sub realtime _from 96
+            
+            let realtime_updated = dist day
+            yield! (List.ofArray day)]
+
     let distribute (phev_expected:float<kWh> array) realtime theta days = 
 //        printfn "sum of PHEV expected %f" (Array.sum phev_expected)
         let util pos' (day:float<kWh> array) (pos,x) = 

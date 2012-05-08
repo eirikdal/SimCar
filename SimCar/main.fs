@@ -13,14 +13,34 @@ open Tree
 type Method = 
     | Swarm
     | Shaving
-    | Distribute
+    | Distance
+    | Mixed
+    | Random
 
 type Contribution =
     | Expected
     | Simulated
 
-type SimCar(nIter, nTicksPerDayq) = 
-    let _agents = to_agents <| powergrid()
+type Scheduler = 
+    | Proactive 
+    | Reactive
+    | Random
+    | Mixed
+
+type SimCar(nIter, nTicksPerDayq, ?scheduler) =
+    let _agents = 
+        match scheduler with
+        | Some Reactive -> 
+            Grid.Centralized.make_tree <| powergrid() <| BRP.Action.schedule_reactive
+        | Some Proactive -> 
+            Grid.Centralized.make_tree <| powergrid() <| BRP.Action.schedule_proactive
+        | Some Mixed -> 
+            Grid.Decentralized.Mixed.make_tree <| powergrid()
+        | Some Random ->
+            Grid.Decentralized.Random.make_tree <| powergrid()
+        | None ->
+            Grid.Centralized.make_tree <| powergrid() <| BRP.Action.schedule_reactive
+
     member self.Agents = _agents |> Tree.map (fun (name, from) -> from)
     
     member self.PostalService = postalService
@@ -86,7 +106,7 @@ type SimCar(nIter, nTicksPerDayq) =
 
     member self.Init() = 
         IO.clear_screenshots()
-        postalService.agents <- _agents
+//        postalService.agents <- _agents
 
     member self.ComputeDayahead(?days, ?dayahead, ?baseline) = 
         let n = match days with Some d -> d | None -> nIter
@@ -125,7 +145,7 @@ type SimCar(nIter, nTicksPerDayq) =
 // Pre-compute alternative:
                 postalService.send("brp", Dayahead((fun _ -> 0.0<kWh>)))
                 postalService.send("brp", Prediction((fun _ -> 0.0<kWh>)))
-                postalService.send("brp", Schedule(BRP.Action.schedule_none))
+//                postalService.send("brp", Schedule(BRP.Action.schedule_none))
                 
                 [|for i in 0 .. (n-1) do
                     let _from,_to = (i*96),(i*96)+96
@@ -144,9 +164,14 @@ type SimCar(nIter, nTicksPerDayq) =
             | Some Swarm ->
 // Swarm alternative:
                 DayaheadSwarm.dayahead(realtime, n) 
-            | Some Distributed ->
+            | Some Distance ->
 // Non-swarm alternative:
                 DayaheadExp.Algorithm.distribute phev_contribution realtime 0.95 n |> Array.ofList
+            | Some Method.Random ->
+                DayaheadExp.Algorithm.distribute_random phev_contribution realtime n |> Array.ofList
+            | Some Method.Mixed ->
+                DayaheadExp.Algorithm.distribute_random phev_contribution realtime n |> Array.ofList
+                
 //        printfn "sum of dayahead %f" <| Array.sum dayahead
         postalService.send("brp", Dayahead(dayahead |> Array.get))
         postalService.send("brp", Prediction(realtime |> Array.get))
@@ -161,11 +186,10 @@ type SimCar(nIter, nTicksPerDayq) =
     member self.Run(?days) = 
         let n = match days with Some d -> d | None -> nIter
 
-
 //        postalService.send("brp", Dayahead(FileManager.dayahead()))
 //        postalService.send("brp", Prediction(FileManager.prediction()))
-        postalService.send("brp", Schedule(BRP.Action.schedule_reactive))
-
+//        postalService.send("brp", Schedule(BRP.Action.schedule_reactive))
+        
         printfn "Running simulations"
         [for i in 0 .. (n-1) do run i self.Agents false] |> ignore 
         printfn "Finished simulations"

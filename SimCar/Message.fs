@@ -20,8 +20,10 @@ type Message =
     | Dayahead of dayahead
     | Prediction of realtime
     | ReplyTo of Message * AsyncReplyChannel<Message>
+    | RequestMixed
     | RequestModel
     | RequestDayahead
+    | Mixed of float list
     | Model of Grid
     | Error of string
     | Update of int
