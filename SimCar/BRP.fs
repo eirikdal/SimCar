@@ -89,7 +89,6 @@ module Agent =
                             queue.Enqueue(msg)
                             return! loop brp intentions schedule tick waiting
                         else
-                            printfn "BRP responding to RequestModel"
                             syncContext.RaiseEvent jobDebug <| "BRP responding to RequestModel"
                             reply.Reply(Model(brp))
                             return! loop brp [] schedule tick false
@@ -121,9 +120,7 @@ module Agent =
                 | Kill ->
                     printfn "Agent %s: Exiting.." "BRP"
                 | _ -> 
-                    syncContext.RaiseEvent error <| Exception("BRP: Not implemented yet")
-                    raise <| Exception("WTF")
-                    return! loop brp intentions schedule tick waiting }    
+                    syncContext.RaiseEvent error <| Exception("BRP: Not implemented yet") }    
 
             loop brp [] schedule 0 false)
     module Decentralized = 
@@ -180,11 +177,12 @@ module Agent =
                         postalService.send(name, Mixed(problist))
                         return! loop brp tick problist
                     | Update(tick) -> 
-                        let baseline = [for i in tick .. (tick+20) do yield realtime(i)]
+                        let baseline = [for i in tick .. (tick+40) do yield realtime(i)]
                         let max_baseline = List.max baseline
-                        let sum_baseline = List.sum baseline
-                        let inv_baseline = baseline |> List.map (fun x -> max_baseline-x)
-                        let probs = List.map (fun x -> x / sum_baseline) inv_baseline
+                        let min_baseline = List.min baseline
+//                        let sum_baseline = List.sum baseline
+//                        let inv_baseline = baseline |> List.map (fun x -> max_baseline-x)
+                        let probs = List.map (fun x -> (x-min_baseline) / (max_baseline-min_baseline)) baseline
                         return! loop brp tick probs
                     | Dayahead(dayahead) ->
                         return! loop <| BRP({ brp_args with dayahead=dayahead }) <| tick <| problist

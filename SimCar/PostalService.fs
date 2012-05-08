@@ -26,10 +26,6 @@ type PostalService() =
                 agentdict.Remove(name) |> ignore
                 return! loop()
             | Kill -> printfn "PostalService: Exiting.."
-            | Completed(message) ->
-                printfn "%s" message
-
-                return! loop()
             | Error(message) ->
                 printfn "Error: %s" message
                 return! loop()

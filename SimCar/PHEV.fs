@@ -13,7 +13,7 @@ open PostalService
 open MathNet.Numerics.Distributions
 open MathNet.Numerics.Statistics
 //open Node
-let mutable rand = new System.Random()
+let rand = new System.Random()
 //let syncContext = SynchronizationContext.CaptureCurrent()
 
 module Action = 
@@ -45,8 +45,9 @@ module Action =
 
     let generate_intention ({ battery=battery; capacity=capacity; rate=rate }) probs : float<kWh> list = 
         let rec gen problist intentions rem = 
+            let r = rand.NextDouble()
             match problist with 
-            | h::t -> if rand.NextDouble() <= h && rem > 0.0<kWh> then gen t (rate::intentions) (rem-rate) else gen t ((0.0<kWh>)::intentions) rem
+            | h::t -> if r <= h && rem > 0.0<kWh> then gen t (rate::intentions) (rem-rate) else gen t ((0.0<kWh>)::intentions) rem
             | _ -> intentions
 
         gen probs [] (capacity-battery)
@@ -86,7 +87,7 @@ module Action =
 
 module Agent = 
     module Centralized = 
-        let create_phev_agent _p = Agent<Message>.Start(fun agent ->
+        let create_phev_agent _p name = Agent<Message>.Start(fun agent ->
             let queue = new Queue<Message>() 
             let test = new MathNet.Numerics.Statistics.Histogram()
     
@@ -171,7 +172,12 @@ module Agent =
                         return! loop phev waiting tick
                     | Mixed(problist) ->
                         let ttl = Action.find_ttl histogram tick 
-                        let intentions = Action.generate_intention phev_args problist
+
+                        let intentions = 
+                            if phev_args.intentions.Length <= 0 then
+                                Action.generate_intention phev_args problist
+                            else
+                                phev_args.intentions
 
                         let msg = 
                             match intentions with

@@ -12,11 +12,8 @@ type Message =
     | Charge_OK of string * energy * int
     | Charge_Accepted of energy list
     | Charge_Intentions of Message list
-    | Completed of string
-    | Assign of Agent<Message> * Grid
     | Register of string * Agent<Message>
     | Deregister of string * Agent<Message>
-    | Broadcast of Message
     | Dayahead of dayahead
     | Prediction of realtime
     | ReplyTo of Message * AsyncReplyChannel<Message>

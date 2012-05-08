@@ -27,7 +27,7 @@ type Scheduler =
     | Random
     | Mixed
 
-type SimCar(nIter, nTicksPerDayq, ?scheduler) =
+type SimCar(nIter, nTicksPerDay, ?scheduler) =
     let agents = 
         match scheduler with
         | Some Reactive -> 
@@ -141,7 +141,7 @@ type SimCar(nIter, nTicksPerDayq, ?scheduler) =
 
         let dayahead = 
             match dayahead with
-            | None | Some Shaving ->
+            | None | Some Method.Shaving ->
 // Pre-compute alternative:
                 postalService.send("brp", Dayahead((fun _ -> 0.0<kWh>)))
                 postalService.send("brp", Prediction((fun _ -> 0.0<kWh>)))
@@ -161,10 +161,10 @@ type SimCar(nIter, nTicksPerDayq, ?scheduler) =
                         Array.sum2 phev day
                         |> DayAhead.shave 0.3 0.95
                     yield! realtime_updated|]
-            | Some Swarm ->
+            | Some Method.Swarm ->
 // Swarm alternative:
                 DayaheadSwarm.dayahead(realtime, n) 
-            | Some Distance ->
+            | Some Method.Distance ->
 // Non-swarm alternative:
                 DayaheadExp.Algorithm.distribute phev_contribution realtime 0.95 n |> Array.ofList
             | Some Method.Random ->
@@ -179,7 +179,7 @@ type SimCar(nIter, nTicksPerDayq, ?scheduler) =
 //        IO.write_doubles <| FileManager.file_prediction <| Parsing.parse_dayahead (List.ofArray pnodes)
 //        IO.write_doubles <| FileManager.file_dayahead <| (dayahead |> List.ofArray |> List.map Energy.toFloat)
 
-        PHEV.rand <- new System.Random()
+//        PHEV.rand <- new System.Random()
         printfn "Dayahead computed"
         
     // create an infinite sequence of simulation steps

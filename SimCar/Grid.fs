@@ -19,7 +19,7 @@ module Centralized =
             postalService.add_agent(name, agent)
             agent
         | PHEV(_) ->
-            let agent = Agent.Centralized.create_phev_agent node
+            let agent = Agent.Centralized.create_phev_agent node name
             postalService.add_agent(name, agent)
             agent
         | PowerNode(_) ->
@@ -27,7 +27,7 @@ module Centralized =
             postalService.add_agent(name, agent)
             agent
         | BRP(_) ->
-            let agent = Agent.Centralized.create_pnode_agent node
+            let agent = Agent.Centralized.create_brp_agent node schedule
             postalService.add_agent(name, agent)
             agent
 
