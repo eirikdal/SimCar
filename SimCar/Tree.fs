@@ -47,23 +47,23 @@ let rec map mapf node =
         Leaf(None)
 
 // traverse a tree of agents, return an isomorphic tree of (agent,message) pairs
-let send_reply msg node = 
-    let rec send_reply msg (node : Node<Agent<Message>>) = 
-        match node with
-        | Node(nodes, Some(leaf)) ->
-            let list = List.map (fun n -> send_reply msg n) nodes 
-            let res = leaf.PostAndAsyncReply((fun replyChannel -> ReplyTo(msg, replyChannel)), 100000)
-            Node(list, Some (leaf, res))
-        | Node(nodes, None) -> 
-            Node(List.map (fun n -> send_reply msg n) nodes, None)
-        | Leaf(Some(leaf)) ->
-            let res = leaf.PostAndAsyncReply((fun replyChannel -> ReplyTo(msg, replyChannel)), 100000)
-            Leaf(Some <| (leaf, res))
-        | Leaf(None) ->
-            Leaf(None)
+let rec send_reply msg node = 
+//    let rec send_reply msg (node : Node<Agent<Message>>) = 
+    match node : Node<Agent<Message>> with
+    | Node(nodes, Some(leaf)) ->
+        let list = List.map (fun n -> send_reply msg n) nodes 
+        let res = leaf.PostAndReply((fun replyChannel -> ReplyTo(msg, replyChannel)), 100000)
+        Node(list, Some (leaf, res))
+    | Node(nodes, None) -> 
+        Node(List.map (fun n -> send_reply msg n) nodes, None)
+    | Leaf(Some(leaf)) ->
+        let res = leaf.PostAndReply((fun replyChannel -> ReplyTo(msg, replyChannel)), 100000)
+        Leaf(Some <| (leaf, res))
+    | Leaf(None) ->
+        Leaf(None)
 
-    send_reply msg node
-    |> mapBack (fun (ag, msg) -> (ag, Async.RunSynchronously(msg)))
+//    send_reply msg node
+//    |> mapBack (fun (ag, msg) -> (ag, Async.RunSynchronously(msg)))
 
 // traverse a tree of models, return an isomorphic tree of agents
 let rec send msg (node : Node<Agent<Message>>) = 

@@ -54,6 +54,7 @@ let run day agents compute_dayahead =
     let tick n = 
         agents
         |> Tree.send (Update(n)) // inform agents that new tick has begun
+        |> (fun x -> printfn "Tick %i" n; x)
         |> Tree.send_reply RequestModel // request model from agents
 
     printfn "Simulating day %d" day

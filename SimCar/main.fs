@@ -28,7 +28,7 @@ type Scheduler =
     | Mixed
 
 type SimCar(nIter, nTicksPerDayq, ?scheduler) =
-    let _agents = 
+    let agents = 
         match scheduler with
         | Some Reactive -> 
             Grid.Centralized.make_tree <| powergrid() <| BRP.Action.schedule_reactive
@@ -39,9 +39,9 @@ type SimCar(nIter, nTicksPerDayq, ?scheduler) =
         | Some Random ->
             Grid.Decentralized.Random.make_tree <| powergrid()
         | None ->
-            Grid.Centralized.make_tree <| powergrid() <| BRP.Action.schedule_reactive
+            Grid.Centralized.make_tree <| powergrid() <| BRP.Action.schedule_none
 
-    member self.Agents = _agents |> Tree.map (fun (name, from) -> from)
+//    member self.Agents = _agents |> Tree.map (fun (name, from) -> from)
     
     member self.PostalService = postalService
    
@@ -135,8 +135,8 @@ type SimCar(nIter, nTicksPerDayq, ?scheduler) =
              | None | Some Expected -> 
                 Tree.phev_expected
              | Some Simulated -> 
-                [for i in 0 .. (n-1) do run i self.Agents true] |> ignore
-                self.Agents |> Tree.send (Reset) |> ignore
+                [for i in 0 .. (n-1) do run i agents true] |> ignore
+                agents |> Tree.send (Reset) |> ignore
                 Array.init(n*96) (fun i -> FileManager.dayahead()(i))
 
         let dayahead = 
@@ -191,9 +191,9 @@ type SimCar(nIter, nTicksPerDayq, ?scheduler) =
 //        postalService.send("brp", Schedule(BRP.Action.schedule_reactive))
         
         printfn "Running simulations"
-        [for i in 0 .. (n-1) do run i self.Agents false] |> ignore 
+        [for i in 0 .. (n-1) do run i agents false] |> ignore 
         printfn "Finished simulations"
-        kill self.Agents
+        kill agents
 
     member self.TestDayahead(n) = 
-        test_dayahead n self.Agents
+        test_dayahead n agents

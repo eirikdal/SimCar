@@ -45,6 +45,7 @@ module Agent =
                 | Kill ->
                     printfn "Agent %s: Exiting.." name
                 | _ -> 
+                    raise <| Exception("WTF")
                     syncContext.RaiseEvent error <| Exception("Not implemented yet")
                     return! loop pnode waiting
             }
@@ -73,13 +74,14 @@ module Agent =
                 | Update(tick) -> 
                     let current = pnode_args.realtime tick
                     postalService.send(parent, Charge_OK(name, current, -1))
-        //            printfn "PowerNode %s: Sending charge_ok to %s" name parent
+//                    printfn "PowerNode %s: Sending charge_ok to %s" name parent
                     return! loop <| pnode <| true
                 | Model(pnode) -> 
                     return! loop pnode waiting
                 | Reset ->
                     return! loop <| PowerNode({ pnode_args with current=0.0<kWh>}) <| false
-                | Charge_OK(_,current,_) -> return! loop <| PowerNode({ pnode_args with current=current }) <| false
+                | Charge_OK(_,current,_) -> 
+                    return! loop <| PowerNode({ pnode_args with current=current }) <| false
                 | Kill ->
                     printfn "Agent %s: Exiting.." name
                 | _ -> 

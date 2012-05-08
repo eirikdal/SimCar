@@ -146,7 +146,7 @@ module Agent =
                 let queue = new Queue<Message>() 
                 let test = new MathNet.Numerics.Statistics.Histogram()
     
-                let rec loop (PHEV({ name=name; parent=parent; histogram=histogram } as phev_args) as phev) waiting = async {
+                let rec loop (PHEV({ name=name; parent=parent; histogram=histogram } as phev_args) as phev) waiting tick = async {
                     let! (msg : Message) = 
                         if not waiting && queue.Count > 0 then
                             async { return queue.Dequeue() }
@@ -158,24 +158,26 @@ module Agent =
                         | RequestModel ->
                             if not waiting then
                                 reply.Reply(Model(phev))
-                                return! loop phev false
+                                return! loop phev false tick
                             else
                                 queue.Enqueue(msg)
-                                return! loop phev waiting
+                                return! loop phev waiting tick
                     | Model(phev) ->
-                        return! loop phev waiting
+                        return! loop phev waiting tick
                     | Charge_OK(_,_,_) ->
-                        return! loop (Action.charge phev_args) false
+                        return! loop (Action.charge phev_args) false tick
                     | Update(tick) ->
+                        postalService.send("brp", RequestMixed(name))
+                        return! loop phev waiting tick
+                    | Mixed(problist) ->
                         let ttl = Action.find_ttl histogram tick 
-                        let (Mixed(problist)) = postalService.send_reply("brp", RequestMixed)
                         let intentions = Action.generate_intention phev_args problist
 
                         let msg = 
                             match intentions with
                             | h::t -> Charge_OK(phev_args.name, h, ttl)
                             | [] -> Charge_OK(phev_args.name, 0.0<kWh>,ttl)
-
+//                        printfn "PHEV %s: Sending charge_ok to %s" name parent
                         postalService.send(phev_args.parent, msg)
             
                         if phev_args.name = "phev_827" then
@@ -186,18 +188,18 @@ module Agent =
                                 syncContext.RaiseDelegateEvent phevStatus 0.0
 
                         if phev_args.duration <= 0 then
-                            return! loop <| Action.leave name { phev_args with intentions=intentions } tick <| true
+                            return! loop <| Action.leave name { phev_args with intentions=intentions } tick <| true <| tick
                         else
-                            return! loop <| PHEV({ phev_args with intentions=intentions }.drive()) <| true
+                            return! loop <| PHEV({ phev_args with intentions=intentions }.drive()) <| true <| tick
                     | Reset -> 
-                        return! loop <| PHEV({ phev_args with battery=phev_args.capacity; duration=(-1) }) <| false
+                        return! loop <| PHEV({ phev_args with battery=phev_args.capacity; duration=(-1) }) <| false <| tick
                     | Kill ->
                         printfn "Agent %s: Exiting.." name
                     | _ -> 
                         syncContext.RaiseEvent error <| Exception("PHEV: Not implemented yet")
 
-                        return! loop phev waiting }
-                loop _p false)
+                        return! loop phev waiting tick }
+                loop _p false 0)
         module Random = 
             let create_phev_agent _p = Agent<Message>.Start(fun agent ->
                 let queue = new Queue<Message>() 

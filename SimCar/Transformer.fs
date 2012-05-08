@@ -147,6 +147,8 @@ module Agent =
                     | Kill ->
                         printfn "Agent %s: Exiting.." name
                     | _ as test ->
+                        raise <| Exception("WTF")
+                        
                         raise (Exception((test.ToString())))
                         return! loop trf intentions charges waiting
             }

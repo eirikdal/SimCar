@@ -89,6 +89,7 @@ module Agent =
                             queue.Enqueue(msg)
                             return! loop brp intentions schedule tick waiting
                         else
+                            printfn "BRP responding to RequestModel"
                             syncContext.RaiseEvent jobDebug <| "BRP responding to RequestModel"
                             reply.Reply(Model(brp))
                             return! loop brp [] schedule tick false
@@ -120,7 +121,9 @@ module Agent =
                 | Kill ->
                     printfn "Agent %s: Exiting.." "BRP"
                 | _ -> 
-                    syncContext.RaiseEvent error <| Exception("BRP: Not implemented yet") }    
+                    syncContext.RaiseEvent error <| Exception("BRP: Not implemented yet")
+                    raise <| Exception("WTF")
+                    return! loop brp intentions schedule tick waiting }    
 
             loop brp [] schedule 0 false)
     module Decentralized = 
@@ -172,9 +175,10 @@ module Agent =
                         | RequestDayahead ->
                             reply.Reply(Model(brp))
                             return! loop brp tick problist
-                        | RequestMixed ->
-                            reply.Reply(Mixed(problist))
-                            return! loop brp tick problist
+                    | RequestMixed(name) ->
+//                        reply.Reply(Mixed(problist))
+                        postalService.send(name, Mixed(problist))
+                        return! loop brp tick problist
                     | Update(tick) -> 
                         let baseline = [for i in tick .. (tick+20) do yield realtime(i)]
                         let max_baseline = List.max baseline

@@ -20,7 +20,7 @@ type Message =
     | Dayahead of dayahead
     | Prediction of realtime
     | ReplyTo of Message * AsyncReplyChannel<Message>
-    | RequestMixed
+    | RequestMixed of string
     | RequestModel
     | RequestDayahead
     | Mixed of float list

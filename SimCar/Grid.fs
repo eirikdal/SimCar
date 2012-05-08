@@ -17,19 +17,19 @@ module Centralized =
         | Transformer(_) ->
             let agent = Agent.Centralized.create_trf_agent node
             postalService.add_agent(name, agent)
-            (name, agent)
+            agent
         | PHEV(_) ->
             let agent = Agent.Centralized.create_phev_agent node
             postalService.add_agent(name, agent)
-            (name, agent)
+            agent
         | PowerNode(_) ->
             let agent = Agent.Centralized.create_pnode_agent node
             postalService.add_agent(name, agent)
-            (name, agent)
+            agent
         | BRP(_) ->
             let agent = Agent.Centralized.create_pnode_agent node
             postalService.add_agent(name, agent)
-            (name, Agent.Centralized.create_brp_agent node schedule)
+            agent
 
     // traverse a tree of models, creating a mirrored tree of agents as we go along
     let rec make_tree node scheduler = 
@@ -50,19 +50,19 @@ module Decentralized =
             | Transformer(_) ->
                 let agent = Agent.Decentralized.create_trf_agent node
                 postalService.add_agent(name, agent)
-                (name, agent)
+                agent
             | PHEV(_) ->
                 let agent = Agent.Decentralized.Random.create_phev_agent node
                 postalService.add_agent(name, agent)
-                (name, agent)
+                agent
             | PowerNode(_) ->
                 let agent = Agent.Decentralized.create_pnode_agent node
                 postalService.add_agent(name, agent)
-                (name, agent)
+                agent
             | BRP(_) ->
                 let agent = Agent.Decentralized.Random.create_brp_agent node
                 postalService.add_agent(name, agent)
-                (name, agent)
+                agent
 
         // traverse a tree of models, creating a mirrored tree of agents as we go along
         let rec make_tree node = 
@@ -81,19 +81,19 @@ module Decentralized =
             | Transformer(_) ->
                 let agent = Agent.Decentralized.create_trf_agent node
                 postalService.add_agent(name, agent)
-                (name, agent)
+                agent
             | PHEV(_) ->
                 let agent = Agent.Decentralized.Mixed.create_phev_agent node
                 postalService.add_agent(name, agent)
-                (name, agent)
+                agent
             | PowerNode(_) ->
                 let agent = Agent.Decentralized.create_pnode_agent node
                 postalService.add_agent(name, agent)
-                (name, agent)
+                agent
             | BRP(_) ->
                 let agent = Agent.Decentralized.Mixed.create_brp_agent node
                 postalService.add_agent(name, agent)
-                (name, agent)
+                agent
 
         // traverse a tree of models, creating a mirrored tree of agents as we go along
         let rec make_tree node = 
