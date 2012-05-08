@@ -1,11 +1,11 @@
 ﻿trf node1 1000.0 0.0 {
   trf node2 100.0 0.0 {
-    phev Godel3 worker 16.0 0.0 16.0 1.25
-    phev Godel4 worker 16.0 0.0 16.0 1.25
+    phev Godel3 worker1 16.0 0.0 16.0 1.25
+    phev Godel4 worker2 16.0 0.0 16.0 1.25
   }
   trf node7 100.0 0.0 {
-    phev Godel1 worker 16.0 0.0 16.0 1.25
-    phev Godel5 worker 16.0 0.0 16.0 1.25
+    phev Godel1 worker3 16.0 0.0 16.0 1.25
+    phev Godel5 worker4 16.0 0.0 16.0 1.25
   }
 pnode node_271 271
 pnode node_266 266
@@ -30,9 +30,9 @@ pnode node_2848 2848
 pnode node_2847 2847
 pnode node_2846 2846
 pnode node_2844 2844
-  phev Godel2 worker 16.0 0.0 16.0 1.25
-  phev Nash4 worker 16.0 0.0 16.0 1.25
-  phev Church6 worker 16.0 0.0 16.0 1.25
-  phev Godel6 worker 16.0 0.0 16.0 1.25
-  phev Nash6 worker 16.0 0.0 16.0 1.25
+  phev Godel2 worker1 16.0 0.0 16.0 1.25
+  phev Nash4 worker2 16.0 0.0 16.0 1.25
+  phev Church6 worker3 16.0 0.0 16.0 1.25
+  phev Godel6 worker4 16.0 0.0 16.0 1.25
+  phev Nash6 worker1 16.0 0.0 16.0 1.25
 }

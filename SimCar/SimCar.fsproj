@@ -9,8 +9,9 @@
     <OutputType>Library</OutputType>
     <RootNamespace>SimCar</RootNamespace>
     <AssemblyName>SimCar</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
     <Name>SimCar</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\SimCar\</SolutionDir>
     <RestorePackages>true</RestorePackages>
@@ -18,8 +19,8 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
-    <Optimize>true</Optimize>
-    <Tailcalls>false</Tailcalls>
+    <Optimize>false</Optimize>
+    <Tailcalls>true</Tailcalls>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
@@ -36,35 +37,37 @@
     <PlatformTarget>x86</PlatformTarget>
     <DocumentationFile>bin\Release\SimCar.XML</DocumentationFile>
   </PropertyGroup>
-  <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
-  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
+  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets" Condition="Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')" />
+  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition="(!Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')) And (Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets'))" />
+  <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="(!Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')) And (!Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets')) And (Exists('$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets'))" />
   <ItemGroup>
     <Compile Include="Agent.fs" />
+    <Compile Include="Array.fs" />
+    <Compile Include="List.fs" />
+    <Compile Include="SynchronizationContext.fs" />
     <Compile Include="Models.fs" />
     <Compile Include="Message.fs" />
-    <Compile Include="SynchronizationContext.fs" />
     <Compile Include="FileManager.fs" />
-    <Compile Include="Tree.fs" />
     <Compile Include="PostalService.fs" />
     <Compile Include="Transformer.fs" />
     <Compile Include="PowerNode.fs" />
     <Compile Include="PHEV.fs" />
     <Compile Include="BRP.fs" />
+    <Compile Include="Tree.fs" />
+    <Compile Include="Grid.fs" />
+    <Compile Include="DayaheadExp.fs" />
+    <Compile Include="DayaheadSwarm.fs" />
     <Compile Include="DayAhead.fs" />
     <Compile Include="SimCar.fs" />
     <Compile Include="main.fs" />
-    <Content Include="brp.txt" />
-    <Content Include="profiles.txt" />
-    <Content Include="powerprofiles.txt" />
     <None Include="packages.config" />
-    <None Include="day-ahead-poc.fsx" />
-    <None Include="day-ahead-alt.fsx" />
     <None Include="parse_realtime_data.fsx" />
-    <None Include="FSharpChart.fsx" />
-    <None Include="day-ahead-shave.fsx" />
-    <None Include="day-ahead-test.fsx" />
+    <None Include="make_tree.fsx" />
+    <None Include="counter.fsx" />
+    <None Include="test_powerprofiles.fsx" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="FSharp.PowerPack">
       <HintPath>..\packages\FSPowerPack.Community.2.1.1.1\Lib\Net40\FSharp.PowerPack.dll</HintPath>
       <Private>True</Private>
@@ -89,13 +92,11 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
-    <Reference Include="FSharp.Core" />
     <Reference Include="MSDN.FSharpChart">
       <HintPath>..\packages\FSharpChart\F#\bin\MSDN.FSharpChart.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Drawing" />
     <Reference Include="System.Numerics" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Windows.Forms.DataVisualization" />
