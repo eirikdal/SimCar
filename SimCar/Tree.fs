@@ -4,7 +4,6 @@ open Agent
 open Message
 open System
 open System.Globalization
-open SynchronizationContext
 open Models
 
 // traverse a tree of nodes, applying function iterf to each node
@@ -53,12 +52,12 @@ let send_reply msg node =
         match node with
         | Node(nodes, Some(leaf)) ->
             let list = List.map (fun n -> send_reply msg n) nodes 
-            let res = leaf.PostAndAsyncReply((fun replyChannel -> ReplyTo(msg, replyChannel)))
+            let res = leaf.PostAndAsyncReply((fun replyChannel -> ReplyTo(msg, replyChannel)), 100000)
             Node(list, Some (leaf, res))
         | Node(nodes, None) -> 
             Node(List.map (fun n -> send_reply msg n) nodes, None)
         | Leaf(Some(leaf)) ->
-            let res = leaf.PostAndAsyncReply((fun replyChannel -> ReplyTo(msg, replyChannel)))
+            let res = leaf.PostAndAsyncReply((fun replyChannel -> ReplyTo(msg, replyChannel)), 100000)
             Leaf(Some <| (leaf, res))
         | Leaf(None) ->
             Leaf(None)
@@ -135,6 +134,6 @@ let phev_expected =
     |> map collect_exp 
     |> collect
     |> List.ofSeq
-    |> List.filter (fun x -> if x.Length = 0 then false else true)
+    |> List.filter (fun x -> x.Length > 0)
     |> List.sumn
     |> Array.ofList

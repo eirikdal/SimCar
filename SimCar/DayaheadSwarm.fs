@@ -127,6 +127,7 @@ module Swarm =
                     ant.Post(Init(init_pos, inertia)))
                 
                 let rec loop() = 
+                    agent.Scan(fun x ->
                     let all_in_pos agent_pos = 
                         let all_in_pos = agent_pos |> Array.forall (fun p -> p = (int infinity) || p >= 0)
 
@@ -135,7 +136,7 @@ module Swarm =
                             Some(async { return! filling agg_dist'.[0] 0 })
                         else
                             Some(async { return! loop() }) 
-                    agent.Scan(function
+                    match x with
                     | Moved(ag, pos) ->
                         let d = agent_pos |> Array.tryFindIndex (fun p -> p <> (int infinity) && abs(pos-p) < 5)
 

@@ -53,7 +53,7 @@ module IO =
 
     let clear_screenshots () = 
         let clear_subfolder folder =    
-            for file in Directory.GetFiles(folder) do
+            for file in Directory.EnumerateFiles(folder) do
                 File.Delete(file)
         clear_subfolder <| screen_folder + "dayahead"
         clear_subfolder <| screen_folder + "phev"
@@ -125,18 +125,17 @@ module Parsing =
         parse_profiles stream [] (&rest)
 
     let parse_powerprofiles (folder) =
-        let files = Directory.GetFiles(folder)
+        let files = Directory.EnumerateFiles(folder)
 
         files 
-        |> Array.map (fun file -> 
+        |> List.ofSeq
+        |> List.map (fun file -> 
             match file with
             | Regex.ParseRegex "([0-9]+).dat" [Integer i] ->
                 let name = sprintf "%i" i
                 (name, read_doubles(file)))
-        |> List.ofArray
-        |> List.filter (fun (_,p) -> if p.Length = 2976 then true else false)
+//            |> List.filter (fun (_,p) -> p.Length = 2976)
 
-    
     let powerprofiles = parse_powerprofiles (data_folder)
     // 
     // Parsing the powergrid, transformers, power nodes and PHEVs.
@@ -159,7 +158,7 @@ module Parsing =
                 children <- name :: children
                 parse_powergrid t (node::nodes) (&rest) (&children) parent
             | [|"pnode";name;realtime|] ->
-                let realtime = (List.tryFind (fun (n, s) -> n = realtime) powerprofiles)
+                let realtime = (List.tryFind (fun (n, _) -> n = realtime) (List.ofSeq powerprofiles))
                 match realtime with
                 | None -> raise <| IOException(sprintf "Could not find powernode with name %s in powerprofiles.txt" name)
                 | Some realtime ->

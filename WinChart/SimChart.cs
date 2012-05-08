@@ -11,9 +11,7 @@ namespace WinChart
     {
         const int nSim = 10;
         const int nTicks = 96;
-        Sim.SimCar tSim = new Sim.SimCar(nSim, nTicks);
-        
-        private Mutex mut = new Mutex();
+
         private const int nRealTime = 0;
         private const int nPowerNodes = 1;
         private const int nPhev = 2;
@@ -52,6 +50,7 @@ namespace WinChart
         private delegate void addPointDelegate(Chart chart, int i, Double point);
         private delegate void incrementPointDelegate(Chart chart, int i, int point, Double val);
         private delegate void updatePointDelegate(Chart chart, int i, int point, Double val);
+        private delegate void startDelegate();
         
 
         void saveImageControl(string fileName)
@@ -344,7 +343,7 @@ namespace WinChart
             chart.ChartAreas[0].AxisX.CustomLabels.Add(90, 95, "24:00");
         }
 
-        void RegisterEvents()
+        void RegisterEvents(Sim.SimCar tSim)
         {
             tSim.RegisterEvents();
             tSim.RegisterPhevBattery(phevBattery_Changed);
@@ -438,8 +437,8 @@ namespace WinChart
             seriesArray[nRealTime].BorderWidth = 2;
             seriesArray[nRealTime].BorderDashStyle = ChartDashStyle.Solid;
 
-            seriesArray[nPowerNodes].ChartType = SeriesChartType.Column;
-            seriesArray[nPowerNodes].Color = Color.Aqua;
+            seriesArray[nPowerNodes].ChartType = SeriesChartType.Line;
+            seriesArray[nPowerNodes].Color = Color.Blue;
             seriesArray[nPowerNodes].BorderWidth = 2;
             seriesArray[nPowerNodes].BorderDashStyle = ChartDashStyle.Dot;
 
@@ -518,24 +517,81 @@ namespace WinChart
             seriesDayahead[nDayaheadAnts].BorderWidth = 2;
             seriesDayahead[nDayaheadAnts].BorderDashStyle = ChartDashStyle.Solid;
 
-            tSim.Init();
-            RegisterEvents();
-
-            Thread oThread = new Thread(new ThreadStart(Start));
-            oThread.Start();
-            
-            while (!oThread.IsAlive) ;
-
+            comboBox1.SelectedItem = "Random";
+            comboBox2.SelectedItem = "Mixed";
+            comboBox3.SelectedItem = "Expected";
         }
 
         public void Start()
         {
-            tSim.ComputeDayahead(new FSharpOption<int>(nSim + 1), 
-                new FSharpOption<Sim.Method>(Sim.Method.Shaving),
-                new FSharpOption<Sim.Contribution>(Sim.Contribution.Expected));
-            resetChart(chart1, 0, chart1.Series.Count);
-            resetChart(chart2, 0, chart2.Series.Count);
-            tSim.Run(new FSharpOption<int>(nSim));
+            if (comboBox1.InvokeRequired)
+            {
+                comboBox1.Invoke(new startDelegate(Start));
+            }
+            else
+            {
+                FSharpOption<Sim.Method> method = null;
+                FSharpOption<Sim.Contribution> contr = null;
+                FSharpOption<Sim.Scheduler> scheduler = null;
+
+                switch (comboBox1.SelectedItem.ToString())
+                {
+                    case "Peak-shaving":
+                        method = new FSharpOption<Sim.Method>(Sim.Method.Shaving);
+                        break;
+                    case "Distance-rule":
+                        method = new FSharpOption<Sim.Method>(Sim.Method.Distance);
+                        break;
+                    case "Swarm":
+                        method = new FSharpOption<Sim.Method>(Sim.Method.Swarm);
+                        break;
+                    case "Random":
+                        method = new FSharpOption<Sim.Method>(Sim.Method.Random);
+                        break;
+                    case "Mixed":
+                        method = new FSharpOption<Sim.Method>(Sim.Method.Mixed);
+                        break;
+                }
+                switch (comboBox2.SelectedItem.ToString())
+                {
+                    case "Proactive":
+                        scheduler = new FSharpOption<Sim.Scheduler>(Sim.Scheduler.Proactive);
+                        break;
+                    case "Reactive":
+                        scheduler = new FSharpOption<Sim.Scheduler>(Sim.Scheduler.Reactive);
+                        break;
+                    case "Random":
+                        scheduler = new FSharpOption<Sim.Scheduler>(Sim.Scheduler.Random);
+                        break;
+                    case "Mixed":
+                        scheduler = new FSharpOption<Sim.Scheduler>(Sim.Scheduler.Mixed);
+                        break;
+                }
+                switch (comboBox3.SelectedItem.ToString())
+                {
+                    case "Expected":
+                        contr = new FSharpOption<Sim.Contribution>(Sim.Contribution.Expected);
+                        break;
+                    case "Simulated":
+                        contr = new FSharpOption<Sim.Contribution>(Sim.Contribution.Simulated);
+                        break;
+                }
+
+                Sim.SimCar tSim = new Sim.SimCar(nSim, nTicks, scheduler);
+                tSim.Init();
+                RegisterEvents(tSim);
+                tSim.ComputeDayahead(new FSharpOption<int>(nSim + 1), method, contr);
+                resetChart(chart1, 0, chart1.Series.Count);
+                resetChart(chart2, 0, chart2.Series.Count);
+                tSim.Run(new FSharpOption<int>(nSim));
+            }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            //Thread oThread = new Thread(new ThreadStart(Start));
+            //oThread.Start();
+            Start();
         }
     }
 }
