@@ -5,7 +5,7 @@
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{5b792483-5c16-4c17-9af5-3d846daa0054}</ProjectGuid>
+    <ProjectGuid>{abc76106-27dd-4cc9-81b6-eec345d02614}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>SimCar</RootNamespace>
     <AssemblyName>SimCar</AssemblyName>
@@ -18,8 +18,8 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
-    <Optimize>true</Optimize>
-    <Tailcalls>false</Tailcalls>
+    <Optimize>false</Optimize>
+    <Tailcalls>true</Tailcalls>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
@@ -36,13 +36,16 @@
     <PlatformTarget>x86</PlatformTarget>
     <DocumentationFile>bin\Release\SimCar.XML</DocumentationFile>
   </PropertyGroup>
-  <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
-  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
+  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets" Condition="Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')" />
+  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition="(!Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')) And (Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets'))" />
+  <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="(!Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')) And (!Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets')) And (Exists('$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets'))" />
   <ItemGroup>
     <Compile Include="Agent.fs" />
+    <Compile Include="SynchronizationContext.fs" />
+    <Compile Include="List.fs" />
+    <Compile Include="Array.fs" />
     <Compile Include="Models.fs" />
     <Compile Include="Message.fs" />
-    <Compile Include="SynchronizationContext.fs" />
     <Compile Include="FileManager.fs" />
     <Compile Include="Tree.fs" />
     <Compile Include="PostalService.fs" />
@@ -51,18 +54,16 @@
     <Compile Include="PHEV.fs" />
     <Compile Include="BRP.fs" />
     <Compile Include="DayAhead.fs" />
+    <Compile Include="DayaheadExp.fs" />
+    <Compile Include="DayaheadSwarm.fs" />
     <Compile Include="SimCar.fs" />
     <Compile Include="main.fs" />
-    <Content Include="brp.txt" />
-    <Content Include="profiles.txt" />
-    <Content Include="powerprofiles.txt" />
     <None Include="packages.config" />
-    <None Include="day-ahead-poc.fsx" />
-    <None Include="day-ahead-alt.fsx" />
     <None Include="parse_realtime_data.fsx" />
     <None Include="FSharpChart.fsx" />
-    <None Include="day-ahead-shave.fsx" />
-    <None Include="day-ahead-test.fsx" />
+    <None Include="make_tree.fsx" />
+    <None Include="test_powerprofiles.fsx" />
+    <None Include="dayahead_swarm.fsx" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.PowerPack">
@@ -90,9 +91,6 @@
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
-    <Reference Include="MSDN.FSharpChart">
-      <HintPath>..\packages\FSharpChart\F#\bin\MSDN.FSharpChart.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
