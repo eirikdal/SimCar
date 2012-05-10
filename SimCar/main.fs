@@ -27,22 +27,30 @@ type Scheduler =
     | Random
     | Mixed
 
-type SimCar(nIter, nTicksPerDay, ?scheduler) =
+type SimCar(nIter, nTicksPerDay, ?scheduler, ?ttlwindow) =
+    let mutable distanceTheta = 1.0
+    let mutable shavingTheta = 0.99
+    let mutable shavingAlpha = 0.2
+    let mutable mixedwindow = 40
+    let ttlwindow = match ttlwindow with Some ttl -> ttl | None -> 76
     let agents = 
         match scheduler with
         | Some Reactive -> 
-            Grid.Centralized.make_tree <| powergrid() <| BRP.Action.schedule_reactive
+            Grid.Centralized.make_tree <| powergrid() <| BRP.Action.schedule_reactive <| ttlwindow
         | Some Proactive -> 
-            Grid.Centralized.make_tree <| powergrid() <| BRP.Action.schedule_proactive
+            Grid.Centralized.make_tree <| powergrid() <| BRP.Action.schedule_proactive <| ttlwindow
         | Some Mixed -> 
-            Grid.Decentralized.Mixed.make_tree <| powergrid()
+            Grid.Decentralized.Mixed.make_tree <| powergrid() <| ttlwindow <| mixedwindow
         | Some Random ->
-            Grid.Decentralized.Random.make_tree <| powergrid()
+            Grid.Decentralized.Random.make_tree <| powergrid() <| ttlwindow
         | None ->
-            Grid.Centralized.make_tree <| powergrid() <| BRP.Action.schedule_none
+            Grid.Centralized.make_tree <| powergrid() <| BRP.Action.schedule_none <| ttlwindow
 
-//    member self.Agents = _agents |> Tree.map (fun (name, from) -> from)
-    
+    member self.DistanceTheta with set(theta) = distanceTheta <- theta
+    member self.ShavingTheta with set(theta) = shavingTheta <- theta
+    member self.ShavingAlpha with set(alpha) = shavingAlpha <- alpha
+    member self.MixedWindow with set(window) = mixedwindow <- window
+
     member self.PostalService = postalService
    
     member self.RegisterDayaheadAnt (handler) =
@@ -106,7 +114,6 @@ type SimCar(nIter, nTicksPerDay, ?scheduler) =
 
     member self.Init() = 
         IO.clear_screenshots()
-//        postalService.agents <- _agents
 
     member self.ComputeDayahead(?days, ?dayahead, ?baseline) = 
         let n = match days with Some d -> d | None -> nIter
@@ -146,31 +153,31 @@ type SimCar(nIter, nTicksPerDay, ?scheduler) =
                 postalService.send("brp", Dayahead((fun _ -> 0.0<kWh>)))
                 postalService.send("brp", Prediction((fun _ -> 0.0<kWh>)))
 //                postalService.send("brp", Schedule(BRP.Action.schedule_none))
-                
+                let window_size = 128
                 [|for i in 0 .. (n-1) do
-                    let _from,_to = (i*96),(i*96)+96
-                    let day = Array.sub realtime _from 96
+                    let _from,_to = (i*96),(i*96)+window_size
+                    let day = Array.sub realtime _from window_size
                     let phev = 
                         match baseline with 
                         | None | Some Expected ->
                             Tree.phev_expected
                         | Some Simulated ->
-                            Array.sub phev_contribution _from 96
+                            Array.sub phev_contribution _from window_size
             
                     let realtime_updated =                 
                         Array.sum2 phev day
-                        |> DayAhead.shave 0.3 0.95
+                        |> DayAhead.shave shavingAlpha shavingTheta
                     yield! realtime_updated|]
             | Some Method.Swarm ->
 // Swarm alternative:
                 DayaheadSwarm.dayahead(realtime, n) 
             | Some Method.Distance ->
 // Non-swarm alternative:
-                DayaheadExp.Algorithm.distribute phev_contribution realtime 0.95 n |> Array.ofList
+                DayaheadExp.Algorithm.distribute phev_contribution realtime distanceTheta n |> Array.ofList
             | Some Method.Random ->
                 DayaheadExp.Algorithm.distribute_random phev_contribution realtime n |> Array.ofList
             | Some Method.Mixed ->
-                DayaheadExp.Algorithm.distribute_random phev_contribution realtime n |> Array.ofList
+                DayaheadExp.Algorithm.distribute_mixed phev_contribution realtime n |> Array.ofList
                 
 //        printfn "sum of dayahead %f" <| Array.sum dayahead
         postalService.send("brp", Dayahead(dayahead |> Array.get))

@@ -158,8 +158,8 @@ module Agent =
 
                 loop brp 0)
         module Mixed = 
-            let create_brp_agent brp = Agent.Start(fun agent ->
-                let rec loop (BRP({ children=children; realtime=realtime } as brp_args) as brp) (tick : int) (problist) = async {
+            let create_brp_agent brp window = Agent.Start(fun agent ->
+                let rec loop (BRP({ children=children; realtime=realtime } as brp_args) as brp) (tick : int) = async {
                     let! (msg : Message) = agent.Receive()
 
                     match msg with
@@ -168,35 +168,30 @@ module Agent =
                         | RequestModel ->
                             syncContext.RaiseEvent jobDebug <| "BRP responding to RequestModel"
                             reply.Reply(Model(brp))
-                            return! loop brp tick problist
+                            return! loop brp tick
                         | RequestDayahead ->
                             reply.Reply(Model(brp))
-                            return! loop brp tick problist
-                    | RequestMixed(name) ->
+                            return! loop brp tick
+                    | RequestMixed(name, ttl) ->
 //                        reply.Reply(Mixed(problist))
-                        postalService.send(name, Mixed(problist))
-                        return! loop brp tick problist
+                        let window = [for i in tick .. ttl do yield realtime(i)]
+                        postalService.send(name, Mixed(window))
+                        return! loop brp tick
                     | Update(tick) -> 
-                        let baseline = [for i in tick .. (tick+40) do yield realtime(i)]
-                        let max_baseline = List.max baseline
-                        let min_baseline = List.min baseline
-//                        let sum_baseline = List.sum baseline
-//                        let inv_baseline = baseline |> List.map (fun x -> max_baseline-x)
-                        let probs = List.map (fun x -> (x-min_baseline) / (max_baseline-min_baseline)) baseline
-                        return! loop brp tick probs
+                        return! loop brp tick
                     | Dayahead(dayahead) ->
-                        return! loop <| BRP({ brp_args with dayahead=dayahead }) <| tick <| problist
+                        return! loop <| BRP({ brp_args with dayahead=dayahead }) <| tick
                     | Prediction(realtime) ->
-                        return! loop <| BRP({ brp_args with realtime=realtime }) <| tick <| problist
+                        return! loop <| BRP({ brp_args with realtime=realtime }) <| tick
                     | Schedule(_) ->
     //                    raise <| Exception("Decentralized BRP agent does not support scheduling")
-                        return! loop brp tick problist
+                        return! loop brp tick
                     | Model(brp) -> 
-                        return! loop brp tick problist
-                    | Reset -> return! loop brp tick problist
+                        return! loop brp tick
+                    | Reset -> return! loop brp tick
                     | Kill ->
                         printfn "Agent %s: Exiting.." "BRP"
                     | _ ->
-                        return! loop brp tick problist}    
+                        return! loop brp tick}    
 
-                loop brp 0 [])
+                loop brp 0)

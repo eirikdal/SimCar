@@ -17,10 +17,10 @@ type Message =
     | Dayahead of dayahead
     | Prediction of realtime
     | ReplyTo of Message * AsyncReplyChannel<Message>
-    | RequestMixed of string
+    | RequestMixed of string * int
     | RequestModel
     | RequestDayahead
-    | Mixed of float list
+    | Mixed of energy list
     | Model of Grid
     | Error of string
     | Update of int

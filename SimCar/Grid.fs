@@ -1,5 +1,7 @@
 ﻿module Grid
 
+#nowarn "25"
+
 open System
 open Agent
 open Message
@@ -12,14 +14,14 @@ open PowerNode
 open MathNet.Numerics
 
 module Centralized = 
-    let make_agent name node schedule = 
+    let make_agent name node schedule ttlwindow = 
         match node with
         | Transformer(_) ->
             let agent = Agent.Centralized.create_trf_agent node
             postalService.add_agent(name, agent)
             agent
         | PHEV(_) ->
-            let agent = Agent.Centralized.create_phev_agent node name
+            let agent = Agent.Centralized.create_phev_agent node name ttlwindow
             postalService.add_agent(name, agent)
             agent
         | PowerNode(_) ->
@@ -32,27 +34,27 @@ module Centralized =
             agent
 
     // traverse a tree of models, creating a mirrored tree of agents as we go along
-    let rec make_tree node scheduler = 
+    let rec make_tree node scheduler ttlwindow = 
         match node with
         | Node(nodes, Some(Transformer({name=name}) as trf)) ->
-            Node(List.map (fun n -> make_tree n scheduler) nodes, Some <| make_agent name trf scheduler)
+            Node(List.map (fun n -> make_tree n scheduler ttlwindow) nodes, Some <| make_agent name trf scheduler ttlwindow)
         | Node(nodes, Some(PowerNode({name=name}) as pnode)) ->
-            Leaf(Some <| make_agent name pnode scheduler)
+            Leaf(Some <| make_agent name pnode scheduler ttlwindow)
         | Node(nodes, Some(PHEV({name=name}) as phev)) ->
-            Leaf(Some <| make_agent name phev scheduler)
+            Leaf(Some <| make_agent name phev scheduler ttlwindow)
         | Node(nodes, Some(BRP({name=name}) as brp)) ->
-            Node(List.map (fun n -> make_tree n scheduler) nodes, Some <| make_agent name brp scheduler)
+            Node(List.map (fun n -> make_tree n scheduler ttlwindow) nodes, Some <| make_agent name brp scheduler ttlwindow)
 
 module Decentralized = 
     module Random = 
-        let make_agent name node =    
+        let make_agent name node ttlwindow =    
             match node with
             | Transformer(_) ->
                 let agent = Agent.Decentralized.create_trf_agent node
                 postalService.add_agent(name, agent)
                 agent
             | PHEV(_) ->
-                let agent = Agent.Decentralized.Random.create_phev_agent node
+                let agent = Agent.Decentralized.Random.create_phev_agent node ttlwindow
                 postalService.add_agent(name, agent)
                 agent
             | PowerNode(_) ->
@@ -65,25 +67,25 @@ module Decentralized =
                 agent
 
         // traverse a tree of models, creating a mirrored tree of agents as we go along
-        let rec make_tree node = 
+        let rec make_tree node ttlwindow = 
             match node with
             | Node(nodes, Some(Transformer({name=name}) as trf)) ->
-                Node(List.map (fun n -> make_tree n) nodes, Some <| make_agent name trf)
+                Node(List.map (fun n -> make_tree n ttlwindow) nodes, Some <| make_agent name trf ttlwindow)
             | Node(nodes, Some(PowerNode({name=name}) as pnode)) ->
-                Leaf(Some <| make_agent name pnode)
+                Leaf(Some <| make_agent name pnode ttlwindow)
             | Node(nodes, Some(PHEV({name=name}) as phev)) ->
-                Leaf(Some <| make_agent name phev)
+                Leaf(Some <| make_agent name phev ttlwindow)
             | Node(nodes, Some(BRP({name=name}) as brp)) ->
-                Node(List.map (fun n -> make_tree n) nodes, Some <| make_agent name brp)
+                Node(List.map (fun n -> make_tree n ttlwindow) nodes, Some <| make_agent name brp ttlwindow)
     module Mixed = 
-        let make_agent name node =    
+        let make_agent name node ttlwindow mixedwindow =    
             match node with
             | Transformer(_) ->
                 let agent = Agent.Decentralized.create_trf_agent node
                 postalService.add_agent(name, agent)
                 agent
             | PHEV(_) ->
-                let agent = Agent.Decentralized.Mixed.create_phev_agent node
+                let agent = Agent.Decentralized.Mixed.create_phev_agent node ttlwindow
                 postalService.add_agent(name, agent)
                 agent
             | PowerNode(_) ->
@@ -91,21 +93,21 @@ module Decentralized =
                 postalService.add_agent(name, agent)
                 agent
             | BRP(_) ->
-                let agent = Agent.Decentralized.Mixed.create_brp_agent node
+                let agent = Agent.Decentralized.Mixed.create_brp_agent node mixedwindow
                 postalService.add_agent(name, agent)
                 agent
 
         // traverse a tree of models, creating a mirrored tree of agents as we go along
-        let rec make_tree node = 
+        let rec make_tree node ttlwindow mixedwindow = 
             match node with
             | Node(nodes, Some(Transformer({name=name}) as trf)) ->
-                Node(List.map (fun n -> make_tree n) nodes, Some <| make_agent name trf)
+                Node(List.map (fun n -> make_tree n ttlwindow mixedwindow) nodes, Some <| make_agent name trf ttlwindow mixedwindow)
             | Node(nodes, Some(PowerNode({name=name}) as pnode)) ->
-                Leaf(Some <| make_agent name pnode)
+                Leaf(Some <| make_agent name pnode ttlwindow mixedwindow)
             | Node(nodes, Some(PHEV({name=name}) as phev)) ->
-                Leaf(Some <| make_agent name phev)
+                Leaf(Some <| make_agent name phev ttlwindow mixedwindow)
             | Node(nodes, Some(BRP({name=name}) as brp)) ->
-                Node(List.map (fun n -> make_tree n) nodes, Some <| make_agent name brp)
+                Node(List.map (fun n -> make_tree n ttlwindow mixedwindow) nodes, Some <| make_agent name brp ttlwindow mixedwindow)
 
 module Util  = 
     // the update-function, takes the current node and threaded accumulator as parameters
@@ -137,20 +139,3 @@ module Util  =
         match grid with 
         | PowerNode(phev_args) -> ac + phev_args.current
         | _ -> ac
-
-    // Compute kernel for the blur algorithm
-    let computeCoefficients size =
-      let halfSize = size / 2
-      let gauss = List.init size (fun i -> 
-        Math.Exp(-float((i - halfSize) * (i - halfSize)) / 8.0))
-    
-      // Normalize values and convert them to 'float4'
-      let sum = List.sum gauss
-      [ for v in gauss -> (v / sum) ]
-
-    let filter = computeCoefficients 4
-    let gaussian_blur (array : float<kWh> array) = 
-        array |> Seq.ofArray |> Seq.windowed (4) |> Seq.map (fun x -> Seq.map2 (fun f x -> f * x) filter x) |> Seq.map Seq.sum
-
-    let moving_average (array : float<kWh> array) = 
-        array |> Seq.ofArray |> Seq.windowed (4) |> Seq.map Array.average

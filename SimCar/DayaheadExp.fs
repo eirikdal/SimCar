@@ -14,6 +14,34 @@ let rate = 1.25<kWh>
 
 module Algorithm = 
     let rand = new Random()
+    let distribute_mixed phev_expected realtime days =
+        let generate_problist tick window realtime = 
+            let baseline = [for i in tick .. (tick+window) do yield realtime(i)]
+            let max_baseline = List.max baseline
+            let min_baseline = List.min baseline
+
+            List.map (fun x -> (x-min_baseline) / (max_baseline-min_baseline)) baseline
+
+        let dist (day : float<kWh> array) : float<kWh> array = 
+            let rec fill idx left =
+                if left > rate then 
+                    let i = rand.Next(0,96)
+                    day.[i] <- day.[i] + rate
+                    fill idx (left-rate)
+                else
+                    let idx = rand.Next(0,96)
+                    day.[idx] <- day.[idx] + (rate - (rate-left))
+                    day.[idx]
+                  
+            phev_expected |> Array.mapi fill
+
+        [for i in 0 .. (days-1) do
+            let _from,_to = (i*96),(i*96)+96
+            let mutable day = Array.sub realtime _from 96
+            
+            let realtime_updated = dist day
+            yield! (List.ofArray day)]    
+
     let distribute_random phev_expected realtime days = 
         let dist (day : float<kWh> array) : float<kWh> array = 
             let rec fill idx left =

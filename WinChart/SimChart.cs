@@ -576,9 +576,22 @@ namespace WinChart
                         contr = new FSharpOption<Sim.Contribution>(Sim.Contribution.Simulated);
                         break;
                 }
+                Double distanceTheta = 1.0, shavingTheta = 0.99, shavingAlpha = 0.2;
+                int phevLearningWindow = 76, mixedWindow = 40;
 
-                Sim.SimCar tSim = new Sim.SimCar(nSim, nTicks, scheduler);
+                Int32.TryParse(textBoxPhevLearning.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out phevLearningWindow);
+                Int32.TryParse(textBoxMixedWindow.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out mixedWindow);
+                Double.TryParse(textBoxDistanceTheta.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out distanceTheta);
+                Double.TryParse(textBoxShavingAlpha.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out shavingAlpha);
+                Double.TryParse(textBoxShavingTheta.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out shavingTheta);
+
+                Sim.SimCar tSim = new Sim.SimCar(nSim, nTicks, scheduler, new FSharpOption<int>(phevLearningWindow));
+                tSim.MixedWindow = mixedWindow;
+                tSim.DistanceTheta = distanceTheta;
+                tSim.ShavingAlpha = shavingAlpha;
+                tSim.ShavingTheta = shavingTheta;
                 tSim.Init();
+
                 RegisterEvents(tSim);
                 tSim.ComputeDayahead(new FSharpOption<int>(nSim + 1), method, contr);
                 resetChart(chart1, 0, chart1.Series.Count);
@@ -592,6 +605,21 @@ namespace WinChart
             //Thread oThread = new Thread(new ThreadStart(Start));
             //oThread.Start();
             Start();
+        }
+
+        private void comboBox3_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void textBox2_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void comboBox2_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

@@ -73,21 +73,26 @@ module Action =
         | None ->
             PHEV({ phevArgs with left=(-1);})
 
-    let find_ttl (histogram : int array) tick =
+    let find_ttl (histogram : int array) tick nbhood =
         let tick' = (tick%96)
-        let nbhood = (tick'+ 76)
+        let nbhood' = (tick'+ nbhood)
 
-        // finding the mode
-        [for i in tick' .. nbhood do yield histogram.[(i%96)]] 
-        |> List.fold (fun ((i, cur), ac) x -> if x > ac then ((i+1,i),x) else ((i+1,cur),ac)) ((0,0),0) 
-        |> fst 
-        |> snd
-        |> (+) tick
+        let window = [for i in tick' .. nbhood do yield histogram.[(i%96)]] 
+
+        // Check to see if there are any recorded events in the neihhborhood. If not, use default value.
+        if List.sum window = 0 then 
+            tick+nbhood
+        else
+            window    
+            |> List.fold (fun ((i, cur), ac) x -> if x > ac then ((i+1,i),x) else ((i+1,cur),ac)) ((0,0),0) 
+            |> fst 
+            |> snd
+            |> (+) tick
 
 
 module Agent = 
     module Centralized = 
-        let create_phev_agent _p name = Agent<Message>.Start(fun agent ->
+        let create_phev_agent _p name ttlwindow = Agent<Message>.Start(fun agent ->
             let queue = new Queue<Message>() 
             let test = new MathNet.Numerics.Statistics.Histogram()
     
@@ -118,7 +123,7 @@ module Agent =
                 | Charge_OK(_,_,_) ->
                     return! loop (Action.charge phev_args) false
                 | Update(tick) ->
-                    let ttl = Action.find_ttl histogram tick 
+                    let ttl = Action.find_ttl histogram tick ttlwindow
                     let wait_for_reply = Action.send_intention phev_args ttl
             
                     if phev_args.name = "phev_827" then
@@ -143,7 +148,7 @@ module Agent =
             loop _p false)
     module Decentralized = 
         module Mixed = 
-            let create_phev_agent _p = Agent<Message>.Start(fun agent ->
+            let create_phev_agent _p ttlwindow = Agent<Message>.Start(fun agent ->
                 let queue = new Queue<Message>() 
                 let test = new MathNet.Numerics.Statistics.Histogram()
     
@@ -168,21 +173,30 @@ module Agent =
                     | Charge_OK(_,_,_) ->
                         return! loop (Action.charge phev_args) false tick
                     | Update(tick) ->
-                        postalService.send("brp", RequestMixed(name))
+                        let ttl = Action.find_ttl histogram tick ttlwindow
+                        postalService.send("brp", RequestMixed(name, ttl))
                         return! loop phev waiting tick
-                    | Mixed(problist) ->
-                        let ttl = Action.find_ttl histogram tick 
+                    | Mixed(baseline) ->
+                        let max_baseline = List.max baseline
+                        let min_baseline = List.min baseline
+
+                        let probs = 
+                            if max_baseline-min_baseline <> 0.0<kWh> then
+                                List.map (fun x -> (x-min_baseline) / (max_baseline-min_baseline)) baseline
+                            else
+                                List.map (fun _ -> 0.5) baseline
 
                         let intentions = 
                             if phev_args.intentions.Length <= 0 then
-                                Action.generate_intention phev_args problist
+                                Action.generate_intention phev_args probs
                             else
                                 phev_args.intentions
 
                         let msg = 
                             match intentions with
-                            | h::t -> Charge_OK(phev_args.name, h, ttl)
-                            | [] -> Charge_OK(phev_args.name, 0.0<kWh>,ttl)
+                            | h::t -> Charge_OK(phev_args.name, h, List.length probs)
+                            | [] -> Charge_OK(phev_args.name, 0.0<kWh>, List.length probs)
+
 //                        printfn "PHEV %s: Sending charge_ok to %s" name parent
                         postalService.send(phev_args.parent, msg)
             
@@ -207,7 +221,7 @@ module Agent =
                         return! loop phev waiting tick }
                 loop _p false 0)
         module Random = 
-            let create_phev_agent _p = Agent<Message>.Start(fun agent ->
+            let create_phev_agent _p ttlwindow = Agent<Message>.Start(fun agent ->
                 let queue = new Queue<Message>() 
                 let test = new MathNet.Numerics.Statistics.Histogram()
     
@@ -232,7 +246,7 @@ module Agent =
                     | Charge_OK(_,_,_) ->
                         return! loop (Action.charge phev_args) false
                     | Update(tick) ->
-                        let ttl = Action.find_ttl histogram tick 
+                        let ttl = Action.find_ttl histogram tick ttlwindow
                         let intentions = Action.create_intention phev_args tick ttl
 
                         let msg = 
