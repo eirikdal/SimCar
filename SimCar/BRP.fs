@@ -158,7 +158,7 @@ module Agent =
 
                 loop brp 0)
         module Mixed = 
-            let create_brp_agent brp window = Agent.Start(fun agent ->
+            let create_brp_agent brp = Agent.Start(fun agent ->
                 let rec loop (BRP({ children=children; realtime=realtime } as brp_args) as brp) (tick : int) = async {
                     let! (msg : Message) = agent.Receive()
 

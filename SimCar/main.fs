@@ -31,7 +31,7 @@ type SimCar(nIter, nTicksPerDay, ?scheduler, ?ttlwindow) =
     let mutable distanceTheta = 1.0
     let mutable shavingTheta = 0.99
     let mutable shavingAlpha = 0.2
-    let mutable mixedwindow = 40
+
     let ttlwindow = match ttlwindow with Some ttl -> ttl | None -> 76
     let agents = 
         match scheduler with
@@ -40,7 +40,7 @@ type SimCar(nIter, nTicksPerDay, ?scheduler, ?ttlwindow) =
         | Some Proactive -> 
             Grid.Centralized.make_tree <| powergrid() <| BRP.Action.schedule_proactive <| ttlwindow
         | Some Mixed -> 
-            Grid.Decentralized.Mixed.make_tree <| powergrid() <| ttlwindow <| mixedwindow
+            Grid.Decentralized.Mixed.make_tree <| powergrid() <| ttlwindow 
         | Some Random ->
             Grid.Decentralized.Random.make_tree <| powergrid() <| ttlwindow
         | None ->
@@ -49,7 +49,6 @@ type SimCar(nIter, nTicksPerDay, ?scheduler, ?ttlwindow) =
     member self.DistanceTheta with set(theta) = distanceTheta <- theta
     member self.ShavingTheta with set(theta) = shavingTheta <- theta
     member self.ShavingAlpha with set(alpha) = shavingAlpha <- alpha
-    member self.MixedWindow with set(window) = mixedwindow <- window
 
     member self.PostalService = postalService
    

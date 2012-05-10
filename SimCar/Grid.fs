@@ -78,7 +78,7 @@ module Decentralized =
             | Node(nodes, Some(BRP({name=name}) as brp)) ->
                 Node(List.map (fun n -> make_tree n ttlwindow) nodes, Some <| make_agent name brp ttlwindow)
     module Mixed = 
-        let make_agent name node ttlwindow mixedwindow =    
+        let make_agent name node ttlwindow =    
             match node with
             | Transformer(_) ->
                 let agent = Agent.Decentralized.create_trf_agent node
@@ -93,21 +93,21 @@ module Decentralized =
                 postalService.add_agent(name, agent)
                 agent
             | BRP(_) ->
-                let agent = Agent.Decentralized.Mixed.create_brp_agent node mixedwindow
+                let agent = Agent.Decentralized.Mixed.create_brp_agent node
                 postalService.add_agent(name, agent)
                 agent
 
         // traverse a tree of models, creating a mirrored tree of agents as we go along
-        let rec make_tree node ttlwindow mixedwindow = 
+        let rec make_tree node ttlwindow = 
             match node with
             | Node(nodes, Some(Transformer({name=name}) as trf)) ->
-                Node(List.map (fun n -> make_tree n ttlwindow mixedwindow) nodes, Some <| make_agent name trf ttlwindow mixedwindow)
+                Node(List.map (fun n -> make_tree n ttlwindow) nodes, Some <| make_agent name trf ttlwindow)
             | Node(nodes, Some(PowerNode({name=name}) as pnode)) ->
-                Leaf(Some <| make_agent name pnode ttlwindow mixedwindow)
+                Leaf(Some <| make_agent name pnode ttlwindow)
             | Node(nodes, Some(PHEV({name=name}) as phev)) ->
-                Leaf(Some <| make_agent name phev ttlwindow mixedwindow)
+                Leaf(Some <| make_agent name phev ttlwindow)
             | Node(nodes, Some(BRP({name=name}) as brp)) ->
-                Node(List.map (fun n -> make_tree n ttlwindow mixedwindow) nodes, Some <| make_agent name brp ttlwindow mixedwindow)
+                Node(List.map (fun n -> make_tree n ttlwindow) nodes, Some <| make_agent name brp ttlwindow)
 
 module Util  = 
     // the update-function, takes the current node and threaded accumulator as parameters

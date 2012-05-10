@@ -9,7 +9,6 @@ namespace WinChart
 {
     public partial class SimChart : Form
     {
-        const int nSim = 10;
         const int nTicks = 96;
 
         private const int nRealTime = 0;
@@ -577,26 +576,25 @@ namespace WinChart
                         break;
                 }
                 Double distanceTheta = 1.0, shavingTheta = 0.99, shavingAlpha = 0.2;
-                int phevLearningWindow = 76, mixedWindow = 40;
+                int phevLearningWindow = 76, nDays = 10;
 
                 Int32.TryParse(textBoxPhevLearning.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out phevLearningWindow);
-                Int32.TryParse(textBoxMixedWindow.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out mixedWindow);
+                Int32.TryParse(textBoxDays.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out nDays);
                 Double.TryParse(textBoxDistanceTheta.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out distanceTheta);
                 Double.TryParse(textBoxShavingAlpha.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out shavingAlpha);
                 Double.TryParse(textBoxShavingTheta.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out shavingTheta);
 
-                Sim.SimCar tSim = new Sim.SimCar(nSim, nTicks, scheduler, new FSharpOption<int>(phevLearningWindow));
-                tSim.MixedWindow = mixedWindow;
+                Sim.SimCar tSim = new Sim.SimCar(nDays, nTicks, scheduler, new FSharpOption<int>(phevLearningWindow));
                 tSim.DistanceTheta = distanceTheta;
                 tSim.ShavingAlpha = shavingAlpha;
                 tSim.ShavingTheta = shavingTheta;
                 tSim.Init();
 
                 RegisterEvents(tSim);
-                tSim.ComputeDayahead(new FSharpOption<int>(nSim + 1), method, contr);
+                tSim.ComputeDayahead(new FSharpOption<int>(nDays + 1), method, contr);
                 resetChart(chart1, 0, chart1.Series.Count);
                 resetChart(chart2, 0, chart2.Series.Count);
-                tSim.Run(new FSharpOption<int>(nSim));
+                tSim.Run(new FSharpOption<int>(nDays));
             }
         }
 
