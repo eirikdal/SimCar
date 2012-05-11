@@ -47,7 +47,7 @@ module Action =
         let rec gen problist intentions rem = 
             let r = rand.NextDouble()
             match problist with 
-            | h::t -> if r <= h && rem > 0.0<kWh> then gen t (rate::intentions) (rem-rate) else gen t ((0.0<kWh>)::intentions) rem
+            | h::t -> if r <= h && rem >= rate then gen t (rate::intentions) (rem-rate) else if r <= h && rem > 0.0<kWh> then gen t ((rate-rem)::intentions) (rem-(rate-rem)) else gen t ((0.0<kWh>)::intentions) rem
             | _ -> intentions
 
         gen probs [] (capacity-battery)
@@ -126,8 +126,9 @@ module Agent =
                     let ttl = Action.find_ttl histogram tick ttlwindow
                     let wait_for_reply = Action.send_intention phev_args ttl
             
-                    if phev_args.name = "phev_827" then
+                    if phev_args.name = "phev_17" then
                         syncContext.RaiseDelegateEvent phevBattery phev_args.battery
+
                         if phev_args.duration > 0 then
                             syncContext.RaiseDelegateEvent phevStatus 1.0
                         else 
@@ -168,6 +169,43 @@ module Agent =
                             else
                                 queue.Enqueue(msg)
                                 return! loop phev waiting tick
+                        | Mixed(baseline) ->
+                            let max_baseline = List.max baseline
+                            let min_baseline = List.min baseline
+
+                            let probs = 
+                                if max_baseline-min_baseline <> 0.0<kWh> then
+                                    List.map (fun x -> (x-min_baseline) / (max_baseline-min_baseline)) baseline
+                                else
+                                    List.map (fun _ -> 0.5) baseline
+
+                            let intentions = 
+                                if phev_args.intentions.Length <= 0 then
+                                    Action.generate_intention phev_args probs
+                                else
+                                    phev_args.intentions
+
+                            reply.Reply(Strategy(intentions))
+
+                            let msg = 
+                                match intentions with
+                                | h::t -> Charge_OK(phev_args.name, h, List.length probs)
+                                | [] -> Charge_OK(phev_args.name, 0.0<kWh>, List.length probs)
+
+    //                        printfn "PHEV %s: Sending charge_ok to %s" name parent
+                            postalService.send(phev_args.parent, msg)
+            
+                            if phev_args.name = "phev_17" then
+                                syncContext.RaiseDelegateEvent phevBattery phev_args.battery
+                                if phev_args.duration > 0 then
+                                    syncContext.RaiseDelegateEvent phevStatus 1.0
+                                else 
+                                    syncContext.RaiseDelegateEvent phevStatus 0.0
+
+                            if phev_args.duration <= 0 then
+                                return! loop <| Action.leave name { phev_args with intentions=intentions } tick <| true <| tick
+                            else
+                                return! loop <| PHEV({ phev_args with intentions=intentions }.drive()) <| true <| tick
                     | Model(phev) ->
                         return! loop phev waiting tick
                     | Charge_OK(_,_,_) ->
@@ -176,41 +214,6 @@ module Agent =
                         let ttl = Action.find_ttl histogram tick ttlwindow
                         postalService.send("brp", RequestMixed(name, ttl))
                         return! loop phev waiting tick
-                    | Mixed(baseline) ->
-                        let max_baseline = List.max baseline
-                        let min_baseline = List.min baseline
-
-                        let probs = 
-                            if max_baseline-min_baseline <> 0.0<kWh> then
-                                List.map (fun x -> (x-min_baseline) / (max_baseline-min_baseline)) baseline
-                            else
-                                List.map (fun _ -> 0.5) baseline
-
-                        let intentions = 
-                            if phev_args.intentions.Length <= 0 then
-                                Action.generate_intention phev_args probs
-                            else
-                                phev_args.intentions
-
-                        let msg = 
-                            match intentions with
-                            | h::t -> Charge_OK(phev_args.name, h, List.length probs)
-                            | [] -> Charge_OK(phev_args.name, 0.0<kWh>, List.length probs)
-
-//                        printfn "PHEV %s: Sending charge_ok to %s" name parent
-                        postalService.send(phev_args.parent, msg)
-            
-                        if phev_args.name = "phev_827" then
-                            syncContext.RaiseDelegateEvent phevBattery phev_args.battery
-                            if phev_args.duration > 0 then
-                                syncContext.RaiseDelegateEvent phevStatus 1.0
-                            else 
-                                syncContext.RaiseDelegateEvent phevStatus 0.0
-
-                        if phev_args.duration <= 0 then
-                            return! loop <| Action.leave name { phev_args with intentions=intentions } tick <| true <| tick
-                        else
-                            return! loop <| PHEV({ phev_args with intentions=intentions }.drive()) <| true <| tick
                     | Reset -> 
                         return! loop <| PHEV({ phev_args with battery=phev_args.capacity; duration=(-1) }) <| false <| tick
                     | Kill ->
@@ -256,7 +259,7 @@ module Agent =
 
                         postalService.send(phev_args.parent, msg)
             
-                        if phev_args.name = "phev_827" then
+                        if phev_args.name = "phev_17" then
                             syncContext.RaiseDelegateEvent phevBattery phev_args.battery
                             if phev_args.duration > 0 then
                                 syncContext.RaiseDelegateEvent phevStatus 1.0

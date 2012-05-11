@@ -2,12 +2,19 @@
 #r "C:\SimCar\packages\MathNet.Numerics.2.1.2\lib\Net40\MathNet.Numerics.dll"
 #r "C:\SimCar\packages\MathNet.Numerics.FSharp.2.1.2\lib\Net40\MathNet.Numerics.FSharp.dll"
 
+(*
+parse_realtime_data.fsx:
+
+This script reads in a dataset of smart meter readings, and converts
+these into a dataformat which can be used by the simulator. 
+*)
+
 open System
 open System.IO
 open System.Globalization
 open System.Text.RegularExpressions
 open MathNet
-open MathNet.Numerics.Interpolation
+open MathNet.Numerics.Interpolation 
 open FileManager
 
 #nowarn "25"

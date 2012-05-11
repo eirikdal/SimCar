@@ -97,13 +97,13 @@
             this.chart2.ChartAreas.Add(chartArea6);
             legend6.Name = "Legend1";
             this.chart2.Legends.Add(legend6);
-            this.chart2.Location = new System.Drawing.Point(529, -5);
+            this.chart2.Location = new System.Drawing.Point(449, -5);
             this.chart2.Name = "chart2";
             series6.ChartArea = "ChartArea1";
             series6.Legend = "Legend1";
             series6.Name = "Series1";
             this.chart2.Series.Add(series6);
-            this.chart2.Size = new System.Drawing.Size(457, 276);
+            this.chart2.Size = new System.Drawing.Size(537, 276);
             this.chart2.TabIndex = 1;
             this.chart2.Text = "chart2";
             // 
@@ -318,7 +318,7 @@
             this.textBoxPhevLearning.Name = "textBoxPhevLearning";
             this.textBoxPhevLearning.Size = new System.Drawing.Size(40, 20);
             this.textBoxPhevLearning.TabIndex = 0;
-            this.textBoxPhevLearning.Text = "76";
+            this.textBoxPhevLearning.Text = "40";
             // 
             // groupBox4
             // 

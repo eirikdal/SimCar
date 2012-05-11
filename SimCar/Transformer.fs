@@ -49,7 +49,7 @@ module Agent =
                             else 
                                 rem) (trf_args.capacity)
             
-                    if name = "med_29" then
+                    if name = "med_1" then
                         syncContext.RaiseDelegateEvent trfFiltered (rem)
                         syncContext.RaiseDelegateEvent trfCurrent sum_of_charges
                         syncContext.RaiseDelegateEvent trfCapacity trf_args.capacity
@@ -101,19 +101,19 @@ module Agent =
 
                     let sum_of_charges = charges |> List.sumBy (fun (Charge_OK(_,energy,ttl)) -> energy)
 
-                    let rem = 
+                    let (rem, filtered) = 
                         charges 
                         |> List.sortBy (fun (Charge_OK(_,_,ttl)) -> ttl)
-                        |> List.fold (fun rem (Charge_OK(name,energy,ttl)) ->     
+                        |> List.fold (fun (rem,filtered) (Charge_OK(name,energy,ttl)) ->     
                             if not (name.StartsWith("med") || name.StartsWith("high")) then
-                                let filtered, remaining = Action.filter energy rem
-                                postalService.send(name, Charge_OK(name, filtered, ttl))
-                                remaining
+                                let filter, remaining = Action.filter energy rem
+                                postalService.send(name, Charge_OK(name, filter, ttl))
+                                remaining, filtered+(energy-filter)
                             else 
-                                rem) (trf_args.capacity)
+                                rem,filtered) (trf_args.capacity, 0.0<kWh>)
             
-                    if name = "med_29" then
-                        syncContext.RaiseDelegateEvent trfFiltered (rem)
+                    if name = "med_1" then
+                        syncContext.RaiseDelegateEvent trfFiltered (filtered)
                         syncContext.RaiseDelegateEvent trfCurrent sum_of_charges
                         syncContext.RaiseDelegateEvent trfCapacity trf_args.capacity
                 

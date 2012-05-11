@@ -52,12 +52,12 @@ let rec send_reply msg node =
     match node : Node<Agent<Message>> with
     | Node(nodes, Some(leaf)) ->
         let list = List.map (fun n -> send_reply msg n) nodes 
-        let res = leaf.PostAndReply((fun replyChannel -> ReplyTo(msg, replyChannel)), 100000)
+        let res = leaf.PostAndReply((fun replyChannel -> ReplyTo(msg, replyChannel)), 20000)
         Node(list, Some (leaf, res))
     | Node(nodes, None) -> 
         Node(List.map (fun n -> send_reply msg n) nodes, None)
     | Leaf(Some(leaf)) ->
-        let res = leaf.PostAndReply((fun replyChannel -> ReplyTo(msg, replyChannel)), 100000)
+        let res = leaf.PostAndReply((fun replyChannel -> ReplyTo(msg, replyChannel)), 20000)
         Leaf(Some <| (leaf, res))
     | Leaf(None) ->
         Leaf(None)

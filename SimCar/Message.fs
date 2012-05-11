@@ -22,6 +22,7 @@ type Message =
     | RequestDayahead
     | Mixed of energy list
     | Model of Grid
+    | Strategy of energy list
     | Error of string
     | Update of int
     | Kill

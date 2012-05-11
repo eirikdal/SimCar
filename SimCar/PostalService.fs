@@ -11,7 +11,7 @@ open Models
 open System.Collections.Generic
 
 type PostalService() = 
-    let agentdict = new Dictionary<string, Agent<Message>>()
+    let mutable agentdict = new Dictionary<string, Agent<Message>>()
     let mutable _agents = Node(List.empty, None) : Node<Agent<_>>
 
     let agent = Agent<Message>.Start(fun agent ->
@@ -34,6 +34,8 @@ type PostalService() =
 
         }
         loop())
+
+    member self.Reset() = agentdict <- new Dictionary<string, Agent<Message>>()
 
     member self.Post(msg) = agent.Post(msg)
 

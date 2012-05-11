@@ -175,12 +175,10 @@ type Profile =
                         ac + (window |> Array.fold (fun ac' (i', rate') -> if (i%96) = (i'%96) then ac'+rate' else ac') 0.0<kWh>)) 0.0<kWh>)
                 |> List.ofArray
 
-            let test = 
-                dist_list 
-                |> List.map (fun dist -> calc_for_dist dist)
-                |> List.sumn
-//            printfn "%A" test
-            test
+            dist_list 
+            |> List.map (fun dist -> calc_for_dist dist)
+            |> List.sumn
+
         | DistProfile(name,dist_list) ->
             self.calc(name,dist_list).to_exp_float(rate, capacity)
 type Node<'T> = 
@@ -221,10 +219,7 @@ type PhevArguments =
         member self.leave(tick : int, duration : int) : PhevArguments =  
             self.histogram.[(tick%96)] <- self.histogram.[(tick%96)] + 1
 
-            if self.battery < self.capacity && (self.capacity - self.battery) >= self.rate then 
-                syncContext.RaiseDelegateEvent phevFailed (tick%96)
-
-            syncContext.RaiseDelegateEvent phevLeft (tick%96)
+            syncContext.RaiseDelegateEvent phevLeft (tick%96, Math.Round(Energy.toFloat <| self.capacity-self.battery))
         
             { self with left=(tick%96); duration=duration; intentions=[]}
         member self.charge() = 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Drawing;
 using System.Threading;
 using System.Windows.Forms;
@@ -10,6 +11,7 @@ namespace WinChart
     public partial class SimChart : Form
     {
         const int nTicks = 96;
+        Sim.SimCar tSim;
 
         private const int nRealTime = 0;
         private const int nPowerNodes = 1;
@@ -164,7 +166,7 @@ namespace WinChart
                     for (int j = 0; j < 96; j++)
                         chart.Series[i].Points.Add(0);
                 double temp = chart.Series[i].Points[point].YValues[0];
-                chart.Series[i].Points[point].SetValueY(temp + 10.0);
+                chart.Series[i].Points[point].SetValueY(temp + val);
             }
         }
 
@@ -226,11 +228,11 @@ namespace WinChart
             addPoint(chart2, nPhevStatus, point);
         }
 
-        void phevFailed_Changed(object sender, EventArgs e)
+        void phevLeft_Changed(object sender, EventArgs e)
         {
-            int point = (int)sender;
+            Tuple<int, Double> chart = (Tuple<int, Double>)sender;
 
-            incrementPoint(chart1, nPhevsLeft, point, 1.0);
+            incrementPoint(chart1, nPhevsLeft, chart.Item1, chart.Item2);
         }
 
         void phevBattery_Changed(object sender, EventArgs e)
@@ -350,7 +352,7 @@ namespace WinChart
             tSim.RegisterProgressTotal(total_Changed);
             tSim.RegisterProgressPhev(phev_Changed);
             tSim.RegisterProgressPnode(pnode_Changed);
-            tSim.RegisterPhevFailed(phevFailed_Changed);
+            tSim.RegisterPhevLeft(phevLeft_Changed);
             tSim.RegisterProb(prob_Calc);
             tSim.RegisterProbReset(prob_Reset);
             tSim.RegisterDayaheadProgress(dayahead_Changed);
@@ -446,7 +448,7 @@ namespace WinChart
             seriesArray[nPhev].BorderWidth = 2;
             seriesArray[nPhev].BorderDashStyle = ChartDashStyle.Dot;
 
-            seriesArray[nPhevsLeft].ChartType = SeriesChartType.Point;
+            seriesArray[nPhevsLeft].ChartType = SeriesChartType.Line;
             seriesArray[nPhevsLeft].Color = Color.Black;
             seriesArray[nPhevsLeft].BorderWidth = 2;
             seriesArray[nPhevsLeft].BorderDashStyle = ChartDashStyle.Dash;
@@ -454,7 +456,7 @@ namespace WinChart
             seriesArray[nDayAhead].ChartType = SeriesChartType.Line;
             seriesArray[nDayAhead].Color = Color.Sienna;
             seriesArray[nDayAhead].BorderWidth = 2;
-            seriesArray[nDayAhead].BorderDashStyle = ChartDashStyle.Solid;
+            seriesArray[nDayAhead].BorderDashStyle = ChartDashStyle.Dash;
 
             seriesPhev[nPhevStatus].ChartType = SeriesChartType.StepLine;
             seriesPhev[nPhevStatus].Color = Color.Red;
@@ -489,7 +491,7 @@ namespace WinChart
             seriesDayahead[nDayaheadOriginal].ChartType = SeriesChartType.Line;
             seriesDayahead[nDayaheadOriginal].Color = Color.Sienna;
             seriesDayahead[nDayaheadOriginal].BorderWidth = 2;
-            seriesDayahead[nDayaheadOriginal].BorderDashStyle = ChartDashStyle.Solid;
+            seriesDayahead[nDayaheadOriginal].BorderDashStyle = ChartDashStyle.Dash;
 
             seriesDayahead[nDayaheadPrev].ChartType = SeriesChartType.Line;
             seriesDayahead[nDayaheadPrev].Color = Color.Blue;
@@ -519,83 +521,107 @@ namespace WinChart
             comboBox1.SelectedItem = "Random";
             comboBox2.SelectedItem = "Mixed";
             comboBox3.SelectedItem = "Expected";
-        }
-
-        public void Start()
-        {
+            
             if (comboBox1.InvokeRequired)
             {
                 comboBox1.Invoke(new startDelegate(Start));
             }
             else
             {
-                FSharpOption<Sim.Method> method = null;
-                FSharpOption<Sim.Contribution> contr = null;
-                FSharpOption<Sim.Scheduler> scheduler = null;
-
-                switch (comboBox1.SelectedItem.ToString())
-                {
-                    case "Peak-shaving":
-                        method = new FSharpOption<Sim.Method>(Sim.Method.Shaving);
-                        break;
-                    case "Distance-rule":
-                        method = new FSharpOption<Sim.Method>(Sim.Method.Distance);
-                        break;
-                    case "Swarm":
-                        method = new FSharpOption<Sim.Method>(Sim.Method.Swarm);
-                        break;
-                    case "Random":
-                        method = new FSharpOption<Sim.Method>(Sim.Method.Random);
-                        break;
-                    case "Mixed":
-                        method = new FSharpOption<Sim.Method>(Sim.Method.Mixed);
-                        break;
-                }
-                switch (comboBox2.SelectedItem.ToString())
-                {
-                    case "Proactive":
-                        scheduler = new FSharpOption<Sim.Scheduler>(Sim.Scheduler.Proactive);
-                        break;
-                    case "Reactive":
-                        scheduler = new FSharpOption<Sim.Scheduler>(Sim.Scheduler.Reactive);
-                        break;
-                    case "Random":
-                        scheduler = new FSharpOption<Sim.Scheduler>(Sim.Scheduler.Random);
-                        break;
-                    case "Mixed":
-                        scheduler = new FSharpOption<Sim.Scheduler>(Sim.Scheduler.Mixed);
-                        break;
-                }
-                switch (comboBox3.SelectedItem.ToString())
-                {
-                    case "Expected":
-                        contr = new FSharpOption<Sim.Contribution>(Sim.Contribution.Expected);
-                        break;
-                    case "Simulated":
-                        contr = new FSharpOption<Sim.Contribution>(Sim.Contribution.Simulated);
-                        break;
-                }
-                Double distanceTheta = 1.0, shavingTheta = 0.99, shavingAlpha = 0.2;
-                int phevLearningWindow = 76, nDays = 10;
-
-                Int32.TryParse(textBoxPhevLearning.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out phevLearningWindow);
-                Int32.TryParse(textBoxDays.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out nDays);
-                Double.TryParse(textBoxDistanceTheta.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out distanceTheta);
-                Double.TryParse(textBoxShavingAlpha.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out shavingAlpha);
-                Double.TryParse(textBoxShavingTheta.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out shavingTheta);
-
-                Sim.SimCar tSim = new Sim.SimCar(nDays, nTicks, scheduler, new FSharpOption<int>(phevLearningWindow));
-                tSim.DistanceTheta = distanceTheta;
-                tSim.ShavingAlpha = shavingAlpha;
-                tSim.ShavingTheta = shavingTheta;
+                tSim = new Sim.SimCar(nTicks);
                 tSim.Init();
-
                 RegisterEvents(tSim);
-                tSim.ComputeDayahead(new FSharpOption<int>(nDays + 1), method, contr);
-                resetChart(chart1, 0, chart1.Series.Count);
-                resetChart(chart2, 0, chart2.Series.Count);
-                tSim.Run(new FSharpOption<int>(nDays));
             }
+        }
+
+        public void Start()
+        {
+            Double distanceTheta = 1.0, shavingTheta = 0.99, shavingAlpha = 0.2;
+            int phevLearningWindow = 40, nDays = 10;
+
+            Int32.TryParse(textBoxPhevLearning.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out phevLearningWindow);
+            Int32.TryParse(textBoxDays.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out nDays);
+            Double.TryParse(textBoxDistanceTheta.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out distanceTheta);
+            Double.TryParse(textBoxShavingAlpha.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out shavingAlpha);
+            Double.TryParse(textBoxShavingTheta.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out shavingTheta);
+
+            button1.Enabled = false;
+
+            Sim.Method method = null;
+            Sim.Contribution contr = null;
+            Sim.Scheduler scheduler = null;
+
+            switch (comboBox1.SelectedItem.ToString())
+            {
+                case "Peak-shaving":
+                    method = Sim.Method.Shaving;
+                    break;
+                case "Distance-rule":
+                    method = Sim.Method.Distance;
+                    break;
+                case "Swarm":
+                    method = Sim.Method.Swarm;
+                    break;
+                case "Random":
+                    method = Sim.Method.Random;
+                    break;
+                case "Mixed":
+                    method = Sim.Method.Mixed;
+                    break;
+            }
+            switch (comboBox2.SelectedItem.ToString())
+            {
+                case "Proactive":
+                    scheduler = Sim.Scheduler.Proactive;
+                    break;
+                case "Reactive":
+                    scheduler = Sim.Scheduler.Reactive;
+                    break;
+                case "Random":
+                    scheduler = Sim.Scheduler.Random;
+                    break;
+                case "Mixed":
+                    scheduler = Sim.Scheduler.Mixed;
+                    break;
+            }
+            switch (comboBox3.SelectedItem.ToString())
+            {
+                case "Expected":
+                    contr = Sim.Contribution.Expected;
+                    break;
+                case "Simulated":
+                    contr = Sim.Contribution.Simulated;
+                    break;
+            }
+
+            tSim.PhevWindow = phevLearningWindow;
+            tSim.Scheduler = scheduler;
+            tSim.DistanceTheta = distanceTheta;
+            tSim.ShavingAlpha = shavingAlpha;
+            tSim.ShavingTheta = shavingTheta;
+            tSim.Method = method;
+            tSim.Contribution = contr;
+            tSim.Days = nDays;
+
+            BackgroundWorker bgWorker;
+            bgWorker = new BackgroundWorker();
+            bgWorker.DoWork += new DoWorkEventHandler(Simulation_Start);
+            bgWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(Simulation_Completed);
+            bgWorker.RunWorkerAsync(tSim);
+        }
+
+        private void Simulation_Start(object sender, DoWorkEventArgs args)
+        {
+            Sim.SimCar tSim = (Sim.SimCar)args.Argument;
+            tSim.ComputeDayahead();
+            resetChart(chart1, 0, chart1.Series.Count);
+            resetChart(chart2, 0, chart2.Series.Count);
+            tSim.Run();
+        }
+
+        private void Simulation_Completed(object sender, RunWorkerCompletedEventArgs args)
+        {
+            button1.Enabled = true;
         }
 
         private void button1_Click(object sender, EventArgs e)

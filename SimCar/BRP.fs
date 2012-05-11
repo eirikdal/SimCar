@@ -159,7 +159,7 @@ module Agent =
                 loop brp 0)
         module Mixed = 
             let create_brp_agent brp = Agent.Start(fun agent ->
-                let rec loop (BRP({ children=children; realtime=realtime } as brp_args) as brp) (tick : int) = async {
+                let rec loop (BRP({ children=children; realtime=realtime } as brp_args) as brp) (tick : int) (predictions : energy array) = async {
                     let! (msg : Message) = agent.Receive()
 
                     match msg with
@@ -168,30 +168,33 @@ module Agent =
                         | RequestModel ->
                             syncContext.RaiseEvent jobDebug <| "BRP responding to RequestModel"
                             reply.Reply(Model(brp))
-                            return! loop brp tick
+                            return! loop brp tick predictions
                         | RequestDayahead ->
                             reply.Reply(Model(brp))
-                            return! loop brp tick
+                            return! loop brp tick predictions
                     | RequestMixed(name, ttl) ->
 //                        reply.Reply(Mixed(problist))
-                        let window = [for i in tick .. ttl do yield realtime(i)]
-                        postalService.send(name, Mixed(window))
-                        return! loop brp tick
+                        let window = [for i in tick .. ttl do yield predictions.[i%96]]
+                        let (Strategy(strategy)) = postalService.send_reply(name, Mixed(window))
+                        for i in 0 .. (List.length strategy-1) do 
+                            predictions.[i] <- predictions.[i] + strategy.[i]
+                        return! loop brp tick predictions
                     | Update(tick) -> 
-                        return! loop brp tick
+                        [|for i in tick .. tick+96 do yield predictions.[i%96] <- realtime(i)|] |> ignore
+                        return! loop brp tick predictions
                     | Dayahead(dayahead) ->
-                        return! loop <| BRP({ brp_args with dayahead=dayahead }) <| tick
+                        return! loop <| BRP({ brp_args with dayahead=dayahead }) <| tick <| predictions
                     | Prediction(realtime) ->
-                        return! loop <| BRP({ brp_args with realtime=realtime }) <| tick
+                        return! loop <| BRP({ brp_args with realtime=realtime }) <| tick <| predictions
                     | Schedule(_) ->
     //                    raise <| Exception("Decentralized BRP agent does not support scheduling")
-                        return! loop brp tick
+                        return! loop brp tick predictions
                     | Model(brp) -> 
-                        return! loop brp tick
-                    | Reset -> return! loop brp tick
+                        return! loop brp tick predictions
+                    | Reset -> return! loop brp tick predictions
                     | Kill ->
                         printfn "Agent %s: Exiting.." "BRP"
                     | _ ->
-                        return! loop brp tick}    
+                        return! loop brp tick predictions}    
 
-                loop brp 0)
+                loop brp 0 (Array.zeroCreate(96)))
