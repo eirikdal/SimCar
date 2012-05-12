@@ -52,6 +52,7 @@ namespace WinChart
         private delegate void incrementPointDelegate(Chart chart, int i, int point, Double val);
         private delegate void updatePointDelegate(Chart chart, int i, int point, Double val);
         private delegate void startDelegate();
+        private delegate void updateLogDelegate(String ev);
         
 
         void saveImageControl(string fileName)
@@ -336,6 +337,48 @@ namespace WinChart
             //updateChart(chartDayahead, nDayaheadSupervisor, chart);
         }
 
+        void updateLog(String ev)
+        {
+            if (textLog.InvokeRequired)
+            {
+                textLog.BeginInvoke(new updateLogDelegate(updateLog), new object[]{ ev });
+            }
+            else
+            {
+                textLog.AppendText(ev + "\n");
+            }
+        }
+
+        void updateDebug(String ev)
+        {
+            if (textBoxDebug.InvokeRequired)
+            {
+                textBoxDebug.BeginInvoke(new updateLogDelegate(updateDebug), new object[] { ev });
+            }
+            else
+            {
+                textBoxDebug.AppendText(ev + "\n");
+            }
+        }
+
+        void progress_Changed(object sender, EventArgs e)
+        {
+            String ev = (String)sender;
+            updateLog(ev);
+        }
+
+        void debug_Changed(object sender, EventArgs e)
+        {
+            String ev = (String)sender;
+            updateDebug(ev);
+        }
+
+        void error_Changed(object sender, EventArgs e)
+        {
+            String ev = (String)sender;
+            updateDebug(ev);
+        }
+
         void setChartLabels(Chart chart)
         {
             chart.ChartAreas[0].AxisX.CustomLabels.Add(23, 24, "06:00");
@@ -346,7 +389,7 @@ namespace WinChart
 
         void RegisterEvents(Sim.SimCar tSim)
         {
-            tSim.RegisterEvents();
+            //tSim.RegisterEvents();
             tSim.RegisterPhevBattery(phevBattery_Changed);
             tSim.RegisterPhevStatus(phevStatus_Changed);
             tSim.RegisterProgressTotal(total_Changed);
@@ -365,6 +408,9 @@ namespace WinChart
             tSim.RegisterTrfCapacity(trfCapacity_Changed);
             tSim.RegisterTrfCurrent(trfCurrent_Changed);
             tSim.RegisterTrfFiltered(trfFiltered_Changed);
+            tSim.RegisterDebug(debug_Changed);
+            tSim.RegisterError(error_Changed);
+            tSim.RegisterProgress(progress_Changed);
         }
 
         //void UnregisterEvents()
@@ -455,8 +501,8 @@ namespace WinChart
 
             seriesArray[nDayAhead].ChartType = SeriesChartType.Line;
             seriesArray[nDayAhead].Color = Color.Sienna;
-            seriesArray[nDayAhead].BorderWidth = 2;
-            seriesArray[nDayAhead].BorderDashStyle = ChartDashStyle.Dash;
+            seriesArray[nDayAhead].BorderWidth = 1;
+            seriesArray[nDayAhead].BorderDashStyle = ChartDashStyle.Dot;
 
             seriesPhev[nPhevStatus].ChartType = SeriesChartType.StepLine;
             seriesPhev[nPhevStatus].Color = Color.Red;
