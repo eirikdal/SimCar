@@ -597,49 +597,67 @@ namespace WinChart
             Sim.Contribution contr = null;
             Sim.Scheduler scheduler = null;
 
+            updateLog("-------------------------------------");
+            String dayah = "", mech = "", phev = "";
             switch (comboBox1.SelectedItem.ToString())
             {
                 case "Peak-shaving":
+                    dayah = String.Format("Centralized (peak-shaving): alpha={0}, theta={1}", shavingAlpha, shavingTheta);
                     method = Sim.Method.Shaving;
                     break;
                 case "Distance-rule":
+                    dayah = String.Format("Centralized (distance-rule): theta={0}", distanceTheta);
                     method = Sim.Method.Distance;
                     break;
                 case "Swarm":
                     method = Sim.Method.Swarm;
                     break;
                 case "Random":
+                    dayah = (String.Format("Decentralized (Random)"));
                     method = Sim.Method.Random;
                     break;
                 case "Mixed":
+                    dayah = (String.Format("Decentralized (Mixed)"));
                     method = Sim.Method.Mixed;
                     break;
             }
+            updateLog(String.Format("Dayahead:\t {0}", dayah));
             switch (comboBox2.SelectedItem.ToString())
             {
                 case "Proactive":
+                    mech = "Proactive";
                     scheduler = Sim.Scheduler.Proactive;
                     break;
                 case "Reactive":
+                    mech = "Reactive";
                     scheduler = Sim.Scheduler.Reactive;
                     break;
                 case "Random":
+                    mech = "Random";
                     scheduler = Sim.Scheduler.Random;
                     break;
                 case "Mixed":
+                    mech = "Mixed";
                     scheduler = Sim.Scheduler.Mixed;
                     break;
             }
+            updateLog(String.Format("Mechanism:\t {0}", mech));
+
             switch (comboBox3.SelectedItem.ToString())
             {
                 case "Expected":
+                    phev = "Expected";
                     contr = Sim.Contribution.Expected;
                     break;
                 case "Simulated":
+                    phev = "Simulated";
                     contr = Sim.Contribution.Simulated;
                     break;
             }
-
+            updateLog(String.Format("Contribution:\t {0}", phev));
+            updateLog(String.Format("Window (PHEV):\t {0}", phevLearningWindow));
+            updateLog(String.Format("Days:\t\t {0}", nDays));
+            updateLog("-------------------------------------");
             tSim.PhevWindow = phevLearningWindow;
             tSim.Scheduler = scheduler;
             tSim.DistanceTheta = distanceTheta;
@@ -668,10 +686,20 @@ namespace WinChart
         private void Simulation_Completed(object sender, RunWorkerCompletedEventArgs args)
         {
             button1.Enabled = true;
+
+            String fileName = String.Format("{0:ddMMyyhhmmss}", DateTime.Now);
+            String fileLog = String.Format("c:\\SimCar\\SimCar\\data\\log\\{0}.txt", fileName);
+
+            System.IO.StreamWriter file = new System.IO.StreamWriter(fileLog);
+            file.WriteLine(textLog.Text);
+
+            file.Close();
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
+            textBoxDebug.Clear();
+            textLog.Clear();
             //Thread oThread = new Thread(new ThreadStart(Start));
             //oThread.Start();
             Start();

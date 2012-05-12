@@ -92,7 +92,7 @@ module Agent =
                             reply.Reply(Model(brp))
                             return! loop brp [] schedule tick false
                     | RequestDayahead ->
-                        reply.Reply(Model(brp))
+                        reply.Reply(Dayahead(brp_args.dayahead))
                         return! loop brp [] schedule tick waiting
                 | Update(tick) -> 
                     return! loop brp [] schedule tick true
@@ -134,7 +134,7 @@ module Agent =
                             reply.Reply(Model(brp))
                             return! loop brp tick
                         | RequestDayahead ->
-                            reply.Reply(Model(brp))
+                            reply.Reply(Dayahead(brp_args.dayahead))
                             return! loop brp tick
                     | Update(tick) -> 
                         return! loop brp tick
@@ -166,7 +166,7 @@ module Agent =
                             reply.Reply(Model(brp))
                             return! loop brp tick predictions
                         | RequestDayahead ->
-                            reply.Reply(Model(brp))
+                            reply.Reply(Dayahead(brp_args.dayahead))
                             return! loop brp tick predictions
                     | RequestMixed(name, ttl) ->
 //                        reply.Reply(Mixed(problist))

@@ -65,34 +65,43 @@ let run day agents compute_dayahead =
     // right-fold over tree, applying the update function (inorder traversal)
     let updated_realtime = 
         realtime
-        |> Array.map (Tree.foldr Util.update) 
+        |> Array.map (Tree.foldr Util.update)
+        |> Array.map Energy.toFloat
 
     let pnodes = 
         realtime
         |> Array.map (Tree.foldr Util.fold_pnodes)
+        |> Array.map Energy.toFloat
 
     let phevs = 
         realtime
         |> Array.map (Tree.foldr Util.fold_phevs)
-
+        |> Array.map Energy.toFloat
+    
 //    let moving_dayahead = 
 //        updated_realtime
 //        |> moving_average
 //        |> Array.ofSeq
     
     if compute_dayahead then
-        IO.write_doubles <| FileManager.file_prediction <| Parsing.parse_dayahead (List.ofArray pnodes)
-        IO.write_doubles <| FileManager.file_dayahead <| Parsing.parse_dayahead (List.ofArray phevs)
+        IO.write_doubles <| FileManager.file_prediction <| List.ofArray pnodes
+        IO.write_doubles <| FileManager.file_dayahead <| List.ofArray phevs
 //        syncContext.RaiseEvent updateEvent <| dayahead
     else
-        syncContext.RaiseDelegateEvent jobProgress <| sprintf "PHEVs\t\t %f" (phevs |> Array.map Energy.toFloat |> Array.sum)
-        syncContext.RaiseDelegateEvent jobProgress <| sprintf "PowerNodes\t %f" (pnodes |> Array.map Energy.toFloat |> Array.sum)
-        syncContext.RaiseDelegateEvent jobProgress <| sprintf "Total\t\t %f" (updated_realtime |> Array.map Energy.toFloat |> Array.sum)
+        syncContext.RaiseDelegateEvent jobProgress <| sprintf "PHEVs\t\t %f" (phevs |> Array.sum)
+        syncContext.RaiseDelegateEvent jobProgress <| sprintf "PowerNodes\t %f" (pnodes |> Array.sum)
+        syncContext.RaiseDelegateEvent jobProgress <| sprintf "Total\t\t %f" (updated_realtime |> Array.sum)
         syncContext.RaiseDelegateEvent jobProgress <| sprintf "PAR\t\t %f" ((Array.max updated_realtime) / (Array.average updated_realtime))
 
-        let (Model(BRP( { dayahead=dayahead }))) = postalService.send_reply("brp", RequestDayahead)
+        let (Dayahead(dayahead)) = postalService.send_reply("brp", RequestDayahead)
 
-        let dayahead = Array.init(96) (fun i -> dayahead ((day*96) + i))
+        let dayahead = Array.init(96) (fun i -> dayahead ((day*96) + i)) |> Array.map Energy.toFloat
+        let dif = Array.map2 (fun x y -> abs(x - y)) updated_realtime dayahead |> Array.sum
+
+        syncContext.RaiseDelegateEvent jobProgress <| sprintf "Dayahead\t %f" ((dayahead |> Array.sum))
+        syncContext.RaiseDelegateEvent jobProgress <| sprintf "Diff\t\t %f" dif
+        syncContext.RaiseDelegateEvent jobProgress <| sprintf "Ratio\t\t %f" (dif / (updated_realtime |> Array.sum))
+
         // Raise events
         syncContext.RaiseDelegateEvent dayaheadProgress dayahead
         syncContext.RaiseDelegateEvent progressPhev phevs

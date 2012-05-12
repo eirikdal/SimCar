@@ -86,8 +86,6 @@ module Parsing =
     open Regex
     open IO 
 
-    let parse_dayahead (_dayahead : float<kWh> list) = List.map (fun f -> Energy.toFloat f) _dayahead
-
     let parse_dist str = 
         match str with 
         | ParseRegex "mean=([0-9]+){1,2}:([0-9]+){1,2}" [Float h; Float m] ->
