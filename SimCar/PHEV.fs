@@ -141,9 +141,9 @@ module Agent =
                 | Reset -> 
                     return! loop <| PHEV({ phev_args with battery=phev_args.capacity; duration=(-1) }) <| false
                 | Kill ->
-                    printfn "Agent %s: Exiting.." name
+                    syncContext.RaiseDelegateEvent jobProgress <| sprintf "Agent %s: Exiting.." name
                 | _ -> 
-                    syncContext.RaiseEvent error <| Exception("PHEV: Not implemented yet")
+                    syncContext.RaiseDelegateEvent jobError <| Exception("PHEV: Not implemented yet")
 
                     return! loop phev waiting }
             loop _p false)
@@ -192,7 +192,7 @@ module Agent =
                                 | h::t -> Charge_OK(phev_args.name, h, List.length probs)
                                 | [] -> Charge_OK(phev_args.name, 0.0<kWh>, List.length probs)
 
-    //                        printfn "PHEV %s: Sending charge_ok to %s" name parent
+    //                        syncContext.RaiseDelegateEvent jobProgress <|  "PHEV %s: Sending charge_ok to %s" name parent
                             postalService.send(phev_args.parent, msg)
             
                             if phev_args.name = "phev_17" then
@@ -217,9 +217,9 @@ module Agent =
                     | Reset -> 
                         return! loop <| PHEV({ phev_args with battery=phev_args.capacity; duration=(-1) }) <| false <| tick
                     | Kill ->
-                        printfn "Agent %s: Exiting.." name
+                        syncContext.RaiseDelegateEvent jobProgress <| sprintf "Agent %s: Exiting.." name
                     | _ -> 
-                        syncContext.RaiseEvent error <| Exception("PHEV: Not implemented yet")
+                        syncContext.RaiseDelegateEvent jobError <| Exception("PHEV: Not implemented yet")
 
                         return! loop phev waiting tick }
                 loop _p false 0)
@@ -273,9 +273,9 @@ module Agent =
                     | Reset -> 
                         return! loop <| PHEV({ phev_args with battery=phev_args.capacity; duration=(-1) }) <| false
                     | Kill ->
-                        printfn "Agent %s: Exiting.." name
+                        syncContext.RaiseDelegateEvent jobProgress <| sprintf "Agent %s: Exiting.." name
                     | _ -> 
-                        syncContext.RaiseEvent error <| Exception("PHEV: Not implemented yet")
+                        syncContext.RaiseDelegateEvent jobError <| Exception("PHEV: Not implemented yet")
 
                         return! loop phev waiting }
                 loop _p false)

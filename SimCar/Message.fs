@@ -28,7 +28,10 @@ type Message =
     | Kill
     | Reset
     | Reply of Message
-    | Schedule of (dayahead -> realtime -> (string * Message) list -> int -> unit)
+    | Schedule of schedule
+and 
+    schedule = (dayahead -> realtime -> (string * Message) list -> int -> unit)
+
 
 let rec reduce_queue queue = 
     [for msg in queue do 

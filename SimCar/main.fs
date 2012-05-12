@@ -35,8 +35,8 @@ type SimCar(nTicksPerDay) =
     let mutable nDays = 10
     let mutable _method = Distance
     let mutable _contr = Expected
-    
-    let mutable agents = Grid.Centralized.make_tree (powergrid()) BRP.Action.schedule_none ttlWindow
+    let mutable schedule = BRP.Action.schedule_none
+    let mutable agents = Grid.Centralized.make_tree (powergrid) ttlWindow
 
 
     member self.DistanceTheta with set(theta) = distanceTheta <- theta
@@ -51,13 +51,15 @@ type SimCar(nTicksPerDay) =
                                                 agents <- 
                                                 match scheduler with
                                                 | Reactive -> 
-                                                    Grid.Centralized.make_tree <| powergrid() <| BRP.Action.schedule_reactive <| ttlWindow
+                                                    schedule <- BRP.Action.schedule_reactive
+                                                    Grid.Centralized.make_tree <| powergrid <| ttlWindow
                                                 | Proactive -> 
-                                                    Grid.Centralized.make_tree <| powergrid() <| BRP.Action.schedule_proactive <| ttlWindow
+                                                    schedule <- BRP.Action.schedule_proactive
+                                                    Grid.Centralized.make_tree <| powergrid <| ttlWindow
                                                 | Mixed -> 
-                                                    Grid.Decentralized.Mixed.make_tree <| powergrid() <| ttlWindow 
+                                                    Grid.Decentralized.Mixed.make_tree <| powergrid <| ttlWindow 
                                                 | Random ->
-                                                    Grid.Decentralized.Random.make_tree <| powergrid() <| ttlWindow
+                                                    Grid.Decentralized.Random.make_tree <| powergrid <| ttlWindow
     member self.PostalService = postalService
    
     member self.RegisterDayaheadAnt (handler) =
@@ -111,19 +113,29 @@ type SimCar(nTicksPerDay) =
     member self.RegisterTrfFiltered (handler) = 
         trfFiltered.Publish.AddHandler handler
 
+    member self.RegisterError (handler) = 
+        jobError.Publish.AddHandler handler
+
+    member self.RegisterDebug (handler) =
+        jobDebug.Publish.AddHandler handler
+
+    member self.RegisterProgress (handler) = 
+        jobProgress.Publish.AddHandler handler
+
 //    member self.RegisterComputeDayahead () = 
 //        updateEvent.Publish.Add(fun dayahead -> IO.write_to_file <| FileManager.file_dayahead <| Parsing.parse_dayahead (List.ofArray dayahead))
 //    
     // attach functions to events
-    member self.RegisterEvents () = 
-        error.Publish.Add(fun e -> postalService.Post(Error(sprintf "%s" e.Message)))
-        //jobDebug.Publish.Add(fun str -> printfn "%s" str)
+//    member self.RegisterEvents () = 
+//        error.Publish.Add(fun e -> postalService.Post(Error(sprintf "%s" e.Message)))
+//        jobDebug.Publish.Add(fun str -> syncContext.RaiseDelegateEvent jobProgress <|  "%s" str)
 
     member self.Init() = 
         IO.clear_screenshots()
 
     member self.ComputeDayahead() = 
         IO.clear_dayahead_data()
+        postalService.send("brp", Schedule(BRP.Action.schedule_none))
         
 //        self.RegisterComputeDayahead()
         
@@ -135,21 +147,21 @@ type SimCar(nTicksPerDay) =
             | BRP(_) -> 0.0<kWh>
 
         let calc_power tick = 
-            powergrid()
+            powergrid
             |> Tree.foldl (op tick) (0.0<kWh>)
 
         let realtime = [for i in 0 .. (nDays+1)*96 do yield calc_power i] |> Array.ofList
 
-        printfn "Computing dayahead"
+        syncContext.RaiseDelegateEvent jobProgress <| "Computing dayahead"
         
         let phev_contribution = 
              match _contr with
              | Expected -> 
                 Tree.phev_expected
              | Simulated -> 
-                [for i in 0 .. nDays do run i agents true] |> ignore
+                [for i in 0 .. (nDays+1) do run i agents true] |> ignore
                 agents |> Tree.send (Reset) |> ignore
-                Array.init(nDays*96) (fun i -> FileManager.dayahead()(i))
+                Array.init((nDays+1)*96) (fun i -> FileManager.dayahead()(i))
 
         let dayahead = 
             match _method with
@@ -157,9 +169,9 @@ type SimCar(nTicksPerDay) =
 // Pre-compute alternative:
                 postalService.send("brp", Dayahead((fun _ -> 0.0<kWh>)))
                 postalService.send("brp", Prediction((fun _ -> 0.0<kWh>)))
-//                postalService.send("brp", Schedule(BRP.Action.schedule_none))
-                let window_size = 128
-                [|for i in 0 .. (nDays+1) do
+                postalService.send("brp", Schedule(BRP.Action.schedule_none))
+                let window_size = 96
+                [|for i in 0 .. (nDays) do
                     let _from,_to = (i*96),(i*96)+window_size
                     let day = Array.sub realtime _from window_size
                     let phev = 
@@ -171,7 +183,7 @@ type SimCar(nTicksPerDay) =
             
                     let realtime_updated =                 
                         Array.sum2 phev day
-                        |> DayAhead.shave shavingAlpha shavingTheta
+                        |> DayAhead.Shifted.shave shavingAlpha shavingTheta
                     yield! realtime_updated|]
             | Method.Swarm ->
 // Swarm alternative:
@@ -184,7 +196,7 @@ type SimCar(nTicksPerDay) =
             | Method.Mixed ->
                 DayaheadExp.Algorithm.distribute_mixed phev_contribution realtime (nDays+1) |> Array.ofList
                 
-//        printfn "sum of dayahead %f" <| Array.sum dayahead
+//        syncContext.RaiseDelegateEvent jobProgress <|  "sum of dayahead %f" <| Array.sum dayahead
         postalService.send("brp", Dayahead(dayahead |> Array.get))
         postalService.send("brp", Prediction(realtime |> Array.get))
 
@@ -192,17 +204,17 @@ type SimCar(nTicksPerDay) =
 //        IO.write_doubles <| FileManager.file_dayahead <| (dayahead |> List.ofArray |> List.map Energy.toFloat)
 
 //        PHEV.rand <- new System.Random()
-        printfn "Dayahead computed"
+        syncContext.RaiseDelegateEvent jobProgress <|  "Dayahead computed"
         
     // create an infinite sequence of simulation steps
     member self.Run() = 
 //        postalService.send("brp", Dayahead(FileManager.dayahead()))
 //        postalService.send("brp", Prediction(FileManager.prediction()))
-//        postalService.send("brp", Schedule(BRP.Action.schedule_reactive))
+        postalService.send("brp", Schedule(schedule))
         
-        printfn "Running simulations"
+        syncContext.RaiseDelegateEvent jobProgress <|  "Running simulations"
         [for i in 0 .. (nDays-1) do run i agents false] |> ignore 
-        printfn "Finished simulations"
+        syncContext.RaiseDelegateEvent jobProgress <|  "Finished simulations"
 
     member self.TestDayahead(n) = 
         test_dayahead n agents

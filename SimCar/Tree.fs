@@ -130,7 +130,7 @@ let collect_exp node =
     | BRP(_) -> []
 
 let phev_expected = 
-    FileManager.powergrid()
+    FileManager.powergrid
     |> map collect_exp 
     |> collect
     |> List.ofSeq

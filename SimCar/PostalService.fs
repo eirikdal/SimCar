@@ -25,12 +25,12 @@ type PostalService() =
             | Deregister(name, from_agent) ->
                 agentdict.Remove(name) |> ignore
                 return! loop()
-            | Kill -> printfn "PostalService: Exiting.."
+            | Kill -> syncContext.RaiseDelegateEvent jobProgress <|  "PostalService: Exiting.."
             | Error(message) ->
-                printfn "Error: %s" message
+                syncContext.RaiseDelegateEvent jobProgress <| sprintf "Error: %s" message
                 return! loop()
             | _ ->
-                syncContext.RaiseEvent error <| Exception("PostalService: Not implemented yet")
+                syncContext.RaiseDelegateEvent jobError "PostalService: Not implemented yet"
 
         }
         loop())

@@ -17,7 +17,18 @@ module Action =
             energy, rem - energy
         else
             0.0<kWh>, rem
-
+    
+    let filter_charges trf_args charges = 
+        charges 
+        |> List.sortBy (fun (Charge_OK(_,_,ttl)) -> ttl)
+        |> List.fold (fun (rem,filtered) (Charge_OK(name,energy,ttl)) ->     
+            if not (name.StartsWith("med") || name.StartsWith("high")) then
+                let filter, remaining = filter energy rem
+                postalService.send(name, Charge_OK(name, filter, ttl))
+                remaining, filtered+(energy-filter)
+            else 
+                rem,filtered) (trf_args.capacity, 0.0<kWh>)
+    
 module Agent = 
     module Centralized = 
         let create_trf_agent trf = Agent.Start(fun agent ->
@@ -38,19 +49,10 @@ module Agent =
                         |> List.map (fun (child,_) -> charges |> List.exists (fun (Charge_OK(name,_,_)) -> child=name)) 
                         |> List.forall (fun x -> x)
 
-                    let rem = 
-                        charges 
-                        |> List.sortBy (fun (Charge_OK(_,_,ttl)) -> ttl)
-                        |> List.fold (fun rem (Charge_OK(name,energy,ttl)) ->     
-                            if not (name.StartsWith("med") || name.StartsWith("high")) then
-                                let filtered, remaining = Action.filter energy rem
-                                postalService.send(name, Charge_OK(name, filtered, ttl))
-                                remaining
-                            else 
-                                rem) (trf_args.capacity)
-            
+                    let (rem, filtered) = Action.filter_charges trf_args charges
+
                     if name = "med_1" then
-                        syncContext.RaiseDelegateEvent trfFiltered (rem)
+                        syncContext.RaiseDelegateEvent trfFiltered (filtered)
                         syncContext.RaiseDelegateEvent trfCurrent sum_of_charges
                         syncContext.RaiseDelegateEvent trfCapacity trf_args.capacity
                 
@@ -85,7 +87,7 @@ module Agent =
                     | Reset ->
                         return! loop trf intentions charges waiting
                     | Kill ->
-                        printfn "Agent %s: Exiting.." name
+                        syncContext.RaiseDelegateEvent jobProgress <| sprintf "Agent %s: Exiting.." name
                     | _ as test ->
                         raise (Exception((test.ToString())))
                         return! loop trf intentions charges waiting
@@ -101,17 +103,8 @@ module Agent =
 
                     let sum_of_charges = charges |> List.sumBy (fun (Charge_OK(_,energy,ttl)) -> energy)
 
-                    let (rem, filtered) = 
-                        charges 
-                        |> List.sortBy (fun (Charge_OK(_,_,ttl)) -> ttl)
-                        |> List.fold (fun (rem,filtered) (Charge_OK(name,energy,ttl)) ->     
-                            if not (name.StartsWith("med") || name.StartsWith("high")) then
-                                let filter, remaining = Action.filter energy rem
-                                postalService.send(name, Charge_OK(name, filter, ttl))
-                                remaining, filtered+(energy-filter)
-                            else 
-                                rem,filtered) (trf_args.capacity, 0.0<kWh>)
-            
+                    let (rem, filtered) = Action.filter_charges trf_args charges
+                        
                     if name = "med_1" then
                         syncContext.RaiseDelegateEvent trfFiltered (filtered)
                         syncContext.RaiseDelegateEvent trfCurrent sum_of_charges
@@ -144,7 +137,7 @@ module Agent =
                     | Reset ->
                         return! loop trf charges waiting
                     | Kill ->
-                        printfn "Agent %s: Exiting.." name
+                        syncContext.RaiseDelegateEvent jobProgress <| sprintf "Agent %s: Exiting.." name
                     | _ as test ->
                         raise (Exception((test.ToString())))
                         return! loop trf charges waiting

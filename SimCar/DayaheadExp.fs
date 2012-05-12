@@ -63,7 +63,7 @@ module Algorithm =
             yield! (List.ofArray day)]
 
     let distribute (phev_expected:float<kWh> array) realtime theta days = 
-//        printfn "sum of PHEV expected %f" (Array.sum phev_expected)
+//        syncContext.RaiseDelegateEvent jobProgress <|  "sum of PHEV expected %f" (Array.sum phev_expected)
         let util pos' (day:float<kWh> array) (pos,x) = 
             let distance = theta ** (float <| abs(pos-pos'))
             distance*(1.0<kWh> / day.[pos])

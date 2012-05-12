@@ -3,6 +3,7 @@
 #nowarn "25"
 
 open Models
+open SynchronizationContext
 open System
 open System.IO
 open System.Globalization
@@ -19,6 +20,7 @@ let screen_folder = "C:\\SimCar\\SimCar\\data\\img\\"
 
 module IO =
     let read_file (file : string) = 
+        syncContext.RaiseDelegateEvent jobProgress <| "Reading files..."
         if not <| File.Exists(file) then File.WriteAllText(file, "")
     //        use sr = new StreamReader(folder_of file)
         use sr = new StreamReader(file)
@@ -27,6 +29,7 @@ module IO =
             yield sr.ReadLine()]
 
     let write_doubles (file : string) (contents : float list) = 
+        syncContext.RaiseDelegateEvent jobProgress <| "Writing files..."
         use bw = new BinaryWriter(File.Open(file, FileMode.Append))
             
         contents |> List.iter (fun q -> bw.Write(q)) |> ignore
@@ -48,10 +51,12 @@ module IO =
             File.WriteAllLines(file, contents)
 
     let clear_dayahead_data () = 
+        syncContext.RaiseDelegateEvent jobProgress <| "Cleaning dayahead-files..."
         File.Delete (file_prediction)
         File.Delete (file_dayahead)
 
     let clear_screenshots () = 
+        syncContext.RaiseDelegateEvent jobProgress <| "Cleaning screenshot-folders..."
         let clear_subfolder folder =    
             for file in Directory.EnumerateFiles(folder) do
                 File.Delete(file)
@@ -178,10 +183,11 @@ let dayahead() = Parsing.parse_dayahead_file(file_dayahead) |> Array.get >> Ener
 
 let prediction() = Parsing.parse_dayahead_file(file_prediction) |> Array.get >> Energy.ofFloat
 
-let powergrid() = 
+let powergrid = 
     let mutable rest = []
     let mutable children : string list = []
     let stream = IO.read_file file_brp
 
+    syncContext.RaiseDelegateEvent jobProgress <| "Initializing powergrid..."
     create_brp "brp" (Parsing.parse_powergrid stream [] (&rest) (&children) "brp") (fun n -> 0.0<kWh>) (children)
 

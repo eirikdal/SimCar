@@ -37,7 +37,7 @@ let test_dayahead iter agents =
     let rec shave n rt = 
         syncContext.RaiseDelegateEvent dayaheadProgress rt
         if n > 0 then 
-            shave (n-1) (rt |> DayAhead.shave 0.3 0.95)
+            shave (n-1) (rt |> DayAhead.Shifted.shave 0.3 0.95)
 
     shave iter updated_realtime
 
@@ -54,10 +54,11 @@ let run day agents compute_dayahead =
     let tick n = 
         agents
         |> Tree.send (Update(n)) // inform agents that new tick has begun
-        |> (fun x -> printfn "Tick %i" n; x)
+        |> (fun x -> syncContext.RaiseDelegateEvent jobDebug <| sprintf "Tick %i" n; x)
         |> Tree.send_reply RequestModel // request model from agents
 
-    printfn "Simulating day %d" day
+    syncContext.RaiseDelegateEvent jobProgress <| "----------------"
+    syncContext.RaiseDelegateEvent jobProgress <| sprintf "Day %d:\n" day
 
     let realtime = Array.init(96) (fun i -> tick ((day*96) + i))
 
@@ -84,7 +85,10 @@ let run day agents compute_dayahead =
         IO.write_doubles <| FileManager.file_dayahead <| Parsing.parse_dayahead (List.ofArray phevs)
 //        syncContext.RaiseEvent updateEvent <| dayahead
     else
-        printfn "sum of phevs %f" <| (phevs |> Array.map Energy.toFloat |> Array.sum)
+        syncContext.RaiseDelegateEvent jobProgress <| sprintf "PHEVs\t\t %f" (phevs |> Array.map Energy.toFloat |> Array.sum)
+        syncContext.RaiseDelegateEvent jobProgress <| sprintf "PowerNodes\t %f" (pnodes |> Array.map Energy.toFloat |> Array.sum)
+        syncContext.RaiseDelegateEvent jobProgress <| sprintf "Total\t\t %f" (updated_realtime |> Array.map Energy.toFloat |> Array.sum)
+        syncContext.RaiseDelegateEvent jobProgress <| sprintf "PAR\t\t %f" ((Array.max updated_realtime) / (Array.average updated_realtime))
 
         let (Model(BRP( { dayahead=dayahead }))) = postalService.send_reply("brp", RequestDayahead)
 

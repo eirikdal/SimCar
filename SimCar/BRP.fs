@@ -71,7 +71,7 @@ module Action =
 
 module Agent =
     module Centralized = 
-        let create_brp_agent brp schedule = Agent.Start(fun agent ->
+        let create_brp_agent brp = Agent.Start(fun agent ->
             let queue = new Queue<Message>() 
     
             let rec loop (BRP({ children=children; } as brp_args) as brp) (intentions : Message list) schedule (tick : int) waiting = async {
@@ -89,7 +89,6 @@ module Agent =
                             queue.Enqueue(msg)
                             return! loop brp intentions schedule tick waiting
                         else
-                            syncContext.RaiseEvent jobDebug <| "BRP responding to RequestModel"
                             reply.Reply(Model(brp))
                             return! loop brp [] schedule tick false
                     | RequestDayahead ->
@@ -107,7 +106,6 @@ module Agent =
                     return! loop brp intentions schedule tick waiting
                 | Charge_Intentions(messages) -> 
                     if intentions.Length + 1 >= children.Length then
-                        syncContext.RaiseEvent jobDebug <| "BRP got charges"
                         let messages' = (msg :: intentions) |> Message.reduce_queue
                         schedule brp_args.dayahead brp_args.realtime messages' tick
 
@@ -118,11 +116,11 @@ module Agent =
                 | Charge_OK(_,_,_) ->
                     return! loop brp (msg :: intentions) schedule tick waiting
                 | Kill ->
-                    printfn "Agent %s: Exiting.." "BRP"
+                    syncContext.RaiseDelegateEvent jobProgress <| sprintf "Agent %s: Exiting.." "BRP"
                 | _ -> 
-                    syncContext.RaiseEvent error <| Exception("BRP: Not implemented yet") }    
+                    syncContext.RaiseDelegateEvent jobError <| Exception("BRP: Not implemented yet") }    
 
-            loop brp [] schedule 0 false)
+            loop brp [] (Action.schedule_none) 0 false)
     module Decentralized = 
         module Random = 
             let create_brp_agent brp = Agent.Start(fun agent ->
@@ -133,7 +131,6 @@ module Agent =
                     | ReplyTo(replyToMsg, reply) ->
                         match replyToMsg with
                         | RequestModel ->
-                            syncContext.RaiseEvent jobDebug <| "BRP responding to RequestModel"
                             reply.Reply(Model(brp))
                             return! loop brp tick
                         | RequestDayahead ->
@@ -152,7 +149,7 @@ module Agent =
                         return! loop brp tick
                     | Reset -> return! loop brp tick
                     | Kill ->
-                        printfn "Agent %s: Exiting.." "BRP"
+                        syncContext.RaiseDelegateEvent jobProgress <| sprintf "Agent %s: Exiting.." "BRP"
                     | _ ->
                         return! loop brp tick}    
 
@@ -166,7 +163,6 @@ module Agent =
                     | ReplyTo(replyToMsg, reply) ->
                         match replyToMsg with
                         | RequestModel ->
-                            syncContext.RaiseEvent jobDebug <| "BRP responding to RequestModel"
                             reply.Reply(Model(brp))
                             return! loop brp tick predictions
                         | RequestDayahead ->
@@ -193,7 +189,7 @@ module Agent =
                         return! loop brp tick predictions
                     | Reset -> return! loop brp tick predictions
                     | Kill ->
-                        printfn "Agent %s: Exiting.." "BRP"
+                        syncContext.RaiseDelegateEvent jobProgress <| sprintf "Agent %s: Exiting.." "BRP"
                     | _ ->
                         return! loop brp tick predictions}    
 
