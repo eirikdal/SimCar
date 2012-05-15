@@ -38,7 +38,7 @@ let make_day values =
     let v = [for qi in values do yield Double.Parse(qi, NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture)] |> Array.ofList
 //    let v = make_day' values |> Array.ofList
     let test = [for i in 0 .. 4 .. (4*(v.Length-1)) do yield float i] |> Array.ofList
-//    printfn "%d %d" v.Length test.Length
+//    syncContext.RaiseDelegateEvent jobProgress <|  "%d %d" v.Length test.Length
     let test = Algorithms.AkimaSplineInterpolation(test,v)
 //    let test = Interpolate.LinearBetweenPoints(test, v)
     

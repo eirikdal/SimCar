@@ -1,12 +1,17 @@
 ﻿worker1 {
-  gauss, mean=08:15, std=30, duration=07:00
+  weibull, mean=08:15, std=30, duration=07:00
+  gauss, mean=16:15, std=30, duration=01:00
+  gauss, mean=20:15, std=60, duration=03:00
 }
 worker2 {
   gauss, mean=06:15, std=30, duration=07:00
+  gauss, mean=16:15, std=60, duration=03:00
 }
 worker3 {
   gauss, mean=07:15, std=30, duration=07:00
+  gauss, mean=20:15, std=120, duration=02:00
 }
 worker4 {
   gauss, mean=07:15, std=30, duration=07:00
+  gauss, mean=14:15, std=60, duration=04:00
 }
