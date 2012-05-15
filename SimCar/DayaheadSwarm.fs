@@ -15,8 +15,7 @@ let interpol_folder = "C:\\SimCar\\SimCar\\data\\interpol\\"
 
 let profiles_interpol = Parsing.parse_powerprofiles(interpol_folder)
 
-let powergrid = 
-    FileManager.powergrid
+let mutable powergrid = Node([],None)
 
 let collect_exp node = 
     match node with

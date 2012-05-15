@@ -95,6 +95,19 @@ type Distribution =
     duration : int;
     dist : float seq }
 
+type Results = {
+    phevs_sum : float;
+    pnodes_sum : float;
+    total_max : float;
+    total_avg : float;
+    total_sum : float; 
+    par : float;
+    dayahead_sum : float; 
+    dif : float; 
+    ratio : float; 
+    trf_delta : float;
+    trf_filtered : float;}
+
 type Profile = 
     | DistProfile of string * Distribution list
     | FloatProfile of string * Distribution list
@@ -238,6 +251,7 @@ type TrfArguments =
     capacity : capacity;
     current : energy;
     parent : string;
+    filtered : energy;
     children : (string * Status) list; }
 
 type PnodeArguments = 
@@ -266,7 +280,8 @@ let create_node name nodes capacity current parent children =
         TrfArguments.capacity=Capacity.ofFloat <| Double.Parse(capacity, CultureInfo.InvariantCulture);
         TrfArguments.current=Energy.ofFloat <| Double.Parse(current, CultureInfo.InvariantCulture);
         parent=parent;
-        children=children |> List.map (fun child -> (child, Waiting)); }
+        children=children |> List.map (fun child -> (child, Waiting));
+        filtered=0.0<kWh> }
 
     Node(nodes, Some <| Transformer(trf_arg))
 

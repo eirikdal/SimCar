@@ -20,7 +20,7 @@ let screen_folder = "C:\\SimCar\\SimCar\\data\\img\\"
 
 module IO =
     let read_file (file : string) = 
-        syncContext.RaiseDelegateEvent jobProgress <| "Reading files..."
+        syncContext.RaiseDelegateEvent jobDebug <| sprintf "[%s] Reading files..." (String.Format("{0:hh:mm}", DateTime.Now))
         if not <| File.Exists(file) then File.WriteAllText(file, "")
     //        use sr = new StreamReader(folder_of file)
         use sr = new StreamReader(file)
@@ -29,7 +29,7 @@ module IO =
             yield sr.ReadLine()]
 
     let write_doubles (file : string) (contents : float list) = 
-        syncContext.RaiseDelegateEvent jobProgress <| "Writing files..."
+        syncContext.RaiseDelegateEvent jobDebug <| sprintf "[%s] Writing files..." (String.Format("{0:hh:mm}", DateTime.Now))
         use bw = new BinaryWriter(File.Open(file, FileMode.Append))
             
         contents |> List.iter (fun q -> bw.Write(q)) |> ignore
@@ -51,12 +51,12 @@ module IO =
             File.WriteAllLines(file, contents)
 
     let clear_dayahead_data () = 
-        syncContext.RaiseDelegateEvent jobProgress <| "Cleaning dayahead-files..."
+        syncContext.RaiseDelegateEvent jobDebug <| sprintf "[%s] Cleaning dayahead-files..." (String.Format("{0:hh:mm}", DateTime.Now))
         File.Delete (file_prediction)
         File.Delete (file_dayahead)
 
     let clear_screenshots () = 
-        syncContext.RaiseDelegateEvent jobProgress <| "Cleaning screenshot-folders..."
+        syncContext.RaiseDelegateEvent jobDebug <| sprintf "[%s] Cleaning screenshot-folders..." (String.Format("{0:hh:mm}", DateTime.Now))
         let clear_subfolder folder =    
             for file in Directory.EnumerateFiles(folder) do
                 File.Delete(file)
@@ -181,11 +181,12 @@ let dayahead() = Parsing.parse_dayahead_file(file_dayahead) |> Array.get >> Ener
 
 let prediction() = Parsing.parse_dayahead_file(file_prediction) |> Array.get >> Energy.ofFloat
 
-let powergrid = 
+let create_powergrid() = 
     let mutable rest = []
     let mutable children : string list = []
     let stream = IO.read_file file_brp
 
-    syncContext.RaiseDelegateEvent jobProgress <| "Initializing powergrid..."
+    syncContext.RaiseDelegateEvent jobDebug <| sprintf "[%s] Initializing powergrid..." (String.Format("{0:hh:mm}", DateTime.Now))
     create_brp "brp" (Parsing.parse_powergrid stream [] (&rest) (&children) "brp") (fun n -> 0.0<kWh>) (children)
-
+//
+//let powergrid = create_powergrid()

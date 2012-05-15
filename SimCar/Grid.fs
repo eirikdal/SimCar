@@ -139,3 +139,13 @@ module Util  =
         match grid with 
         | PowerNode(phev_args) -> ac + phev_args.current
         | _ -> ac
+
+    let fold_trf_delta (_, Model(grid)) (ac : float<kWh>) = 
+        match grid with 
+        | Transformer(trf_args) -> if trf_args.current > trf_args.capacity then ac + (trf_args.capacity - trf_args.current) else ac
+        | _ -> ac
+
+    let fold_trf_filter (_, Model(grid)) (ac : float<kWh>) =
+        match grid with 
+        | Transformer(trf_args) -> ac + trf_args.filtered
+        | _ -> ac

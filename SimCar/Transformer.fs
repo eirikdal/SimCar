@@ -56,7 +56,7 @@ module Agent =
                         syncContext.RaiseDelegateEvent trfCurrent sum_of_charges
                         syncContext.RaiseDelegateEvent trfCapacity trf_args.capacity
                 
-                    return! loop trf [] [] false
+                    return! loop (Transformer({ trf_args with filtered=filtered; current=sum_of_charges })) [] [] false
                 else
                     let! (msg : Message) = 
                         if (not waiting && queue.Count > 0) then
@@ -66,7 +66,7 @@ module Agent =
 
                     match msg with
                     | Update(tick) ->
-                        return! loop trf intentions charges true
+                        return! loop (Transformer({ trf_args with filtered=0.0<kWh>; current=0.0<kWh> })) intentions charges true
                     | ReplyTo(replyToMsg, reply) ->
                         match replyToMsg with
                         | RequestModel ->
@@ -89,7 +89,7 @@ module Agent =
                     | Kill ->
                         syncContext.RaiseDelegateEvent jobProgress <| sprintf "Agent %s: Exiting.." name
                     | _ as test ->
-                        raise (Exception((test.ToString())))
+                        syncContext.RaiseDelegateEvent jobError (Exception((test.ToString())))
                         return! loop trf intentions charges waiting
             }
             loop trf [] [] false)
@@ -104,13 +104,13 @@ module Agent =
                     let sum_of_charges = charges |> List.sumBy (fun (Charge_OK(_,energy,ttl)) -> energy)
 
                     let (rem, filtered) = Action.filter_charges trf_args charges
-                        
+                    
                     if name = "med_1" then
                         syncContext.RaiseDelegateEvent trfFiltered (filtered)
                         syncContext.RaiseDelegateEvent trfCurrent sum_of_charges
                         syncContext.RaiseDelegateEvent trfCapacity trf_args.capacity
-                
-                    return! loop trf [] false
+                    
+                    return! loop (Transformer({ trf_args with filtered=filtered; current=sum_of_charges})) [] false
                 else
                     let! (msg : Message) = 
                         if (not waiting && queue.Count > 0) then
@@ -120,7 +120,7 @@ module Agent =
 
                     match msg with
                     | Update(tick) ->
-                        return! loop trf charges true
+                        return! loop (Transformer({ trf_args with filtered=0.0<kWh>; current=0.0<kWh> })) charges true
                     | ReplyTo(replyToMsg, reply) ->
                         match replyToMsg with
                         | RequestModel ->

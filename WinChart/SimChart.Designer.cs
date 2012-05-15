@@ -67,6 +67,7 @@
             this.textBoxDays = new System.Windows.Forms.TextBox();
             this.textLog = new System.Windows.Forms.TextBox();
             this.textBoxDebug = new System.Windows.Forms.TextBox();
+            this.progressBar1 = new System.Windows.Forms.ProgressBar();
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.chart2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.chart3)).BeginInit();
@@ -89,7 +90,7 @@
             series9.Legend = "Legend1";
             series9.Name = "Series1";
             this.chart1.Series.Add(series9);
-            this.chart1.Size = new System.Drawing.Size(537, 276);
+            this.chart1.Size = new System.Drawing.Size(471, 276);
             this.chart1.TabIndex = 0;
             this.chart1.Text = "chart1";
             // 
@@ -121,7 +122,7 @@
             series11.Legend = "Legend1";
             series11.Name = "Series1";
             this.chart3.Series.Add(series11);
-            this.chart3.Size = new System.Drawing.Size(537, 276);
+            this.chart3.Size = new System.Drawing.Size(471, 276);
             this.chart3.TabIndex = 2;
             this.chart3.Text = "chart3";
             // 
@@ -147,9 +148,10 @@
             this.comboBox1.Items.AddRange(new object[] {
             "Peak-shaving",
             "Distance-rule",
-            "Swarm",
             "Mixed",
-            "Random"});
+            "Random",
+            "Superposition",
+            "None"});
             this.comboBox1.Location = new System.Drawing.Point(990, 25);
             this.comboBox1.Name = "comboBox1";
             this.comboBox1.Size = new System.Drawing.Size(121, 21);
@@ -162,7 +164,8 @@
             "Reactive",
             "Proactive",
             "Random",
-            "Mixed"});
+            "Mixed",
+            "None"});
             this.comboBox2.Location = new System.Drawing.Point(992, 67);
             this.comboBox2.Name = "comboBox2";
             this.comboBox2.Size = new System.Drawing.Size(121, 21);
@@ -367,14 +370,22 @@
             this.textBoxDebug.Name = "textBoxDebug";
             this.textBoxDebug.ReadOnly = true;
             this.textBoxDebug.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBoxDebug.Size = new System.Drawing.Size(500, 110);
+            this.textBoxDebug.Size = new System.Drawing.Size(500, 89);
             this.textBoxDebug.TabIndex = 16;
+            // 
+            // progressBar1
+            // 
+            this.progressBar1.Location = new System.Drawing.Point(486, 626);
+            this.progressBar1.Name = "progressBar1";
+            this.progressBar1.Size = new System.Drawing.Size(500, 23);
+            this.progressBar1.TabIndex = 17;
             // 
             // SimChart
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1123, 651);
+            this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.textBoxDebug);
             this.Controls.Add(this.textLog);
             this.Controls.Add(this.groupBox4);
@@ -440,6 +451,7 @@
         private System.Windows.Forms.TextBox textBoxDays;
         private System.Windows.Forms.TextBox textLog;
         private System.Windows.Forms.TextBox textBoxDebug;
+        private System.Windows.Forms.ProgressBar progressBar1;
     }
 }
 

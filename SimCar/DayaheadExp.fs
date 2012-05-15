@@ -62,12 +62,12 @@ module Algorithm =
             let realtime_updated = dist day
             yield! (List.ofArray day)]
 
-    let distribute (phev_expected:float<kWh> array) realtime theta days = 
+    let distribute (phev_expected:float<kWh> array) theta days realtime = 
 //        syncContext.RaiseDelegateEvent jobProgress <|  "sum of PHEV expected %f" (Array.sum phev_expected)
         let util pos' (day:float<kWh> array) (pos,x) = 
             let distance = theta ** (float <| abs(pos-pos'))
             distance*(1.0<kWh> / day.[pos])
-        let dist (day : float<kWh> array) : float<kWh> array = 
+        let dist (day : float<kWh> array) (phev_expected : float<kWh> array) : float<kWh> array = 
             let rec fill idx left =
                 if left > rate then 
                     let (i,v) = 
@@ -88,7 +88,11 @@ module Algorithm =
         [for i in 0 .. (days-1) do
             let _from,_to = (i*96),(i*96)+96
             let mutable day = Array.sub realtime _from 96
-            
-            let realtime_updated = dist day
+            let phev_expected = 
+                if phev_expected.Length > 96 then
+                    Array.sub phev_expected _from 96
+                else
+                    phev_expected
+            let realtime_updated = dist day phev_expected
             yield! (List.ofArray day)]
 

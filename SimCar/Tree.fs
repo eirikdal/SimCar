@@ -52,12 +52,12 @@ let rec send_reply msg node =
     match node : Node<Agent<Message>> with
     | Node(nodes, Some(leaf)) ->
         let list = List.map (fun n -> send_reply msg n) nodes 
-        let res = leaf.PostAndReply((fun replyChannel -> ReplyTo(msg, replyChannel)), 20000)
+        let res = leaf.PostAndReply((fun replyChannel -> ReplyTo(msg, replyChannel)))
         Node(list, Some (leaf, res))
     | Node(nodes, None) -> 
         Node(List.map (fun n -> send_reply msg n) nodes, None)
     | Leaf(Some(leaf)) ->
-        let res = leaf.PostAndReply((fun replyChannel -> ReplyTo(msg, replyChannel)), 20000)
+        let res = leaf.PostAndReply((fun replyChannel -> ReplyTo(msg, replyChannel)))
         Leaf(Some <| (leaf, res))
     | Leaf(None) ->
         Leaf(None)
@@ -130,10 +130,9 @@ let collect_exp node =
     | BRP(_) -> []
 
 let phev_expected = 
-    FileManager.powergrid
-    |> map collect_exp 
-    |> collect
-    |> List.ofSeq
-    |> List.filter (fun x -> x.Length > 0)
-    |> List.sumn
-    |> Array.ofList
+    map collect_exp 
+    >> collect
+    >> List.ofSeq
+    >> List.filter (fun x -> x.Length > 0)
+    >> List.sumn
+    >> Array.ofList

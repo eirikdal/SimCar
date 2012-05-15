@@ -118,7 +118,8 @@ module Agent =
                 | Kill ->
                     syncContext.RaiseDelegateEvent jobProgress <| sprintf "Agent %s: Exiting.." "BRP"
                 | _ -> 
-                    syncContext.RaiseDelegateEvent jobError <| Exception("BRP: Not implemented yet") }    
+                    syncContext.RaiseDelegateEvent jobError <| Exception("BRP: Not implemented yet")     
+                    return! loop brp intentions schedule tick waiting }
 
             loop brp [] (Action.schedule_none) 0 false)
     module Decentralized = 
@@ -149,7 +150,7 @@ module Agent =
                         return! loop brp tick
                     | Reset -> return! loop brp tick
                     | Kill ->
-                        syncContext.RaiseDelegateEvent jobProgress <| sprintf "Agent %s: Exiting.." "BRP"
+                        syncContext.RaiseDelegateEvent jobDebug <| sprintf "Agent %s: Exiting.." "BRP"
                     | _ ->
                         return! loop brp tick}    
 
@@ -189,7 +190,7 @@ module Agent =
                         return! loop brp tick predictions
                     | Reset -> return! loop brp tick predictions
                     | Kill ->
-                        syncContext.RaiseDelegateEvent jobProgress <| sprintf "Agent %s: Exiting.." "BRP"
+                        syncContext.RaiseDelegateEvent jobDebug <| sprintf "Agent %s: Exiting.." "BRP"
                     | _ ->
                         return! loop brp tick predictions}    
 

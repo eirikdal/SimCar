@@ -126,7 +126,7 @@ module Agent =
                     let ttl = Action.find_ttl histogram tick ttlwindow
                     let wait_for_reply = Action.send_intention phev_args ttl
             
-                    if phev_args.name = "phev_17" then
+                    if phev_args.name = "phev_135" then
                         syncContext.RaiseDelegateEvent phevBattery phev_args.battery
 
                         if phev_args.duration > 0 then
@@ -195,7 +195,7 @@ module Agent =
     //                        syncContext.RaiseDelegateEvent jobProgress <|  "PHEV %s: Sending charge_ok to %s" name parent
                             postalService.send(phev_args.parent, msg)
             
-                            if phev_args.name = "phev_17" then
+                            if phev_args.name = "phev_135" then
                                 syncContext.RaiseDelegateEvent phevBattery phev_args.battery
                                 if phev_args.duration > 0 then
                                     syncContext.RaiseDelegateEvent phevStatus 1.0
@@ -259,7 +259,7 @@ module Agent =
 
                         postalService.send(phev_args.parent, msg)
             
-                        if phev_args.name = "phev_17" then
+                        if phev_args.name = "phev_135" then
                             syncContext.RaiseDelegateEvent phevBattery phev_args.battery
                             if phev_args.duration > 0 then
                                 syncContext.RaiseDelegateEvent phevStatus 1.0
