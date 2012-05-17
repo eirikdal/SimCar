@@ -13,7 +13,8 @@ open FileManager
 let rate = 1.25<kWh>
 
 module Algorithm = 
-    let rand = new Random()
+    let rand = MathNet.Numerics.Random.Xorshift(true)
+
     let distribute_mixed phev_expected realtime days =
         let generate_problist tick window realtime = 
             let baseline = [for i in tick .. (tick+window) do yield realtime(i)]

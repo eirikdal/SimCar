@@ -12,9 +12,8 @@ open Models
 open PostalService
 open MathNet.Numerics.Distributions
 open MathNet.Numerics.Statistics
-//open Node
-let rand = new System.Random()
-//let syncContext = SynchronizationContext.CaptureCurrent()
+
+let rand = MathNet.Numerics.Random.Xorshift(true)
 
 module Action = 
     let send_intention (phev_args : PhevArguments) ttl =
@@ -68,7 +67,6 @@ module Action =
         // if a distribution was found, let the PHEV leave with the corresponding duration of the distribution
         match dist with
         | Some d ->   
-            //syncContext.RaiseEvent jobDebug <| sprintf "PHEV %s left with chance %f and probability %f" name r (Seq.nth (tick%96) d.dist) 
             PHEV(phevArgs.leave(tick, d.duration))
         | None ->
             PHEV({ phevArgs with left=(-1);})
@@ -126,25 +124,23 @@ module Agent =
                     let ttl = Action.find_ttl histogram tick ttlwindow
                     let wait_for_reply = Action.send_intention phev_args ttl
             
-                    if phev_args.name = "phev_135" then
+                    if phev_args.name = "phev_126" then
                         syncContext.RaiseDelegateEvent phevBattery phev_args.battery
 
-                        if phev_args.duration > 0 then
+                        if List.length phev_args.duration > 0 then
                             syncContext.RaiseDelegateEvent phevStatus 1.0
                         else 
                             syncContext.RaiseDelegateEvent phevStatus 0.0
 
-                    if phev_args.duration <= 0 then
+                    if List.length phev_args.duration <= 0 then
                         return! loop <| Action.leave name phev_args tick <| true
                     else
                         return! loop <| PHEV(phev_args.drive()) <| true
                 | Reset -> 
-                    return! loop <| PHEV({ phev_args with battery=phev_args.capacity; duration=(-1) }) <| false
+                    return! loop <| PHEV({ phev_args with battery=phev_args.capacity; duration=[] }) <| false
                 | Kill ->
                     syncContext.RaiseDelegateEvent jobProgress <| sprintf "Agent %s: Exiting.." name
                 | _ -> 
-                    syncContext.RaiseDelegateEvent jobError <| Exception("PHEV: Not implemented yet")
-
                     return! loop phev waiting }
             loop _p false)
     module Decentralized = 
@@ -195,14 +191,14 @@ module Agent =
     //                        syncContext.RaiseDelegateEvent jobProgress <|  "PHEV %s: Sending charge_ok to %s" name parent
                             postalService.send(phev_args.parent, msg)
             
-                            if phev_args.name = "phev_135" then
+                            if phev_args.name = "phev_126" then
                                 syncContext.RaiseDelegateEvent phevBattery phev_args.battery
-                                if phev_args.duration > 0 then
+                                if List.length phev_args.duration > 0 then
                                     syncContext.RaiseDelegateEvent phevStatus 1.0
                                 else 
                                     syncContext.RaiseDelegateEvent phevStatus 0.0
 
-                            if phev_args.duration <= 0 then
+                            if List.length phev_args.duration <= 0 then
                                 return! loop <| Action.leave name { phev_args with intentions=intentions } tick <| true <| tick
                             else
                                 return! loop <| PHEV({ phev_args with intentions=intentions }.drive()) <| true <| tick
@@ -215,12 +211,10 @@ module Agent =
                         postalService.send("brp", RequestMixed(name, ttl))
                         return! loop phev waiting tick
                     | Reset -> 
-                        return! loop <| PHEV({ phev_args with battery=phev_args.capacity; duration=(-1) }) <| false <| tick
+                        return! loop <| PHEV({ phev_args with battery=phev_args.capacity; duration=[] }) <| false <| tick
                     | Kill ->
                         syncContext.RaiseDelegateEvent jobProgress <| sprintf "Agent %s: Exiting.." name
                     | _ -> 
-                        syncContext.RaiseDelegateEvent jobError <| Exception("PHEV: Not implemented yet")
-
                         return! loop phev waiting tick }
                 loop _p false 0)
         module Random = 
@@ -259,23 +253,21 @@ module Agent =
 
                         postalService.send(phev_args.parent, msg)
             
-                        if phev_args.name = "phev_135" then
+                        if phev_args.name = "phev_126" then
                             syncContext.RaiseDelegateEvent phevBattery phev_args.battery
-                            if phev_args.duration > 0 then
+                            if List.length phev_args.duration > 0 then
                                 syncContext.RaiseDelegateEvent phevStatus 1.0
                             else 
                                 syncContext.RaiseDelegateEvent phevStatus 0.0
 
-                        if phev_args.duration <= 0 then
+                        if List.length phev_args.duration <= 0 then
                             return! loop <| Action.leave name { phev_args with intentions=intentions } tick <| true
                         else
                             return! loop <| PHEV({ phev_args with intentions=intentions }.drive()) <| true
                     | Reset -> 
-                        return! loop <| PHEV({ phev_args with battery=phev_args.capacity; duration=(-1) }) <| false
+                        return! loop <| PHEV({ phev_args with battery=phev_args.capacity; duration=[] }) <| false
                     | Kill ->
                         syncContext.RaiseDelegateEvent jobProgress <| sprintf "Agent %s: Exiting.." name
                     | _ -> 
-                        syncContext.RaiseDelegateEvent jobError <| Exception("PHEV: Not implemented yet")
-
                         return! loop phev waiting }
                 loop _p false)

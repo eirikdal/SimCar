@@ -92,7 +92,7 @@ type Distribution =
     { dist_type : DistributionType;
     mean : float;
     sigma : float;
-    duration : int;
+    duration : int list;
     dist : float seq }
 
 type Results = {
@@ -141,8 +141,7 @@ type Profile =
         let prob ({dist=dist}) i = dist |> Seq.nth (i%96)
         let temp = Seq.initInfinite (fun i -> dist_list |> Seq.fold (fun ac (d : Distribution) -> ac + (prob d i)) 0.0) |> Seq.take 96 |> Array.ofSeq
 
-        if name = "worker1" then
-            probEvent.Trigger [|box temp; box System.EventArgs.Empty|]
+        syncContext.RaiseDelegateEvent probEvent (name, temp)
 
         FloatProfile(name, dist_list)
     member self.float_profile() = 
@@ -168,7 +167,8 @@ type Profile =
                 let duration = dist.duration
                 // create 96 windows of size duration, where the index of each window reflects the ending time of a (potential) trip
                 // (windows are offset by duration to reflect the expected load from a PHEV that is coming back)
-                let windows_of_expected_trips = Seq.init (96+(duration-1)) (fun i -> (i+duration,0.0)) |> Seq.windowed (duration) |> Array.ofSeq
+                let driving_time = List.length <| List.filter (fun x -> x = 1) duration
+                let windows_of_expected_trips = Seq.init (96+(driving_time-1)) (fun i -> (i+driving_time,0.0)) |> Seq.windowed (driving_time) |> Array.ofSeq
 
                 // for each window, calculate the load in tick i' (=i+duration) as the prob that the PHEV left at time i times the charging rate
                 let windows_of_expected = 
@@ -190,7 +190,7 @@ type Profile =
 
             dist_list 
             |> List.map (fun dist -> calc_for_dist dist)
-            |> List.sumn
+            |> List.argmaxn
 
         | DistProfile(name,dist_list) ->
             self.calc(name,dist_list).to_exp_float(rate, capacity)
@@ -224,12 +224,12 @@ type PhevArguments =
     battery : battery;
     rate : energy;
     left : int;
-    duration : int;
+    duration : int list;
     parent : string;
     intentions : energy list;
     histogram : int array }
     with 
-        member self.leave(tick : int, duration : int) : PhevArguments =  
+        member self.leave(tick : int, duration : int list) : PhevArguments =  
             self.histogram.[(tick%96)] <- self.histogram.[(tick%96)] + 1
 
             syncContext.RaiseDelegateEvent phevLeft (tick%96, Math.Round(Energy.toFloat <| self.capacity-self.battery))
@@ -238,14 +238,16 @@ type PhevArguments =
         member self.charge() = 
             match self.intentions with 
             | rate::t -> 
-                let current' = if self.duration <= 0 then rate else 0.0<kWh>
+                let current' = if List.length self.duration <= 0 then rate else 0.0<kWh>
                 { self with current=current'; battery=(self.battery+current'); intentions=t }
             | [] -> { self with current=0.0<kWh>; battery=self.battery; }
         member self.drive() =
-//            { self with current=0.0<kWh>; battery=(self.battery - self.rate); duration=self.duration-1 }
-            let battery' = if self.battery >= self.rate then self.battery - self.rate else 0.0<kWh>
-            { self with current=0.0<kWh>; battery=battery'; duration=self.duration-1 }
-
+            match self.duration with 
+            | 1::t ->
+                let battery' = if self.battery >= self.rate then self.battery - self.rate else 0.0<kWh>
+                { self with current=0.0<kWh>; battery=battery'; duration=self.duration.Tail }
+            | 0::t -> 
+                { self with current=0.0<kWh>; duration=self.duration.Tail }
 type TrfArguments = 
     { name : string; 
     capacity : capacity;
@@ -295,7 +297,7 @@ let create_phev name capacity current battery rate profile parent (profiles : Pr
         battery=Battery.ofFloat <| Double.Parse(battery, CultureInfo.InvariantCulture);
         rate=Energy.ofFloat <| Double.Parse(rate, CultureInfo.InvariantCulture);
         histogram=Array.init (96) (fun i -> 0);
-        duration=(-1);
+        duration=[];
         left=(-1);
         parent=parent;
         intentions=[] }

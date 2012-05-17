@@ -142,7 +142,7 @@ module Util  =
 
     let fold_trf_delta (_, Model(grid)) (ac : float<kWh>) = 
         match grid with 
-        | Transformer(trf_args) -> if trf_args.current > trf_args.capacity then ac + (trf_args.capacity - trf_args.current) else ac
+        | Transformer(trf_args) -> if trf_args.current > trf_args.capacity then ac + (trf_args.current - trf_args.capacity) else ac
         | _ -> ac
 
     let fold_trf_filter (_, Model(grid)) (ac : float<kWh>) =

@@ -24,6 +24,7 @@ type Message =
     | Model of Grid
     | Strategy of energy list
     | Error of string
+    | Filter of bool
     | Update of int
     | Kill
     | Reset

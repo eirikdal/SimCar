@@ -76,6 +76,8 @@ module Regex =
         if System.Double.TryParse(str, &floatvalue) then Some(floatvalue)
         else None
 
+    let (|String|_|) (str: string) = Some str
+
     let (|ParseRegex|_|) regex str =
         let m = Regex(regex).Match(str)
         if m.Success
@@ -86,22 +88,27 @@ module Parsing =
     open Regex
     open IO 
 
-    let parse_dist str = 
-        match str with 
+    let parse_dist = 
+        function
         | ParseRegex "mean=([0-9]+){1,2}:([0-9]+){1,2}" [Float h; Float m] ->
             h*4.0 + (m / 15.0)
         | ParseRegex "std=([0-9]+)" [Float std] ->
             (std / 15.0)
-        | ParseRegex "duration=([0-9]+){1,2}:([0-9]+){1,2}" [Float h; Float m] ->
-            h*4.0 + (m / 15.0)
+//        | ParseRegex "duration=([0-9]+){1,2}:([0-9]+){1,2}" [Float h; Float m] ->
+//            h*4.0 + (m / 15.0)
         | _ -> raise <| Exception "Parsing failed"
+
+    let parse_dur = 
+        function
+        | ParseRegex "duration=(.*)" [String str] ->
+            str.Split(';') |> Array.map Int32.Parse |> List.ofArray
 
     let rec parse_profile stream (dist : Distribution list) (rest : string list byref) = 
         match (stream : string list) with 
         | h::t ->
             match h.Split([|' ';','|], StringSplitOptions.RemoveEmptyEntries) with
             | [|dist_type;mean;std;duration|] ->
-                let temp = create_distribution dist_type (parse_dist mean) (parse_dist std) (int <| parse_dist duration)
+                let temp = create_distribution dist_type (parse_dist mean) (parse_dist std) (parse_dur duration)
                 parse_profile t (temp::dist) (&rest)
             | [|"}"|] -> 
                 rest <- t

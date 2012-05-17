@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Text.RegularExpressions;
 using System.ComponentModel;
 using System.Drawing;
@@ -13,6 +14,8 @@ namespace WinChart
     {
         const int nTicks = 96;
         Sim.SimCar tSim;
+
+        private ArrayList profiles = new ArrayList();
 
         private const int nRealTime = 0;
         private const int nPowerNodes = 1;
@@ -48,7 +51,7 @@ namespace WinChart
         private delegate void updateChartSaveImageDelegate(Chart chart, int i, Double[] points, bool saveImage, String path);
         private delegate void resetChartDelegate(Chart chart, int i, int j);
         private delegate void resetChartSaveImageDelegate(Chart chart, int i, int j, bool saveImage, String path);
-        private delegate void updatePDFDelegate(Double[] chart);
+        private delegate void updatePDFDelegate(String profile, Double[] chart);
         private delegate void addPointDelegate(Chart chart, int i, Double point);
         private delegate void incrementPointDelegate(Chart chart, int i, int point, Double val);
         private delegate void updatePointDelegate(Chart chart, int i, int point, Double val);
@@ -99,15 +102,17 @@ namespace WinChart
             }
         }
 
-        void updatePDF(Double[] prob)
+        void updatePDF(String profile, Double[] prob)
         {
             if (chart2.InvokeRequired)
             {
-                chart2.BeginInvoke(new updatePDFDelegate(updatePDF), new object[] { prob });
+                chart2.BeginInvoke(new updatePDFDelegate(updatePDF), new object[] { profile, prob });
             }
             else
             {
                 resetChart(chart2, 0, 2);
+                chart2.ChartAreas[0].AxisY.Maximum = 1.0;
+                chart2.ChartAreas[0].AxisY.Minimum = 0.0;
 
                 for (int i = 0; i < prob.Length; i++)
                 {
@@ -116,7 +121,11 @@ namespace WinChart
                     else if (prob[i] > chart2.Series[nPhevsPDF].Points[i].YValues[0])
                         chart2.Series[nPhevsPDF].Points[i].SetValueY(prob[i]);
                 }
-                chart2.SaveImage(String.Format("C:\\SimCar\\SimCar\\data\\img\\phev\\phev_pdf.png"), ChartImageFormat.Png);
+                chart2.SaveImage(String.Format("C:\\SimCar\\SimCar\\data\\img\\phev\\{0}.png", profile), ChartImageFormat.Png);
+
+                chart2.ChartAreas[0].AxisY.Maximum = 20.0;
+                chart2.ChartAreas[0].AxisY.Minimum = 0.0;
+
                 resetChart(chart2, nPhevsPDF, nPhevsPDF + 1);
             }
         }
@@ -254,9 +263,13 @@ namespace WinChart
 
         void prob_Calc(object sender, EventArgs e)
         {
-            Double[] chart = (Double[]) sender;
+            Tuple<String, Double[]> chart = (Tuple<String, Double[]>)sender;
 
-            updatePDF(chart);
+            if (!profiles.Contains(chart.Item1))
+            {
+                updatePDF(chart.Item1, chart.Item2);
+                profiles.Add(chart.Item1);
+            }
         }
         
         void phev_Changed(object sender, EventArgs e)
@@ -423,6 +436,14 @@ namespace WinChart
             chart.ChartAreas[0].AxisX.CustomLabels.Add(90, 95, "24:00");
         }
 
+        void setChartAxis(Chart chart)
+        {
+            chart.ChartAreas[0].AxisX.MajorGrid.LineColor = Color.Gainsboro;
+            chart.ChartAreas[0].AxisX.MajorGrid.LineDashStyle = ChartDashStyle.Dash;
+            chart.ChartAreas[0].AxisY.MajorGrid.LineColor = Color.Gainsboro;
+            chart.ChartAreas[0].AxisY.MajorGrid.LineDashStyle = ChartDashStyle.Dash;
+        }
+
         void RegisterEvents(Sim.SimCar tSim)
         {
             //tSim.RegisterEvents();
@@ -481,6 +502,11 @@ namespace WinChart
             chartDayahead.Series.Add(_seriesDayahead[nDayaheadExp]);
             //chartDayahead.Series.Add(_seriesDayahead[nDayaheadSupervisor]);
             //chartDayahead.Series.Add(_seriesDayahead[nDayaheadAnts]);
+
+            setChartAxis(chart1);
+            setChartAxis(chart2);
+            setChartAxis(chart3);
+            setChartAxis(chartDayahead);
 
             setChartLabels(chart1);
             setChartLabels(chart2);
@@ -608,7 +634,7 @@ namespace WinChart
             button1.Enabled = false;
 
             FSharpOption<Sim.Method> method = null;
-            Sim.Contribution contr = null;
+            FSharpOption<Sim.Contribution> contr = null;
             FSharpOption<Sim.Scheduler> scheduler = null;
 
             updateLog("-------------------------------------");
@@ -626,9 +652,6 @@ namespace WinChart
                 case "Superposition":
                     method = new FSharpOption<Sim.Method>(Sim.Method.Superposition);
                     break;
-                case "None":
-                    method = FSharpOption<Sim.Method>.None;
-                    break;
                 case "Random":
                     dayah = (String.Format("Decentralized (Random)"));
                     method = new FSharpOption<Sim.Method>(Sim.Method.Random);
@@ -636,6 +659,9 @@ namespace WinChart
                 case "Mixed":
                     dayah = (String.Format("Decentralized (Mixed)"));
                     method = new FSharpOption<Sim.Method>(Sim.Method.Mixed);
+                    break;
+                case "None":
+                    method = FSharpOption<Sim.Method>.None;
                     break;
             }
             updateLog(String.Format("Dayahead:\t {0}", dayah));
@@ -668,11 +694,15 @@ namespace WinChart
             {
                 case "Expected":
                     phev = "Expected";
-                    contr = Sim.Contribution.Expected;
+                    contr = new FSharpOption<Sim.Contribution>(Sim.Contribution.Expected);
                     break;
                 case "Simulated":
                     phev = "Simulated";
-                    contr = Sim.Contribution.Simulated;
+                    contr = new FSharpOption<Sim.Contribution>(Sim.Contribution.Simulated);
+                    break;
+                case "None":
+                    phev = "None";
+                    contr = FSharpOption<Sim.Contribution>.None;
                     break;
             }
             updateLog(String.Format("Contribution:\t {0}", phev));

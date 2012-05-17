@@ -45,8 +45,6 @@ module Agent =
                 | Kill ->
                     syncContext.RaiseDelegateEvent jobProgress <| sprintf "Agent %s: Exiting.." name
                 | _ -> 
-                    raise <| Exception("WTF")
-                    syncContext.RaiseDelegateEvent jobError <| Exception("Not implemented yet")
                     return! loop pnode waiting
             }
 
@@ -85,8 +83,6 @@ module Agent =
                 | Kill ->
                     syncContext.RaiseDelegateEvent jobProgress <| sprintf "Agent %s: Exiting.." name
                 | _ -> 
-                    syncContext.RaiseDelegateEvent jobError <| Exception("Not implemented yet")
-
                     return! loop pnode waiting
             }
 

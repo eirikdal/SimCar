@@ -84,7 +84,6 @@ module Shifted =
     //let theta = 0.95
 
     // BEST: alpha = 0.3, theta = 0.5-0-9?
-
     let shave alpha theta (_D : float<kWh>[]) = 
         let D = Array.copy _D
 
@@ -96,13 +95,13 @@ module Shifted =
         let disc idx = theta ** (dist (float idx) (float i))
         let delta w' idx (target : float<kWh>) = (disc idx) * alpha * (target - w')
         let update idx target = 
-            let d = (delta D.[idx] idx target)
+            let d = max (delta D.[idx] idx target) 0.625<kWh>
             let S' = S + d
         
             D.[idx] <- D.[idx] + d
 
             S <- S'
-            syncContext.RaiseDelegateEvent dayaheadStep (D.Clone())
+//            syncContext.RaiseDelegateEvent dayaheadStep (D.Clone())
     
         // target of peak value should be the average value
         update i x

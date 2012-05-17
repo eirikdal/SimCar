@@ -118,7 +118,6 @@ module Agent =
                 | Kill ->
                     syncContext.RaiseDelegateEvent jobProgress <| sprintf "Agent %s: Exiting.." "BRP"
                 | _ -> 
-                    syncContext.RaiseDelegateEvent jobError <| Exception("BRP: Not implemented yet")     
                     return! loop brp intentions schedule tick waiting }
 
             loop brp [] (Action.schedule_none) 0 false)
