@@ -15,6 +15,10 @@ namespace WinChart
         const int nTicks = 96;
         Sim.SimCar tSim;
 
+        private String filePath = "";
+        private DateTime started = DateTime.Now;
+        private bool trf_updated = false;
+
         private ArrayList profiles = new ArrayList();
 
         private const int nRealTime = 0;
@@ -40,10 +44,14 @@ namespace WinChart
 
         private static string[] series = { "Total", "PowerNodes", "PHEV (x)", "Dayahead", "PHEV (Ux)" };
         private static string[] _seriesPhev = { "PHEV status", "PHEV battery", "PHEV PDF" };
-        private static string[] _seriesTrf = {"Capacity", "Current", "Unfiltered"};
+        private static string[] _seriesTrf = {"Capacity", "Current", "Filtered"};
         private static string[] _seriesDayahead = { "Original", "Dayahead previous", "Dayahead current", "Expected"  };
 
-        private static int counter = 0;
+        private static int counter_trf = 0;
+        private static int counter_phev = 0;
+        private static int counter_power = 0;
+        private static int counter_day = 0;
+
         private static int nstep = 0;
 
         private delegate void saveImageDelegate(string fileName);
@@ -78,7 +86,11 @@ namespace WinChart
                 updateChart(chart, series, points);
 
                 if (saveImage)
-                    chart.SaveImage(String.Format("C:\\SimCar\\SimCar\\data\\img\\{0}\\{1}.png", path, counter++), ChartImageFormat.Png);
+                {
+                    String file = String.Format(filePath + "\\{0}\\{1}.png", path, counter_power++);
+                    (new System.IO.FileInfo(file)).Directory.Create();
+                    chart.SaveImage(file, ChartImageFormat.Png);
+                }
                 
                 //for (int j = 0; j < chart.Series.Count; j++)
                 //    chart.Series[j].Points.Clear();
@@ -121,7 +133,10 @@ namespace WinChart
                     else if (prob[i] > chart2.Series[nPhevsPDF].Points[i].YValues[0])
                         chart2.Series[nPhevsPDF].Points[i].SetValueY(prob[i]);
                 }
-                chart2.SaveImage(String.Format("C:\\SimCar\\SimCar\\data\\img\\phev\\{0}.png", profile), ChartImageFormat.Png);
+
+                String file = String.Format(filePath + "\\{0}\\{1}.png", "pdf", profile);
+                (new System.IO.FileInfo(file)).Directory.Create();
+                chart2.SaveImage(file, ChartImageFormat.Png);
 
                 chart2.ChartAreas[0].AxisY.Maximum = 20.0;
                 chart2.ChartAreas[0].AxisY.Minimum = 0.0;
@@ -192,8 +207,11 @@ namespace WinChart
             else
             {
                 if (saveImage)
-                    chart.SaveImage(String.Format("C:\\SimCar\\SimCar\\data\\img\\{0}\\{1}.png", path, counter++), ChartImageFormat.Png);
-
+                {
+                    String file = String.Format(filePath + "\\{0}\\{1}.png", path, counter_day++);
+                    (new System.IO.FileInfo(file)).Directory.Create();
+                    chart.SaveImage(file, ChartImageFormat.Png);
+                }
                 resetChart(chart, from, to);
             }
         }
@@ -232,6 +250,19 @@ namespace WinChart
 
             //incrementPoint(chart2, nPhevBattery, point, 1.0);
             addPoint(chart3, nTrfFiltered, point);
+        }
+
+        void trfUpdated_Changed(object sender, EventArgs e)
+        {
+            Tuple<Tuple<String, Double[]>, Tuple<Double[], Double[]>> chart = (Tuple<Tuple<String, Double[]>, Tuple<Double[], Double[]>>)sender;
+
+            Double[] capacity = chart.Item1.Item2;
+            Double[] filtered = chart.Item2.Item1;
+            Double[] current = chart.Item2.Item2;
+
+            updateChart(chart3, nTrfCapacity, capacity);
+            updateChart(chart3, nTrfFiltered, filtered);
+            updateChart(chart3, nTrfCurrent, current);
         }
 
         void phevStatus_Changed(object sender, EventArgs e)
@@ -304,7 +335,7 @@ namespace WinChart
         {
             Double[] chart = (Double[])sender;
 
-            this.chart1.Titles[0].Text = (String.Format("Iteration #{0} : Step # {0}", counter, nstep));
+            this.chart1.Titles[0].Text = (String.Format("Iteration #{0} : Step # {0}", counter_day, nstep));
 
             updateChart(chartDayahead, nDayaheadOriginal, chart);
         }
@@ -312,7 +343,7 @@ namespace WinChart
         {
             Double[] chart = (Double[])sender;
 
-            this.chart1.Titles[0].Text = (String.Format("Iteration #{0} : Step # {1}", counter, nstep++));
+            this.chart1.Titles[0].Text = (String.Format("Iteration #{0} : Step # {1}", counter_day, nstep++));
 
             updateChart(chart1, nDayAhead, chart);
         }
@@ -321,7 +352,7 @@ namespace WinChart
         {
             Double[] chart = (Double[])sender;
 
-            this.chartDayahead.Titles[0].Text = (String.Format("Iteration #{0} : Step # {1}", counter, nstep));
+            this.chartDayahead.Titles[0].Text = (String.Format("Iteration #{0} : Step # {1}", counter_day, nstep));
 
             updateChart(chartDayahead, nDayaheadCur, chart);
         }
@@ -465,6 +496,7 @@ namespace WinChart
             tSim.RegisterTrfCapacity(trfCapacity_Changed);
             tSim.RegisterTrfCurrent(trfCurrent_Changed);
             tSim.RegisterTrfFiltered(trfFiltered_Changed);
+            //tSim.RegisterTrfUpdate(trfUpdated_Changed);
             tSim.RegisterDebug(debug_Changed);
             tSim.RegisterError(error_Changed);
             tSim.RegisterProgress(progress_Changed);
@@ -615,7 +647,7 @@ namespace WinChart
             else
             {
                 tSim = new Sim.SimCar(nTicks);
-                tSim.Init();
+                //tSim.Init();
                 RegisterEvents(tSim);
             }
         }
@@ -636,6 +668,9 @@ namespace WinChart
             FSharpOption<Sim.Method> method = null;
             FSharpOption<Sim.Contribution> contr = null;
             FSharpOption<Sim.Scheduler> scheduler = null;
+
+            started = DateTime.Now;
+            filePath = String.Format("C:\\SimCar\\SimCar\\data\\img\\{0:dd.MM.HH.mm}", started);
 
             updateLog("-------------------------------------");
             String dayah = "", mech = "", phev = "";
@@ -729,21 +764,21 @@ namespace WinChart
         private void Simulation_Start(object sender, DoWorkEventArgs args)
         {
             Sim.SimCar tSim = (Sim.SimCar)args.Argument;
-            setMaximumProgress((tSim.Days + 2) * 96);
+            setMaximumProgress((tSim.Days + 3) * 96);
             tSim.ComputeDayahead();
             setMaximumProgress(tSim.Days * 96);
             resetChart(chart1, 0, chart1.Series.Count);
             resetChart(chart2, 0, chart2.Series.Count);
-            tSim.Run();
+            tSim.Run(String.Format("{0:dd.MM.HH.mm}", started));
         }
 
         private void Simulation_Completed(object sender, RunWorkerCompletedEventArgs args)
         {
             button1.Enabled = true;
 
-            String fileName = String.Format("{0:ddMMyyhhmmss}", DateTime.Now);
+            String fileName = String.Format("{0:dd.MM.HH.mm}", started);
             String fileLog = String.Format("c:\\SimCar\\SimCar\\data\\log\\{0}.txt", fileName);
-            textBoxDebug.AppendText(String.Format("[{1}] Writing log to {0}", fileLog, String.Format("{0:hh:mm}", DateTime.Now)));
+            textBoxDebug.AppendText(String.Format("[{1}] Writing log to {0}", fileLog, String.Format("{0:hh:mm}", started)));
             System.IO.StreamWriter file = new System.IO.StreamWriter(fileLog);
             file.WriteLine(textLog.Text);
 

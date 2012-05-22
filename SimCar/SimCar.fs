@@ -37,7 +37,7 @@ let test_dayahead iter agents =
     let rec shave n rt = 
         syncContext.RaiseDelegateEvent dayaheadProgress rt
         if n > 0 then 
-            shave (n-1) (rt |> DayAhead.Shifted.shave 0.3 0.95)
+            shave (n-1) (rt |> DayAhead.Shifted.shave 0.3 0.95 Array.empty)
 
     shave iter updated_realtime
 
@@ -91,11 +91,13 @@ let run day agents =
     let total = Array.map (Tree.foldr Util.update) realtime
     let pnodes = Array.map (Tree.foldr Util.fold_pnodes) realtime
     let phevs = Array.map (Tree.foldr Util.fold_phevs) realtime
+    let phevs_ux = Array.map (Tree.foldr Util.fold_phevs_ux) realtime
     let trf_delta = Array.map (Tree.foldr Util.fold_trf_delta) realtime
     let trf_filtered = Array.map (Tree.foldr Util.fold_trf_filter) realtime
     
 //        syncContext.RaiseEvent updateEvent <| dayahead
     let phevs_sum = Math.Round(Energy.toFloat <| Array.sum phevs,3)
+    let phevs_ux = Math.Round(Energy.toFloat <| Array.sum phevs_ux,3)
     let pnodes_sum = Math.Round(Energy.toFloat <| Array.sum pnodes,3)
     let total_max = Math.Round(Energy.toFloat <| Array.max total,3)
     let total_avg = Math.Round(Energy.toFloat <| Array.average total,3)
@@ -106,6 +108,7 @@ let run day agents =
     
     // Raise events
     syncContext.RaiseDelegateEvent jobProgress <| sprintf "PHEVs\t\t %.2f" phevs_sum
+    syncContext.RaiseDelegateEvent jobProgress <| sprintf "PHEVs (Ux)\t\t %.2f" phevs_ux
     syncContext.RaiseDelegateEvent jobProgress <| sprintf "PowerNodes\t %.2f" pnodes_sum 
     syncContext.RaiseDelegateEvent jobProgress <| sprintf "TrfDelta\t\t %.2f" trf_delta
     syncContext.RaiseDelegateEvent jobProgress <| sprintf "TrfFiltered\t\t %.2f" trf_filtered
@@ -128,7 +131,7 @@ let run day agents =
     syncContext.RaiseDelegateEvent progressPnode pnodes
     syncContext.RaiseDelegateEvent progressTotal total
 
-    { phevs_sum=phevs_sum; pnodes_sum=pnodes_sum; total_max=total_max;
+    { phevs_sum=phevs_sum; phevs_ux=phevs_ux; pnodes_sum=pnodes_sum; total_max=total_max;
         total_avg=total_avg; total_sum=total_sum; par=par;
         dayahead_sum=dayahead_sum; dif=dif; ratio=ratio;
         trf_delta=trf_delta; trf_filtered=trf_filtered }

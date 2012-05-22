@@ -21,8 +21,11 @@ open FileManager
 let profile_file = "C:\\SimCar\\SimCar\\data\\powerprofiles.txt"
 let brp_file = "C:\\SimCar\\SimCar\\data\\brp2.txt"
 
-let high_watt = 155.0*8.0;
-let med_watt = 7.2*8.0;
+//let high_watt = 155.0*8.0;
+//let med_watt = 7.2*8.0;
+let high_watt = 20e3;
+let med_watt = 1e3;
+
 
 let transformer_ampere  = [8.; 8.; 8.] |> List.map (fun x -> Current.ofFloat x)
 let transformer_voltage = [Voltage.ofFloat 0.240; Voltage.ofFloat 7.2; Voltage.ofFloat 155.0]
@@ -36,7 +39,7 @@ type Transformer =
     | PHEV of string
 
 let phev_ratio = 0.35
-let peak_ratio = 1.5
+let peak_ratio = 2.5
 
 let rand = new System.Random()
 
@@ -64,7 +67,7 @@ let make_grid =
     let profiles = 
         Parsing.powerprofiles
         |> List.map (fun (name, powerlist) -> (name, Array.max powerlist))
-        |> List.filter (fun (_,peak) -> peak <= 10.0)
+        |> List.filter (fun (_,peak) -> peak <= 15.0)
         |> List.map (fun ((name, peak) as node) -> LOW(name, peak))
         |> List.fold (fun (med,meds) trf -> make_meds med meds trf) (MED(0,0.0,[]),[])
         |> (fun (med,meds) -> med::meds)
@@ -92,13 +95,13 @@ let make_grid =
         | PHEV(name) -> 
             let r = rand.NextDouble()
             if r < 0.25 then 
-                [yield sprintf "phev %s worker1 16.0 0.0 16.0 2.5" name]
+                [yield sprintf "phev %s suburban 16.0 0.0 16.0 0.625" name]
             else if r >= 0.25 && r < 0.5 then
-                [yield sprintf "phev %s worker2 16.0 0.0 16.0 2.5" name]
+                [yield sprintf "phev %s commuter 16.0 0.0 16.0 0.625" name]
             else if r >= 0.5 && r < 0.75 then 
-                [yield sprintf "phev %s worker3 16.0 0.0 16.0 2.5" name]
+                [yield sprintf "phev %s city 16.0 0.0 16.0 0.625" name]
             else
-                [yield sprintf "phev %s worker4 16.0 0.0 16.0 2.5" name]
+                [yield sprintf "phev %s homeworker 16.0 0.0 16.0 0.625" name]
                 
 //    profiles |> List.fold (fun ac (profile, peak) -> append profile ac peak)
 

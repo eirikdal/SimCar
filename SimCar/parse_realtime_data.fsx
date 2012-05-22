@@ -45,6 +45,7 @@ let make_day values =
     [for i in 0 .. 95 do yield test.Interpolate(float i)]
 
 let parse_powerprofiles stream (values : float list) offset days customer =
+    let init_days = days
     let rec parse_powerprofiles stream (values : float list) _offset days customer =
         match (stream : string list) with 
         | h::t ->
@@ -62,7 +63,7 @@ let parse_powerprofiles stream (values : float list) offset days customer =
     //            let hours = q1::q2::q3::q4::q5::q6::q7::q8::q9::q10::q11::q12::q13::q14::q15::q16::q17::q18::q19::q20::q21::q22::q23::q24::[]
     //            let (day : float list) = [for f in make_day hours do yield f]
                 IO.write_doubles (data_folder + (sprintf "%s.dat" customer)) (List.rev values)
-                parse_powerprofiles (h::t) [] offset 30 cust
+                parse_powerprofiles (h::t) [] offset init_days cust
             | [|cust;date;est;q1;q2;q3;q4;q5;q6;q7;q8;q9;q10;q11;q12;q13;q14;q15;q16;q17;q18;q19;q20;q21;q22;q23;q24|] when cust <> "Customer" ->
                 let hours = q1::q2::q3::q4::q5::q6::q7::q8::q9::q10::q11::q12::q13::q14::q15::q16::q17::q18::q19::q20::q21::q22::q23::q24::[]
                 let (day : float list) = make_day hours
@@ -77,4 +78,4 @@ let powerprofiles =
     let mutable rest = []
     let stream = List.ofSeq read_file
     
-    parse_powerprofiles stream [] 120 30 "0"
+    parse_powerprofiles stream [] 120 150 "0"

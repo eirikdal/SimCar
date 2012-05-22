@@ -20,7 +20,7 @@ let mutable powergrid = Node([],None)
 let collect_exp node = 
     match node with
     | Transformer(_) -> []
-    | PHEV(phev_args) as node -> phev_args.profile.to_exp_float(1.25<kWh>, 32.0<kWh>)
+    | PHEV(phev_args) as node -> phev_args.profile.to_exp_float(1.25<kWh>, 1.25<kWh>, 32.0<kWh>)
     | PowerNode(_) -> []
     | BRP(_) -> []
 

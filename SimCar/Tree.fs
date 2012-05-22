@@ -125,7 +125,7 @@ let rec collect node =
 let collect_exp node = 
     match node with
     | Transformer(_) -> []
-    | PHEV(phev_args) as node -> phev_args.profile.to_exp_float(phev_args.rate, phev_args.capacity)
+    | PHEV(phev_args) as node -> phev_args.profile.to_exp_float(phev_args.charge_rate, phev_args.discharge_rate, phev_args.capacity)
     | PowerNode(_) -> []
     | BRP(_) -> []
 

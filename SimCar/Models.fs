@@ -97,6 +97,7 @@ type Distribution =
 
 type Results = {
     phevs_sum : float;
+    phevs_ux : float;
     pnodes_sum : float;
     total_max : float;
     total_avg : float;
@@ -118,12 +119,17 @@ type Profile =
             let n = new Normal(profile.mean, profile.sigma)
             n.CumulativeDistribution(time) - n.CumulativeDistribution((time-1.0))
         | LogNormal ->
-            let mu = log (profile.mean**2.0/sqrt(profile.sigma+profile.mean**2.0))
-            let sigma = sqrt (log(profile.sigma/(profile.mean**2.0)+1.0))
-            let n = new MathNet.Numerics.Distributions.LogNormal(mu, sigma)
-            n.CumulativeDistribution(time+1.0) - n.CumulativeDistribution((time))
+//            let mu = log (profile.mean**2.0/sqrt(profile.sigma+profile.mean**2.0))
+//            let sigma = sqrt (log(profile.sigma/(profile.mean**2.0)+1.0))
+//            let n = new MathNet.Numerics.Distributions.LogNormal(mu, sigma)
+//            n.CumulativeDistribution(time+1.0) - n.CumulativeDistribution((time))
+            if time >= profile.mean then
+                let n = new MathNet.Numerics.Distributions.LogNormal(0.0,profile.sigma)
+                n.CumulativeDistribution((time-profile.mean)+1.0) - n.CumulativeDistribution(time-profile.mean)
+            else 
+                0.0
         | Weibull ->
-            let n = new MathNet.Numerics.Distributions.Weibull(profile.sigma,1.0)
+            let n = new MathNet.Numerics.Distributions.Weibull(profile.sigma,5.0)
             n.CumulativeDistribution((time-profile.mean)+1.0) - n.CumulativeDistribution(time-profile.mean)
         | Gumbel ->
             if time >= profile.mean then
@@ -159,41 +165,33 @@ type Profile =
             sumn dist_list
         | DistProfile(name,dist_list) ->
             self.calc(name,dist_list).to_float()
-    member self.to_exp_float(rate : float<kWh>, capacity) : float<kWh> list =
+    member self.to_exp_float(charge_rate : float<kWh>, discharge_rate, capacity) : float<kWh> list =
         match self with 
         | FloatProfile(_,dist_list) ->
             let calc_for_dist (dist : Distribution) = 
                 let dist' = dist.dist |> Array.ofSeq
                 let duration = dist.duration
-                // create 96 windows of size duration, where the index of each window reflects the ending time of a (potential) trip
-                // (windows are offset by duration to reflect the expected load from a PHEV that is coming back)
-                let driving_time = List.length <| List.filter (fun x -> x = 1) duration
-                let windows_of_expected_trips = Seq.init (96+(driving_time-1)) (fun i -> (i+driving_time,0.0)) |> Seq.windowed (driving_time) |> Array.ofSeq
 
-                // for each window, calculate the load in tick i' (=i+duration) as the prob that the PHEV left at time i times the charging rate
-                let windows_of_expected = 
-                    windows_of_expected_trips 
-                    |> Array.mapi (fun i window -> 
-                        window 
-                        |> Array.scan (fun (ac,(_,_)) (i',_) -> 
-                            if ac > rate then 
-                                (ac-rate, (i', rate * dist'.[i%96]))
-                            else
-                                (ac-(rate-ac), (i', 0.0<kWh>))) (capacity, (0,0.0<kWh>))
-                        |> Array.map snd)
-                
-                Array.init (96) (fun i ->
-                    windows_of_expected
-                    |> Array.fold (fun ac window -> 
-                        ac + (window |> Array.fold (fun ac' (i', rate') -> if (i%96) = (i'%96) then ac'+rate' else ac') 0.0<kWh>)) 0.0<kWh>)
-                |> List.ofArray
+                let expected = Array.init(96) (fun _ -> 0.0<kWh>)
+
+                let duration' = List.sortBy (fun x -> -x) duration
+                let mutable sum_discharge = duration' |> List.sumBy (fun x -> if x = 1 then discharge_rate else 0.0<kWh>) 
+
+                for i in 0 .. dist'.Length-1 do 
+                    for j in 0 .. duration.Length-1 do 
+                        if sum_discharge > 0.0<kWh> then
+                            let temp = charge_rate * dist'.[i]
+                            expected.[(i+j+duration'.Length)%96] <- expected.[(i+j+duration'.Length)%96] + temp
+                            sum_discharge <- sum_discharge - temp
+
+                expected |> List.ofArray
 
             dist_list 
             |> List.map (fun dist -> calc_for_dist dist)
             |> List.argmaxn
 
         | DistProfile(name,dist_list) ->
-            self.calc(name,dist_list).to_exp_float(rate, capacity)
+            self.calc(name,dist_list).to_exp_float(charge_rate, discharge_rate, capacity)
 type Node<'T> = 
     | Node of (Node<'T> list) * 'T option
     | Leaf of 'T option
@@ -222,11 +220,13 @@ type PhevArguments =
     capacity : capacity;
     current : energy;
     battery : battery;
-    rate : energy;
+    charge_rate : energy;
+    discharge_rate : energy;
     left : int;
     duration : int list;
     parent : string;
     intentions : energy list;
+    failed : energy;
     histogram : int array }
     with 
         member self.leave(tick : int, duration : int list) : PhevArguments =  
@@ -234,17 +234,20 @@ type PhevArguments =
 
             syncContext.RaiseDelegateEvent phevLeft (tick%96, Math.Round(Energy.toFloat <| self.capacity-self.battery))
         
-            { self with left=(tick%96); duration=duration; intentions=[]}
+            { self with left=(tick%96); duration=duration; failed=self.failed+(self.capacity-self.battery); intentions=[]}
         member self.charge() = 
             match self.intentions with 
             | rate::t -> 
                 let current' = if List.length self.duration <= 0 then rate else 0.0<kWh>
-                { self with current=current'; battery=(self.battery+current'); intentions=t }
+                if current'+self.battery <= self.capacity then 
+                    { self with current=current'; battery=(self.battery+current'); intentions=t }
+                else
+                    { self with current=self.capacity-self.battery; battery=self.capacity; }
             | [] -> { self with current=0.0<kWh>; battery=self.battery; }
         member self.drive() =
             match self.duration with 
             | 1::t ->
-                let battery' = if self.battery >= self.rate then self.battery - self.rate else 0.0<kWh>
+                let battery' = if self.battery >= self.discharge_rate then self.battery - self.discharge_rate else 0.0<kWh>
                 { self with current=0.0<kWh>; battery=battery'; duration=self.duration.Tail }
             | 0::t -> 
                 { self with current=0.0<kWh>; duration=self.duration.Tail }
@@ -288,17 +291,19 @@ let create_node name nodes capacity current parent children =
     Node(nodes, Some <| Transformer(trf_arg))
 
 // function that creates a PHEV model, takes name, capacity, current and battery as parameters
-let create_phev name capacity current battery rate profile parent (profiles : Profile list) =
+let create_phev name capacity current battery charge_rate discharge_rate profile parent (profiles : Profile list) =
     let phev_arg = 
         { name=name;
         profile=List.find (fun (DistProfile(prof_name, dist)) -> prof_name = profile) profiles;
         capacity=Capacity.ofFloat <| Double.Parse(capacity, CultureInfo.InvariantCulture);
         current=Energy.ofFloat <| Double.Parse(current, CultureInfo.InvariantCulture);
         battery=Battery.ofFloat <| Double.Parse(battery, CultureInfo.InvariantCulture);
-        rate=Energy.ofFloat <| Double.Parse(rate, CultureInfo.InvariantCulture);
+        charge_rate=Energy.ofFloat <| Double.Parse(charge_rate, CultureInfo.InvariantCulture);
+        discharge_rate=Energy.ofFloat <| Double.Parse(discharge_rate, CultureInfo.InvariantCulture);
         histogram=Array.init (96) (fun i -> 0);
         duration=[];
         left=(-1);
+        failed=0.0<kWh>;
         parent=parent;
         intentions=[] }
     Node(List.empty, Some <| PHEV(phev_arg))

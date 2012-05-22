@@ -42,14 +42,14 @@ let create_chart _from _to (data : float<kWh>[]) (title : string) =
         (InsideArea=false, Font=new Font("Arial", 8.0f),
         Alignment = StringAlignment.Center, Docking=Docking.Top)
 
-let test = Tree.phev_expected
+let test = Tree.phev_expected <| create_powergrid()
 let test2 = take 1280 0 profiles_interpol |> Array.map Models.Energy.ofFloat
 let test3 = Array.sum2 test test2
-let test4 = DayAhead.Shifted.shave 0.3 0.95 test3
+let test4 = DayAhead.Shifted.shave 0.3 1.05 test test3
 //let test4 = DayaheadExp.Algorithm.distribute test test2 0.993 1 |> Array.ofList
 
 
-create_chart 0.0 4000.0 test "Test"
+create_chart 0.0 4000.0 test "Expected PHEV"
 create_chart 2000.0 8000.0 test2 "Test"
 create_chart 2000.0 8000.0 test3 "Test"
 create_chart 2000.0 8000.0 test4 "Test"

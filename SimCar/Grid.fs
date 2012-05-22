@@ -135,6 +135,11 @@ module Util  =
         | PHEV(phev_args) -> ac + phev_args.current
         | _ -> ac
 
+    let fold_phevs_ux (_, Model(grid)) (ac : float<kWh>) = 
+        match grid with 
+        | PHEV(phev_args) -> ac + phev_args.failed
+        | _ -> ac
+
     let fold_pnodes (_, Model(grid)) (ac : float<kWh>) = 
         match grid with 
         | PowerNode(phev_args) -> ac + phev_args.current

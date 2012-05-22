@@ -164,7 +164,7 @@ module Parsing =
                 children <- name :: children
                 parse_powergrid rest (node::nodes) (&rest) (&children) parent
             | [|"phev";name;profile;capacity;current;battery;rate|] -> 
-                let node = create_phev name capacity current battery rate profile parent profiles
+                let node = create_phev name capacity current battery rate "2.0" profile parent profiles
                 children <- name :: children
                 parse_powergrid t (node::nodes) (&rest) (&children) parent
             | [|"pnode";name;realtime|] ->

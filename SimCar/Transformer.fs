@@ -18,16 +18,20 @@ module Action =
         else
             0.0<kWh>, rem
     
-    let filter_charges trf_args charges = 
+    let filter_charges trf_args charges init = 
         charges 
         |> List.sortBy (fun (Charge_OK(_,_,ttl)) -> ttl)
         |> List.fold (fun (rem,filtered) (Charge_OK(name,energy,ttl)) ->     
             if not (name.StartsWith("med") || name.StartsWith("high")) then
-                let filter, remaining = filter energy rem
+                let filter, remaining =
+                    if not (name.StartsWith("node")) then
+                        filter energy rem
+                    else
+                        energy, rem
                 postalService.send(name, Charge_OK(name, filter, ttl))
                 remaining, filtered+(energy-filter)
             else 
-                rem,filtered) (trf_args.capacity, 0.0<kWh>)
+                rem,filtered) init
     
 module Agent = 
     module Centralized = 
@@ -39,23 +43,24 @@ module Agent =
 
                     return! loop trf [] charges filter true
                 else if charges.Length >= children.Length then 
-                    // propagate Charge_OK upwards to (potentially) senior trf agents
-                    postalService.send(parent, Charge_OK(name,0.0<kWh>,-1))
-
                     let sum_of_charges = charges |> List.sumBy (fun (Charge_OK(_,energy,ttl)) -> energy)
 
                     let (rem, filtered) = 
                         if filter then 
-                            Action.filter_charges trf_args charges
+                            let sum_of_nodes = charges |> List.sumBy (fun(Charge_OK(name,energy,_)) -> if name.StartsWith("node") then energy else 0.0<kWh>)
+                            Action.filter_charges trf_args charges (trf_args.capacity-sum_of_nodes, 0.0<kWh>)
                         else
                             charges |> List.iter (fun (Charge_OK(name,energy,ttl)) -> 
                                 if not (name.StartsWith("med") || name.StartsWith("high")) then
                                     postalService.send(name, Charge_OK(name,energy,ttl)))
                             (trf_args.capacity, 0.0<kWh>)
 
-                    if name = "med_3" then
+                    // propagate Charge_OK upwards to (potentially) senior trf agents
+                    postalService.send(parent, Charge_OK(name,sum_of_charges-filtered,-1))
+
+                    if name = "med_4" then
                         syncContext.RaiseDelegateEvent trfFiltered (filtered)
-                        syncContext.RaiseDelegateEvent trfCurrent sum_of_charges
+                        syncContext.RaiseDelegateEvent trfCurrent (sum_of_charges - filtered)
                         syncContext.RaiseDelegateEvent trfCapacity trf_args.capacity
                 
                     return! loop (Transformer({ trf_args with filtered=filtered; current=sum_of_charges })) [] [] filter false
@@ -102,26 +107,30 @@ module Agent =
             let queue = new Queue<Message>() 
             let rec loop (Transformer({ name=name; parent=parent; children=children } as trf_args) as trf) (charges : Message list) filter waiting = async {
                 if charges.Length >= children.Length then 
-                    // propagate Charge_OK upwards to (potentially) senior trf agents
-                    postalService.send(parent, Charge_OK(name,0.0<kWh>,-1))
-
                     let sum_of_charges = charges |> List.sumBy (fun (Charge_OK(_,energy,ttl)) -> energy)
 
                     let (rem, filtered) = 
                         if filter then 
-                            Action.filter_charges trf_args charges
+                            let sum_of_nodes = charges |> List.sumBy (fun(Charge_OK(name,energy,_)) -> if name.StartsWith("node") then energy else 0.0<kWh>)
+                            Action.filter_charges trf_args charges (trf_args.capacity-sum_of_nodes, 0.0<kWh>)
                         else
                             charges |> List.iter (fun (Charge_OK(name,energy,ttl)) -> 
                                 if not (name.StartsWith("med") || name.StartsWith("high")) then
                                     postalService.send(name, Charge_OK(name,energy,ttl)))
                             (trf_args.capacity, 0.0<kWh>)
 
-                    if name = "med_3" then
+                    // propagate Charge_OK upwards to (potentially) senior trf agents
+                    postalService.send(parent, Charge_OK(name,sum_of_charges-filtered,-1))
+                    
+//                    if filtered > 0.0<kWh> || sum_of_charges-filtered > trf_args.capacity then
+//                        printfn "%s" name
+
+                    if name = "med_4" then
                         syncContext.RaiseDelegateEvent trfFiltered (filtered)
-                        syncContext.RaiseDelegateEvent trfCurrent sum_of_charges
+                        syncContext.RaiseDelegateEvent trfCurrent (sum_of_charges-filtered)
                         syncContext.RaiseDelegateEvent trfCapacity trf_args.capacity
                     
-                    return! loop (Transformer({ trf_args with filtered=filtered; current=sum_of_charges})) [] filter false
+                    return! loop (Transformer({ trf_args with filtered=filtered; current=sum_of_charges-filtered})) [] filter false
                 else
                     let! (msg : Message) = 
                         if (not waiting && queue.Count > 0) then

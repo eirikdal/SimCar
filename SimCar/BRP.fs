@@ -170,13 +170,13 @@ module Agent =
                             return! loop brp tick predictions
                     | RequestMixed(name, ttl) ->
 //                        reply.Reply(Mixed(problist))
-                        let window = [for i in tick .. ttl do yield predictions.[i%96]]
+                        let window = [for i in 0 .. (ttl-tick) do yield predictions.[i]]
                         let (Strategy(strategy)) = postalService.send_reply(name, Mixed(window))
                         for i in 0 .. (List.length strategy-1) do 
                             predictions.[i] <- predictions.[i] + strategy.[i]
                         return! loop brp tick predictions
                     | Update(tick) -> 
-                        [|for i in tick .. tick+96 do yield predictions.[i%96] <- realtime(i)|] |> ignore
+                        [|for i in 0 .. 95 do yield predictions.[i] <- realtime(tick+i)|] |> ignore
                         return! loop brp tick predictions
                     | Dayahead(dayahead) ->
                         return! loop <| BRP({ brp_args with dayahead=dayahead }) <| tick <| predictions

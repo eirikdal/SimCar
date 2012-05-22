@@ -1,17 +1,18 @@
-﻿worker1 {
-  weibull, mean=08:15, std=30, duration=07:00
-  gauss, mean=16:15, std=30, duration=01:00
-  gauss, mean=20:15, std=60, duration=03:00
+﻿suburban {
+  weibull, mean=07:15, std=210, duration=1;1;1;1;1;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1
+  lognormal, mean=18:30, std=30, duration=1;0;0;0;1
+  gauss, mean=20:15, std=60, duration=1;1;0;0;1;1
 }
-worker2 {
-  gauss, mean=06:15, std=30, duration=07:00
-  gauss, mean=16:15, std=60, duration=03:00
+homeworker {
+  gauss, mean=12:15, std=60, duration=1;1;1;0;0;0;0;0;1;1;1
+  gauss, mean=17:15, std=60, duration=1;1;1;0;0;0;0;1;1;1
+  gauss, mean=21:15, std=60, duration=1;1;1;0;0;0;0;1;1;1
 }
-worker3 {
-  gauss, mean=07:15, std=30, duration=07:00
-  gauss, mean=20:15, std=120, duration=02:00
+city {
+  weibull, mean=07:45, std=210, duration=1;1;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1
+  lognormal, mean=17:15, std=22.5, duration=1;1;0;0;1;1
 }
-worker4 {
-  gauss, mean=07:15, std=30, duration=07:00
-  gauss, mean=14:15, std=60, duration=04:00
+commuter {
+  weibull, mean=07:15, std=210, duration=1;1;1;1;1;1;1;1;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1
+  lognormal, mean=19:15, std=15, duration=1;1;0;0;0;0;0;0;0;0;1;1
 }
