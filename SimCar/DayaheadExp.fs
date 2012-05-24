@@ -10,40 +10,64 @@ open FileManager
 #nowarn "25"
 #nowarn "40"
 
-let data_folder = "C:\\SimCar\\SimCar\\data\\powernodes\\"
-let interpol_folder = "C:\\SimCar\\SimCar\\data\\interpol\\"
-
-let profiles_interpol = Parsing.parse_powerprofiles(interpol_folder)
-
-let powergrid = 
-    FileManager.powergrid()
-
-let collect_exp node = 
-    match node with
-    | Transformer(_) -> []
-    | PHEV(phev_args) as node -> phev_args.profile.to_exp_float(Energy.toFloat <| phev_args.rate, Energy.toFloat <| phev_args.capacity)
-    | PowerNode(_) -> []
-    | BRP(_) -> []
-
-let mutable agg_dist' = 
-    powergrid
-    |> Tree.map collect_exp 
-    |> Tree.collect
-    |> List.ofSeq
-    |> List.filter (fun x -> if x.Length = 0 then false else true)
-    |> List.sumn
-    |> Array.ofList
-
-let rate = 1.25
+let rate = 1.25<kWh>
 
 module Algorithm = 
-    let distribute realtime days = 
-        printfn "sum of agg_dist %f" (Array.sum agg_dist')
-        let theta = 0.995
-        let util pos' (day:float array) (pos,x) = 
+    let rand = new Random()
+    let distribute_mixed phev_expected realtime days =
+        let generate_problist tick window realtime = 
+            let baseline = [for i in tick .. (tick+window) do yield realtime(i)]
+            let max_baseline = List.max baseline
+            let min_baseline = List.min baseline
+
+            List.map (fun x -> (x-min_baseline) / (max_baseline-min_baseline)) baseline
+
+        let dist (day : float<kWh> array) : float<kWh> array = 
+            let rec fill idx left =
+                if left > rate then 
+                    let i = rand.Next(0,96)
+                    day.[i] <- day.[i] + rate
+                    fill idx (left-rate)
+                else
+                    let idx = rand.Next(0,96)
+                    day.[idx] <- day.[idx] + (rate - (rate-left))
+                    day.[idx]
+                  
+            phev_expected |> Array.mapi fill
+
+        [for i in 0 .. (days-1) do
+            let _from,_to = (i*96),(i*96)+96
+            let mutable day = Array.sub realtime _from 96
+            
+            let realtime_updated = dist day
+            yield! (List.ofArray day)]    
+
+    let distribute_random phev_expected realtime days = 
+        let dist (day : float<kWh> array) : float<kWh> array = 
+            let rec fill idx left =
+                if left > rate then 
+                    let i = rand.Next(0,96)
+                    day.[i] <- day.[i] + rate
+                    fill idx (left-rate)
+                else
+                    let idx = rand.Next(0,96)
+                    day.[idx] <- day.[idx] + (rate - (rate-left))
+                    day.[idx]
+                  
+            phev_expected |> Array.mapi fill
+        [for i in 0 .. (days-1) do
+            let _from,_to = (i*96),(i*96)+96
+            let mutable day = Array.sub realtime _from 96
+            
+            let realtime_updated = dist day
+            yield! (List.ofArray day)]
+
+    let distribute (phev_expected:float<kWh> array) realtime theta days = 
+//        printfn "sum of PHEV expected %f" (Array.sum phev_expected)
+        let util pos' (day:float<kWh> array) (pos,x) = 
             let distance = theta ** (float <| abs(pos-pos'))
-            distance*(1.0 / day.[pos])
-        let dist (day : float array) = 
+            distance*(1.0<kWh> / day.[pos])
+        let dist (day : float<kWh> array) : float<kWh> array = 
             let rec fill idx left =
                 if left > rate then 
                     let (i,v) = 
@@ -60,7 +84,7 @@ module Algorithm =
                     day.[idx] <- day.[idx] + (rate - (rate-left))
                     day.[idx]
                   
-            agg_dist' |> Array.mapi fill
+            phev_expected |> Array.mapi fill
         [for i in 0 .. (days-1) do
             let _from,_to = (i*96),(i*96)+96
             let mutable day = Array.sub realtime _from 96

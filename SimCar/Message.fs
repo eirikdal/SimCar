@@ -1,5 +1,7 @@
 ﻿module Message
 
+#nowarn "25"
+
 open System
 open Agent
 open Models
@@ -10,19 +12,19 @@ type Message =
     | Charge_OK of string * energy * int
     | Charge_Accepted of energy list
     | Charge_Intentions of Message list
-    | Completed of string
-    | Assign of Agent<Message> * Grid
     | Register of string * Agent<Message>
     | Deregister of string * Agent<Message>
-    | Broadcast of Message
     | Dayahead of dayahead
     | Prediction of realtime
     | ReplyTo of Message * AsyncReplyChannel<Message>
+    | RequestMixed of string * int
     | RequestModel
     | RequestDayahead
+    | Mixed of energy list
     | Model of Grid
     | Error of string
     | Update of int
+    | Kill
     | Reset
     | Reply of Message
     | Schedule of (dayahead -> realtime -> (string * Message) list -> int -> unit)

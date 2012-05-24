@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
@@ -15,19 +9,17 @@ namespace WinChart
 {
     public partial class SimChart : Form
     {
-        const int nSim = 10;
         const int nTicks = 96;
-        Sim.SimCar tSim = new Sim.SimCar(nSim, nTicks);
 
-        private Mutex mut = new Mutex();
         private const int nRealTime = 0;
         private const int nPowerNodes = 1;
         private const int nPhev = 2;
         private const int nDayAhead = 3;
-        private const int nPhevPDF = 4;
+        private const int nPhevsLeft = 4;
 
         private const int nPhevStatus = 0;
         private const int nPhevBattery = 1;
+        private const int nPhevsPDF = 2;
 
         private const int nTrfCapacity = 0;
         private const int nTrfCurrent = 1;
@@ -41,7 +33,7 @@ namespace WinChart
         private const int nDayaheadAnts = 5;
 
         private static string[] series = { "Total", "PowerNodes", "PHEVs", "Dayahead", "PHEVs left (not fully charged)" };
-        private static string[] _seriesPhev = { "PHEV status", "PHEV battery" };
+        private static string[] _seriesPhev = { "PHEV status", "PHEV battery", "PHEV PDF" };
         private static string[] _seriesTrf = {"Capacity", "Current", "Unfiltered"};
         private static string[] _seriesDayahead = { "Original", "Dayahead previous", "Dayahead current", "Expected", "Supervisor", "Ants" };
 
@@ -57,6 +49,7 @@ namespace WinChart
         private delegate void addPointDelegate(Chart chart, int i, Double point);
         private delegate void incrementPointDelegate(Chart chart, int i, int point, Double val);
         private delegate void updatePointDelegate(Chart chart, int i, int point, Double val);
+        private delegate void startDelegate();
         
 
         void saveImageControl(string fileName)
@@ -108,13 +101,17 @@ namespace WinChart
             }
             else
             {
+                resetChart(chart2, 0, 2);
+
                 for (int i = 0; i < prob.Length; i++)
                 {
-                    if (chart2.Series[nPhevPDF].Points.Count <= i)
-                        chart2.Series[nPhevPDF].Points.Add(prob[i]);
-                    else if (prob[i] > chart1.Series[nPhevPDF].Points[i].YValues[0])
-                        chart2.Series[nPhevPDF].Points[i].SetValueY(prob[i]);
+                    if (chart2.Series[nPhevsPDF].Points.Count <= i)
+                        chart2.Series[nPhevsPDF].Points.Add(prob[i]);
+                    else if (prob[i] > chart2.Series[nPhevsPDF].Points[i].YValues[0])
+                        chart2.Series[nPhevsPDF].Points[i].SetValueY(prob[i]);
                 }
+                chart2.SaveImage(String.Format("C:\\SimCar\\SimCar\\data\\img\\phev\\phev_pdf.png"), ChartImageFormat.Png);
+                resetChart(chart2, nPhevsPDF, nPhevsPDF + 1);
             }
         }
 
@@ -233,7 +230,7 @@ namespace WinChart
         {
             int point = (int)sender;
 
-            incrementPoint(chart1, nPhevPDF, point, 1.0);
+            incrementPoint(chart1, nPhevsLeft, point, 1.0);
         }
 
         void phevBattery_Changed(object sender, EventArgs e)
@@ -271,7 +268,7 @@ namespace WinChart
             updateChart(chart1, nRealTime, (Double[])sender, true, "power");
             resetChart(chart2, 0, 2, true, "phev");
             resetChart(chart3, 0, 3, true, "trf");
-            resetChart(chart1, nPhevPDF, nPhevPDF+1);
+            resetChart(chart1, nPhevsLeft, nPhevsLeft+1);
         }
 
         void chart_moving_average_comparison_Changed(object sender, EventArgs e)
@@ -345,6 +342,51 @@ namespace WinChart
             chart.ChartAreas[0].AxisX.CustomLabels.Add(90, 95, "24:00");
         }
 
+        void RegisterEvents(Sim.SimCar tSim)
+        {
+            tSim.RegisterEvents();
+            tSim.RegisterPhevBattery(phevBattery_Changed);
+            tSim.RegisterPhevStatus(phevStatus_Changed);
+            tSim.RegisterProgressTotal(total_Changed);
+            tSim.RegisterProgressPhev(phev_Changed);
+            tSim.RegisterProgressPnode(pnode_Changed);
+            tSim.RegisterPhevFailed(phevFailed_Changed);
+            tSim.RegisterProb(prob_Calc);
+            tSim.RegisterProbReset(prob_Reset);
+            tSim.RegisterDayaheadProgress(dayahead_Changed);
+            tSim.RegisterDayaheadInit(dayahead_Init);
+            tSim.RegisterDayaheadStep(dayahead_Step);
+            tSim.RegisterDayaheadExpected(dayahead_Exp);
+            tSim.RegisterDayaheadSupervisor(dayahead_Supervisor);
+            tSim.RegisterDayaheadAnt(dayahead_Ant);
+            //tSim.TestDayahead(nSim);
+            tSim.RegisterTrfCapacity(trfCapacity_Changed);
+            tSim.RegisterTrfCurrent(trfCurrent_Changed);
+            tSim.RegisterTrfFiltered(trfFiltered_Changed);
+        }
+
+        //void UnregisterEvents()
+        //{
+        //    tSim.UnregisterPhevBattery(phevBattery_Changed);
+        //    tSim.UnregisterPhevStatus(phevStatus_Changed);
+        //    tSim.UnregisterProgressTotal(total_Changed);
+        //    tSim.UnregisterProgressPhev(phev_Changed);
+        //    tSim.UnregisterProgressPnode(pnode_Changed);
+        //    tSim.UnregisterPhevFailed(phevFailed_Changed);
+        //    //tSim.RegisterProb(prob_Calc);
+        //    //tSim.RegisterProbReset(prob_Reset);
+        //    tSim.UnregisterDayaheadProgress(dayahead_Changed);
+        //    tSim.UnregisterDayaheadInit(dayahead_Init);
+        //    tSim.UnregisterDayaheadStep(dayahead_Step);
+        //    tSim.UnregisterDayaheadExpected(dayahead_Exp);
+        //    tSim.UnregisterDayaheadSupervisor(dayahead_Supervisor);
+        //    tSim.UnregisterDayaheadAnt(dayahead_Ant);
+        //    //tSim.TestDayahead(nSim);
+        //    tSim.UnregisterTrfCapacity(trfCapacity_Changed);
+        //    tSim.UnregisterTrfCurrent(trfCurrent_Changed);
+        //    tSim.UnregisterTrfFiltered(trfFiltered_Changed);
+        //}
+
         public SimChart()
         {
             InitializeComponent();
@@ -359,12 +401,13 @@ namespace WinChart
             chart1.Series.Add(series[nPowerNodes]);
             chart1.Series.Add(series[nPhev]);
             chart1.Series.Add(series[nDayAhead]);
-            chart1.Series.Add(series[nPhevPDF]);
+            chart1.Series.Add(series[nPhevsLeft]);
 
             //chart1.ChartAreas.Add("ChartArea1");
 
             chart2.Series[0].LegendText = _seriesPhev[nPhevStatus];
             chart2.Series.Add(_seriesPhev[nPhevBattery]);
+            chart2.Series.Add(_seriesPhev[nPhevsPDF]);
 
             chart3.Series[0].LegendText = _seriesTrf[nTrfCapacity];
             chart3.Series.Add(_seriesTrf[nTrfCurrent]);
@@ -382,8 +425,8 @@ namespace WinChart
             setChartLabels(chart3);
             setChartLabels(chartDayahead);
             
-            Series[] seriesPhev = {chart2.Series[nPhevStatus], chart2.Series[nPhevBattery]};
-            Series[] seriesArray = { chart1.Series[nRealTime], chart1.Series[nPowerNodes], chart1.Series[nPhev], chart1.Series[nDayAhead], chart1.Series[nPhevPDF] };
+            Series[] seriesPhev = {chart2.Series[nPhevStatus], chart2.Series[nPhevBattery], chart2.Series[nPhevsPDF]};
+            Series[] seriesArray = { chart1.Series[nRealTime], chart1.Series[nPowerNodes], chart1.Series[nPhev], chart1.Series[nDayAhead], chart1.Series[nPhevsLeft] };
             Series[] seriesTrf = {chart3.Series[nTrfCapacity], chart3.Series[nTrfCurrent], chart3.Series[nTrfFiltered] };
             Series[] seriesDayahead = { chartDayahead.Series[nDayaheadOriginal], chartDayahead.Series[nDayaheadPrev], chartDayahead.Series[nDayaheadCur], chartDayahead.Series[nDayaheadExp], chartDayahead.Series[nDayaheadSupervisor], chartDayahead.Series[nDayaheadAnts] };
 
@@ -393,8 +436,8 @@ namespace WinChart
             seriesArray[nRealTime].BorderWidth = 2;
             seriesArray[nRealTime].BorderDashStyle = ChartDashStyle.Solid;
 
-            seriesArray[nPowerNodes].ChartType = SeriesChartType.Column;
-            seriesArray[nPowerNodes].Color = Color.Aqua;
+            seriesArray[nPowerNodes].ChartType = SeriesChartType.Line;
+            seriesArray[nPowerNodes].Color = Color.Blue;
             seriesArray[nPowerNodes].BorderWidth = 2;
             seriesArray[nPowerNodes].BorderDashStyle = ChartDashStyle.Dot;
 
@@ -403,10 +446,10 @@ namespace WinChart
             seriesArray[nPhev].BorderWidth = 2;
             seriesArray[nPhev].BorderDashStyle = ChartDashStyle.Dot;
 
-            seriesArray[nPhevPDF].ChartType = SeriesChartType.Point;
-            seriesArray[nPhevPDF].Color = Color.Black;
-            seriesArray[nPhevPDF].BorderWidth = 2;
-            seriesArray[nPhevPDF].BorderDashStyle = ChartDashStyle.Dash;
+            seriesArray[nPhevsLeft].ChartType = SeriesChartType.Point;
+            seriesArray[nPhevsLeft].Color = Color.Black;
+            seriesArray[nPhevsLeft].BorderWidth = 2;
+            seriesArray[nPhevsLeft].BorderDashStyle = ChartDashStyle.Dash;
 
             seriesArray[nDayAhead].ChartType = SeriesChartType.Line;
             seriesArray[nDayAhead].Color = Color.Sienna;
@@ -422,6 +465,11 @@ namespace WinChart
             seriesPhev[nPhevBattery].Color = Color.Blue;
             seriesPhev[nPhevBattery].BorderWidth = 2;
             seriesPhev[nPhevBattery].BorderDashStyle = ChartDashStyle.Dash;
+
+            seriesPhev[nPhevsPDF].ChartType = SeriesChartType.StepLine;
+            seriesPhev[nPhevsPDF].Color = Color.Green;
+            seriesPhev[nPhevsPDF].BorderWidth = 2;
+            seriesPhev[nPhevsPDF].BorderDashStyle = ChartDashStyle.Dash;
 
             seriesTrf[nTrfCapacity].ChartType = SeriesChartType.StepLine;
             seriesTrf[nTrfCapacity].Color = Color.Red;
@@ -468,40 +516,108 @@ namespace WinChart
             seriesDayahead[nDayaheadAnts].BorderWidth = 2;
             seriesDayahead[nDayaheadAnts].BorderDashStyle = ChartDashStyle.Solid;
 
-            tSim.Init();
-            tSim.RegisterEvents();
-            tSim.RegisterPhevBattery(phevBattery_Changed);
-            tSim.RegisterPhevStatus(phevStatus_Changed);
-            tSim.RegisterProgressTotal(total_Changed);
-            tSim.RegisterProgressPhev(phev_Changed);
-            tSim.RegisterProgressPnode(pnode_Changed);
-            tSim.RegisterPhevFailed(phevFailed_Changed);
-            //tSim.RegisterProb(prob_Calc);
-            //tSim.RegisterProbReset(prob_Reset);
-            tSim.RegisterDayaheadProgress(new EventHandler(dayahead_Changed));
-            tSim.RegisterDayaheadInit(new EventHandler(dayahead_Init));
-            tSim.RegisterDayaheadStep(new EventHandler(dayahead_Step));
-            tSim.RegisterDayaheadExpected(new EventHandler(dayahead_Exp));
-            tSim.RegisterDayaheadSupervisor(new EventHandler(dayahead_Supervisor));
-            tSim.RegisterDayaheadAnt(new EventHandler(dayahead_Ant));
-            //tSim.TestDayahead(nSim);
-            tSim.RegisterTrfCapacity(trfCapacity_Changed);
-            tSim.RegisterTrfCurrent(trfCurrent_Changed);
-            tSim.RegisterTrfFiltered(trfFiltered_Changed);
-
-            Thread oThread = new Thread(new ThreadStart(Start));
-            oThread.Start();
-
-            while (!oThread.IsAlive) ;
-
+            comboBox1.SelectedItem = "Random";
+            comboBox2.SelectedItem = "Mixed";
+            comboBox3.SelectedItem = "Expected";
         }
 
         public void Start()
         {
-            tSim.ComputeDayahead(new FSharpOption<int>(nSim + 1));
-            resetChart(chart1, 0, chart1.Series.Count);
-            resetChart(chart2, 0, chart2.Series.Count);
-            tSim.Run(new FSharpOption<int>(nSim));
+            if (comboBox1.InvokeRequired)
+            {
+                comboBox1.Invoke(new startDelegate(Start));
+            }
+            else
+            {
+                FSharpOption<Sim.Method> method = null;
+                FSharpOption<Sim.Contribution> contr = null;
+                FSharpOption<Sim.Scheduler> scheduler = null;
+
+                switch (comboBox1.SelectedItem.ToString())
+                {
+                    case "Peak-shaving":
+                        method = new FSharpOption<Sim.Method>(Sim.Method.Shaving);
+                        break;
+                    case "Distance-rule":
+                        method = new FSharpOption<Sim.Method>(Sim.Method.Distance);
+                        break;
+                    case "Swarm":
+                        method = new FSharpOption<Sim.Method>(Sim.Method.Swarm);
+                        break;
+                    case "Random":
+                        method = new FSharpOption<Sim.Method>(Sim.Method.Random);
+                        break;
+                    case "Mixed":
+                        method = new FSharpOption<Sim.Method>(Sim.Method.Mixed);
+                        break;
+                }
+                switch (comboBox2.SelectedItem.ToString())
+                {
+                    case "Proactive":
+                        scheduler = new FSharpOption<Sim.Scheduler>(Sim.Scheduler.Proactive);
+                        break;
+                    case "Reactive":
+                        scheduler = new FSharpOption<Sim.Scheduler>(Sim.Scheduler.Reactive);
+                        break;
+                    case "Random":
+                        scheduler = new FSharpOption<Sim.Scheduler>(Sim.Scheduler.Random);
+                        break;
+                    case "Mixed":
+                        scheduler = new FSharpOption<Sim.Scheduler>(Sim.Scheduler.Mixed);
+                        break;
+                }
+                switch (comboBox3.SelectedItem.ToString())
+                {
+                    case "Expected":
+                        contr = new FSharpOption<Sim.Contribution>(Sim.Contribution.Expected);
+                        break;
+                    case "Simulated":
+                        contr = new FSharpOption<Sim.Contribution>(Sim.Contribution.Simulated);
+                        break;
+                }
+                Double distanceTheta = 1.0, shavingTheta = 0.99, shavingAlpha = 0.2;
+                int phevLearningWindow = 76, nDays = 10;
+
+                Int32.TryParse(textBoxPhevLearning.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out phevLearningWindow);
+                Int32.TryParse(textBoxDays.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out nDays);
+                Double.TryParse(textBoxDistanceTheta.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out distanceTheta);
+                Double.TryParse(textBoxShavingAlpha.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out shavingAlpha);
+                Double.TryParse(textBoxShavingTheta.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out shavingTheta);
+
+                Sim.SimCar tSim = new Sim.SimCar(nDays, nTicks, scheduler, new FSharpOption<int>(phevLearningWindow));
+                tSim.DistanceTheta = distanceTheta;
+                tSim.ShavingAlpha = shavingAlpha;
+                tSim.ShavingTheta = shavingTheta;
+                tSim.Init();
+
+                RegisterEvents(tSim);
+                tSim.ComputeDayahead(new FSharpOption<int>(nDays + 1), method, contr);
+                resetChart(chart1, 0, chart1.Series.Count);
+                resetChart(chart2, 0, chart2.Series.Count);
+                tSim.Run(new FSharpOption<int>(nDays));
+            }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            //Thread oThread = new Thread(new ThreadStart(Start));
+            //oThread.Start();
+            Start();
+        }
+
+        private void comboBox3_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void textBox2_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void comboBox2_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

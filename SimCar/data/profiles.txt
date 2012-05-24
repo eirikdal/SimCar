@@ -1,7 +1,12 @@
-﻿worker {
-  gauss, mean=08:15, std=15, duration=07:00
-  gauss, mean=18:15, std=1, duration=02:00
+﻿worker1 {
+  gauss, mean=08:15, std=30, duration=07:00
 }
-housewife {
-  gauss, mean=08:15, std=15, duration=07:00
+worker2 {
+  gauss, mean=06:15, std=30, duration=07:00
+}
+worker3 {
+  gauss, mean=07:15, std=30, duration=07:00
+}
+worker4 {
+  gauss, mean=07:15, std=30, duration=07:00
 }

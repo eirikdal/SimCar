@@ -21,7 +21,7 @@ let powergrid =
 let collect_exp node = 
     match node with
     | Transformer(_) -> []
-    | PHEV(phev_args) as node -> phev_args.profile.to_exp_float(1.25, 32.0)
+    | PHEV(phev_args) as node -> phev_args.profile.to_exp_float(1.25<kWh>, 32.0<kWh>)
     | PowerNode(_) -> []
     | BRP(_) -> []
 
@@ -40,11 +40,11 @@ let mutable agg_dist : float array = (agg_dist'.Clone() :?> float array)
 type Message = 
     | Init of int * int
     | Moved of int * int
-    | Fill of float
-    | FillQuery of float * int
+    | Fill of float<kWh>
+    | FillQuery of float<kWh> * int
     | Utility of int * float
     | RequestChart of AsyncReplyChannel<Message>
-    | Chart of float array
+    | Chart of float<kWh> array
     | Occupied
     | Accepted
     | Failed of int
@@ -54,10 +54,10 @@ let num_agents = 20
 let theta = 0.99
 let sum_agg_dist = agg_dist |> Array.sum
 
-let rate = 1.25
+let rate = 1.25<kWh>
 
 module Swarm = 
-    let init (realtime : float array) = 
+    let init (realtime : float<kWh> array) = 
         let rand = new System.Random()
         let rec ants = 
             [for i in 0 .. num_agents do 
@@ -89,7 +89,7 @@ module Swarm =
                     agent.Scan((function
                         | FillQuery(rate, pos') -> 
                             let distance = theta ** (float <| abs(pos-pos'))
-                            supervisor.Post(Utility(id, distance*(1.0 / realtime.[pos])))
+                            supervisor.Post(Utility(id, distance*(1.0<kWh> / realtime.[pos])))
                             Some(async { return! filling id pos inertia })
                         | Fill(rate) ->
 //                            printfn "Updating realtime with %f at %d" rate pos
@@ -127,6 +127,7 @@ module Swarm =
                     ant.Post(Init(init_pos, inertia)))
                 
                 let rec loop() = 
+                    agent.Scan(fun x ->
                     let all_in_pos agent_pos = 
                         let all_in_pos = agent_pos |> Array.forall (fun p -> p = (int infinity) || p >= 0)
 
@@ -135,7 +136,7 @@ module Swarm =
                             Some(async { return! filling agg_dist'.[0] 0 })
                         else
                             Some(async { return! loop() }) 
-                    agent.Scan(function
+                    match x with
                     | Moved(ag, pos) ->
                         let d = agent_pos |> Array.tryFindIndex (fun p -> p <> (int infinity) && abs(pos-p) < 5)
 
@@ -212,11 +213,11 @@ let dayahead(realtime, n) =
 
     let days = 
         [for i in 0 .. (n-1) do
-            agg_dist' <- (agg_dist.Clone() :?> float array)
+            agg_dist' <- (agg_dist.Clone() :?> float<kWh> array)
             let _from,_to = (i*96),(i*96)+96
             let day = Array.sub realtime _from 96
             let (supervisor, ants) = Swarm.init(day)
-            let (Chart(chart : float array)) = supervisor.PostAndReply(fun reply -> RequestChart(reply))
+            let (Chart(chart : float<kWh> array)) = supervisor.PostAndReply(fun reply -> RequestChart(reply))
             supervisor.Post(Exit)
             yield! (List.ofArray chart)]
 

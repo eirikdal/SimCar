@@ -85,6 +85,8 @@ module Voltage =
 type DistributionType = 
     | Normal
     | LogNormal
+    | Weibull
+    | Gumbel
 
 type Distribution = 
     { dist_type : DistributionType;
@@ -103,8 +105,19 @@ type Profile =
             let n = new Normal(profile.mean, profile.sigma)
             n.CumulativeDistribution(time) - n.CumulativeDistribution((time-1.0))
         | LogNormal ->
-            let n = new MathNet.Numerics.Distributions.Gamma(profile.mean, 7.0)
+            let mu = log (profile.mean**2.0/sqrt(profile.sigma+profile.mean**2.0))
+            let sigma = sqrt (log(profile.sigma/(profile.mean**2.0)+1.0))
+            let n = new MathNet.Numerics.Distributions.LogNormal(mu, sigma)
             n.CumulativeDistribution(time+1.0) - n.CumulativeDistribution((time))
+        | Weibull ->
+            let n = new MathNet.Numerics.Distributions.Weibull(profile.sigma,1.0)
+            n.CumulativeDistribution((time-profile.mean)+1.0) - n.CumulativeDistribution(time-profile.mean)
+        | Gumbel ->
+            if time >= profile.mean then
+                let n = new MathNet.Numerics.Distributions.Gamma(profile.sigma,20.0)
+                n.CumulativeDistribution((time-profile.mean)+1.0) - n.CumulativeDistribution(time-profile.mean)
+            else 
+                0.0
     // cache the distributions
     member self.calc(name, (profiles : Distribution list)) : Profile =         
         let dist_list = 
@@ -115,7 +128,8 @@ type Profile =
         let prob ({dist=dist}) i = dist |> Seq.nth (i%96)
         let temp = Seq.initInfinite (fun i -> dist_list |> Seq.fold (fun ac (d : Distribution) -> ac + (prob d i)) 0.0) |> Seq.take 96 |> Array.ofSeq
 
-        probEvent.Trigger [|box temp; box System.EventArgs.Empty|]
+        if name = "worker1" then
+            probEvent.Trigger [|box temp; box System.EventArgs.Empty|]
 
         FloatProfile(name, dist_list)
     member self.float_profile() = 
@@ -133,7 +147,7 @@ type Profile =
             sumn dist_list
         | DistProfile(name,dist_list) ->
             self.calc(name,dist_list).to_float()
-    member self.to_exp_float(rate, capacity) =
+    member self.to_exp_float(rate : float<kWh>, capacity) : float<kWh> list =
         match self with 
         | FloatProfile(_,dist_list) ->
             let calc_for_dist (dist : Distribution) = 
@@ -152,13 +166,13 @@ type Profile =
                             if ac > rate then 
                                 (ac-rate, (i', rate * dist'.[i%96]))
                             else
-                                (ac-(rate-ac), (i', 0.0))) (capacity, (0,0.0))
+                                (ac-(rate-ac), (i', 0.0<kWh>))) (capacity, (0,0.0<kWh>))
                         |> Array.map snd)
                 
                 Array.init (96) (fun i ->
                     windows_of_expected
                     |> Array.fold (fun ac window -> 
-                        ac + (window |> Array.fold (fun ac' (i', rate') -> if (i%96) = (i'%96) then ac'+rate' else ac') 0.0)) 0.0)
+                        ac + (window |> Array.fold (fun ac' (i', rate') -> if (i%96) = (i'%96) then ac'+rate' else ac') 0.0<kWh>)) 0.0<kWh>)
                 |> List.ofArray
 
             let test = 
@@ -298,8 +312,10 @@ let create_brp name nodes dayahead children =
 let create_distribution str_type mean sigma duration =
     let dist_type = 
         match str_type with
-        | "gauss" -> Normal
+        | "gauss" | "normal" -> Normal
         | "lognormal" -> LogNormal
+        | "weibull" -> Weibull
+        | "gumbel" -> Gumbel
         | _ -> raise <| Exception("Undefined distribution")
 
     { dist_type=dist_type;
