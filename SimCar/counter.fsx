@@ -23,3 +23,6 @@ let test1 =
 
 let test2 =
     countLines @"C:\SimCar\WinChart" "*.cs" true
+
+let test3 = 
+    countLines @"C:\SimCar\SimCar" "*.fsx" true

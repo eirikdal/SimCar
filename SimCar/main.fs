@@ -87,7 +87,7 @@ type SimCar(nTicksPerDay) =
                                                     Grid.Decentralized.Random.make_tree <| powergrid.Value <| ttlWindow
                                                 | None -> 
                                                     schedule <- BRP.Action.schedule_none
-                                                    Grid.Centralized.make_tree <| powergrid.Value <| ttlWindow
+                                                    Grid.Decentralized.Random.make_tree <| powergrid.Value <| ttlWindow
                                                 _scheduler <- scheduler
                                                     
     member self.PostalService = postalService
@@ -208,7 +208,7 @@ type SimCar(nTicksPerDay) =
 
                 for i in 0 .. (nDays) do
                     let _from,_to = (i*96),(i*96)+window_size
-                    let day = Array.sub dayahead _from window_size
+                    let day = Array.sub realtime _from window_size
                     let phev = 
                         match _contr with 
                         | Some Expected ->

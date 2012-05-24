@@ -63,7 +63,7 @@ module Agent =
                         syncContext.RaiseDelegateEvent trfCurrent (sum_of_charges - filtered)
                         syncContext.RaiseDelegateEvent trfCapacity trf_args.capacity
                 
-                    return! loop (Transformer({ trf_args with filtered=filtered; current=sum_of_charges })) [] [] filter false
+                    return! loop (Transformer({ trf_args with filtered=filtered; current=sum_of_charges-filtered })) [] [] filter false
                 else
                     let! (msg : Message) = 
                         if (not waiting && queue.Count > 0) then

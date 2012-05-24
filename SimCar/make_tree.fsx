@@ -38,7 +38,7 @@ type Transformer =
     | HIGH of int * float * Transformer list
     | PHEV of string
 
-let phev_ratio = 0.35
+let phev_ratio = 0.0
 let peak_ratio = 2.5
 
 let rand = new System.Random()
