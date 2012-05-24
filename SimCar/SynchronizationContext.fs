@@ -21,9 +21,7 @@ let syncContext = SynchronizationContext.CaptureCurrent()
 
 // F# 
 let canceled      = new Event<System.OperationCanceledException>()
-let error         = new Event<System.Exception>()
 //let jobCompleted<'a> = new Event<Agent<Message> * string>()
-let jobDebug = new Event<string>()
 
 let phevEvent     = new Event<string>()
 let brpEvent      = new Event<string>()
@@ -32,6 +30,9 @@ let pnodeEvent    = new Event<string>()
 let updateEvent   = new Event<float[]>()
 
 // Delegate Events for cross-language communication
+let jobDebug        = new DelegateEvent<System.EventHandler>()
+let jobProgress     = new DelegateEvent<System.EventHandler>()
+let jobError         = new DelegateEvent<System.EventHandler>()
 
 // EventHandlers for tracking progress
 let progressTotal       = new DelegateEvent<System.EventHandler>()
@@ -53,10 +54,10 @@ let probReset           = new DelegateEvent<System.EventHandler>()
 let phevBattery         = new DelegateEvent<System.EventHandler>()
 let phevStatus          = new DelegateEvent<System.EventHandler>()
 let phevLeft            = new DelegateEvent<System.EventHandler>()
-
 let phevFailed          = new DelegateEvent<System.EventHandler>()
 
 let trfFailed           = new DelegateEvent<System.EventHandler>()
 let trfCapacity         = new DelegateEvent<System.EventHandler>()
 let trfCurrent          = new DelegateEvent<System.EventHandler>()
 let trfFiltered         = new DelegateEvent<System.EventHandler>()
+let trfUpdate           = new DelegateEvent<System.EventHandler>()

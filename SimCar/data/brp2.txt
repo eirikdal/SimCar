@@ -1,95 +1,83 @@
-trf high_7 1240.000000 0.000000 {
+﻿trf high_4 1240.000000 0.000000 {
 trf med_0 57.600000 0.000000 {
+pnode node_154 154
+phev phev_154 worker1 16.0 0.0 16.0 2.5
+pnode node_150 150
+pnode node_148 148
+pnode node_136 136
+pnode node_135 135
+phev phev_135 worker3 16.0 0.0 16.0 2.5
+pnode node_13 13
 pnode node_126 126
 pnode node_124 124
 pnode node_123 123
 pnode node_12 12
 pnode node_117 117
+phev phev_117 worker3 16.0 0.0 16.0 2.5
 pnode node_115 115
-phev phev_115 worker2 16.0 0.0 16.0 2.5
+phev phev_115 worker4 16.0 0.0 16.0 2.5
 pnode node_112 112
-phev phev_112 worker1 16.0 0.0 16.0 2.5
+phev phev_112 worker3 16.0 0.0 16.0 2.5
 pnode node_111 111
+phev phev_111 worker3 16.0 0.0 16.0 2.5
 pnode node_108 108
 phev phev_108 worker1 16.0 0.0 16.0 2.5
 pnode node_107 107
 pnode node_101 101
 }
 trf med_1 57.600000 0.000000 {
-pnode node_170 170
-pnode node_17 17
-phev phev_17 worker2 16.0 0.0 16.0 2.5
-pnode node_169 169
-pnode node_167 167
-pnode node_163 163
-pnode node_154 154
-pnode node_150 150
-phev phev_150 worker1 16.0 0.0 16.0 2.5
-pnode node_148 148
-pnode node_136 136
-phev phev_136 worker2 16.0 0.0 16.0 2.5
-pnode node_135 135
-phev phev_135 worker3 16.0 0.0 16.0 2.5
-pnode node_13 13
-phev phev_13 worker4 16.0 0.0 16.0 2.5
-}
-trf med_2 57.600000 0.000000 {
-pnode node_232 232
 pnode node_226 226
-phev phev_226 worker2 16.0 0.0 16.0 2.5
 pnode node_225 225
-phev phev_225 worker4 16.0 0.0 16.0 2.5
+phev phev_225 worker2 16.0 0.0 16.0 2.5
 pnode node_223 223
-phev phev_223 worker4 16.0 0.0 16.0 2.5
 pnode node_222 222
-phev phev_222 worker2 16.0 0.0 16.0 2.5
+phev phev_222 worker4 16.0 0.0 16.0 2.5
 pnode node_210 210
+phev phev_210 worker4 16.0 0.0 16.0 2.5
 pnode node_198 198
 pnode node_193 193
 pnode node_192 192
 pnode node_185 185
 phev phev_185 worker1 16.0 0.0 16.0 2.5
 pnode node_18 18
+pnode node_170 170
+pnode node_17 17
+pnode node_169 169
+phev phev_169 worker2 16.0 0.0 16.0 2.5
+pnode node_167 167
+pnode node_163 163
 }
-trf med_3 57.600000 0.000000 {
-pnode node_272 272
-phev phev_272 worker1 16.0 0.0 16.0 2.5
-pnode node_271 271
-pnode node_266 266
-phev phev_266 worker2 16.0 0.0 16.0 2.5
-pnode node_264 264
-pnode node_263 263
-pnode node_262 262
-phev phev_262 worker4 16.0 0.0 16.0 2.5
-pnode node_260 260
-phev phev_260 worker4 16.0 0.0 16.0 2.5
-pnode node_240 240
-phev phev_240 worker3 16.0 0.0 16.0 2.5
-pnode node_237 237
-pnode node_236 236
-phev phev_236 worker2 16.0 0.0 16.0 2.5
-pnode node_235 235
-}
-trf med_4 57.600000 0.000000 {
-pnode node_2768 2768
-phev phev_2768 worker1 16.0 0.0 16.0 2.5
-pnode node_2767 2767
-pnode node_2766 2766
-phev phev_2766 worker4 16.0 0.0 16.0 2.5
-pnode node_2765 2765
-phev phev_2765 worker3 16.0 0.0 16.0 2.5
+trf med_2 57.600000 0.000000 {
 pnode node_2763 2763
-phev phev_2763 worker3 16.0 0.0 16.0 2.5
 pnode node_2761 2761
 phev phev_2761 worker1 16.0 0.0 16.0 2.5
 pnode node_2760 2760
 pnode node_2759 2759
 pnode node_2758 2758
+phev phev_2758 worker4 16.0 0.0 16.0 2.5
 pnode node_275 275
+pnode node_272 272
+phev phev_272 worker2 16.0 0.0 16.0 2.5
+pnode node_271 271
+pnode node_266 266
+pnode node_264 264
+pnode node_263 263
+phev phev_263 worker1 16.0 0.0 16.0 2.5
+pnode node_262 262
+pnode node_260 260
+phev phev_260 worker2 16.0 0.0 16.0 2.5
+pnode node_240 240
+phev phev_240 worker3 16.0 0.0 16.0 2.5
+pnode node_237 237
+phev phev_237 worker1 16.0 0.0 16.0 2.5
+pnode node_236 236
+phev phev_236 worker4 16.0 0.0 16.0 2.5
+pnode node_235 235
+pnode node_232 232
 }
-trf med_5 57.600000 0.000000 {
-pnode node_2782 2782
+trf med_3 57.600000 0.000000 {
 pnode node_2781 2781
+phev phev_2781 worker2 16.0 0.0 16.0 2.5
 pnode node_2778 2778
 pnode node_2777 2777
 pnode node_2776 2776
@@ -98,343 +86,323 @@ pnode node_2773 2773
 pnode node_2770 2770
 pnode node_277 277
 pnode node_2769 2769
+pnode node_2768 2768
+phev phev_2768 worker2 16.0 0.0 16.0 2.5
+pnode node_2767 2767
+pnode node_2766 2766
+phev phev_2766 worker4 16.0 0.0 16.0 2.5
+pnode node_2765 2765
+phev phev_2765 worker3 16.0 0.0 16.0 2.5
 }
-trf med_6 57.600000 0.000000 {
+trf med_4 57.600000 0.000000 {
+pnode node_2807 2807
+pnode node_2806 2806
+phev phev_2806 worker3 16.0 0.0 16.0 2.5
+pnode node_2803 2803
+phev phev_2803 worker4 16.0 0.0 16.0 2.5
+pnode node_2802 2802
+phev phev_2802 worker3 16.0 0.0 16.0 2.5
+pnode node_2801 2801
 pnode node_2800 2800
 pnode node_28 28
-phev phev_28 worker1 16.0 0.0 16.0 2.5
 pnode node_2799 2799
-phev phev_2799 worker3 16.0 0.0 16.0 2.5
+phev phev_2799 worker1 16.0 0.0 16.0 2.5
 pnode node_2797 2797
-phev phev_2797 worker1 16.0 0.0 16.0 2.5
 pnode node_2796 2796
 pnode node_2795 2795
 pnode node_2790 2790
 pnode node_2789 2789
+phev phev_2789 worker1 16.0 0.0 16.0 2.5
 pnode node_2784 2784
+pnode node_2782 2782
+phev phev_2782 worker1 16.0 0.0 16.0 2.5
 }
-}
-trf high_6 1240.000000 0.000000 {
-trf med_7 57.600000 0.000000 {
-pnode node_2818 2818
-phev phev_2818 worker4 16.0 0.0 16.0 2.5
-pnode node_2815 2815
-phev phev_2815 worker3 16.0 0.0 16.0 2.5
-pnode node_2814 2814
-pnode node_2813 2813
-pnode node_2812 2812
-pnode node_2811 2811
-pnode node_2810 2810
-pnode node_2809 2809
-pnode node_2808 2808
-phev phev_2808 worker1 16.0 0.0 16.0 2.5
-pnode node_2807 2807
-pnode node_2806 2806
-pnode node_2803 2803
-phev phev_2803 worker3 16.0 0.0 16.0 2.5
-pnode node_2802 2802
-pnode node_2801 2801
-}
-trf med_8 57.600000 0.000000 {
-pnode node_2830 2830
-pnode node_2829 2829
+trf med_5 57.600000 0.000000 {
 pnode node_2828 2828
 pnode node_2827 2827
-phev phev_2827 worker2 16.0 0.0 16.0 2.5
 pnode node_2825 2825
-phev phev_2825 worker2 16.0 0.0 16.0 2.5
 pnode node_2824 2824
-phev phev_2824 worker1 16.0 0.0 16.0 2.5
+phev phev_2824 worker3 16.0 0.0 16.0 2.5
 pnode node_2823 2823
+phev phev_2823 worker4 16.0 0.0 16.0 2.5
 pnode node_2822 2822
-phev phev_2822 worker2 16.0 0.0 16.0 2.5
+phev phev_2822 worker3 16.0 0.0 16.0 2.5
 pnode node_2821 2821
 pnode node_2819 2819
-phev phev_2819 worker3 16.0 0.0 16.0 2.5
+pnode node_2818 2818
+pnode node_2815 2815
+pnode node_2814 2814
+phev phev_2814 worker1 16.0 0.0 16.0 2.5
+pnode node_2813 2813
+pnode node_2812 2812
+phev phev_2812 worker2 16.0 0.0 16.0 2.5
+pnode node_2811 2811
+phev phev_2811 worker2 16.0 0.0 16.0 2.5
+pnode node_2810 2810
+pnode node_2809 2809
+phev phev_2809 worker2 16.0 0.0 16.0 2.5
+pnode node_2808 2808
 }
-trf med_9 57.600000 0.000000 {
+trf med_6 57.600000 0.000000 {
+pnode node_2848 2848
+pnode node_2847 2847
 pnode node_2846 2846
 pnode node_2844 2844
-phev phev_2844 worker4 16.0 0.0 16.0 2.5
 pnode node_2843 2843
 pnode node_2842 2842
+phev phev_2842 worker2 16.0 0.0 16.0 2.5
 pnode node_2841 2841
 pnode node_2840 2840
-phev phev_2840 worker2 16.0 0.0 16.0 2.5
 pnode node_2839 2839
 pnode node_2838 2838
-phev phev_2838 worker3 16.0 0.0 16.0 2.5
 pnode node_2836 2836
 pnode node_2833 2833
-phev phev_2833 worker4 16.0 0.0 16.0 2.5
+phev phev_2833 worker1 16.0 0.0 16.0 2.5
 pnode node_2832 2832
 pnode node_2831 2831
+pnode node_2830 2830
+pnode node_2829 2829
+phev phev_2829 worker3 16.0 0.0 16.0 2.5
 }
-trf med_10 57.600000 0.000000 {
+trf med_7 57.600000 0.000000 {
+pnode node_2863 2863
+pnode node_2862 2862
+pnode node_2861 2861
+phev phev_2861 worker4 16.0 0.0 16.0 2.5
+pnode node_2860 2860
+pnode node_286 286
+phev phev_286 worker4 16.0 0.0 16.0 2.5
+pnode node_2859 2859
 pnode node_2857 2857
-phev phev_2857 worker1 16.0 0.0 16.0 2.5
 pnode node_2856 2856
-phev phev_2856 worker4 16.0 0.0 16.0 2.5
 pnode node_2855 2855
 pnode node_2854 2854
 pnode node_2853 2853
+phev phev_2853 worker4 16.0 0.0 16.0 2.5
 pnode node_2852 2852
+phev phev_2852 worker2 16.0 0.0 16.0 2.5
 pnode node_2851 2851
+phev phev_2851 worker1 16.0 0.0 16.0 2.5
 pnode node_2850 2850
+phev phev_2850 worker2 16.0 0.0 16.0 2.5
 pnode node_2849 2849
-phev phev_2849 worker4 16.0 0.0 16.0 2.5
-pnode node_2848 2848
-phev phev_2848 worker3 16.0 0.0 16.0 2.5
-pnode node_2847 2847
+phev phev_2849 worker3 16.0 0.0 16.0 2.5
 }
-trf med_11 57.600000 0.000000 {
-pnode node_2867 2867
-phev phev_2867 worker1 16.0 0.0 16.0 2.5
-pnode node_2866 2866
-phev phev_2866 worker3 16.0 0.0 16.0 2.5
-pnode node_2865 2865
-phev phev_2865 worker2 16.0 0.0 16.0 2.5
-pnode node_2864 2864
-pnode node_2863 2863
-phev phev_2863 worker2 16.0 0.0 16.0 2.5
-pnode node_2862 2862
-pnode node_2861 2861
-pnode node_2860 2860
-pnode node_286 286
-pnode node_2859 2859
-}
-trf med_12 57.600000 0.000000 {
+trf med_8 57.600000 0.000000 {
 pnode node_2887 2887
-phev phev_2887 worker1 16.0 0.0 16.0 2.5
 pnode node_2885 2885
 pnode node_2884 2884
+phev phev_2884 worker2 16.0 0.0 16.0 2.5
 pnode node_2883 2883
-phev phev_2883 worker2 16.0 0.0 16.0 2.5
 pnode node_288 288
+phev phev_288 worker1 16.0 0.0 16.0 2.5
 pnode node_2879 2879
+phev phev_2879 worker1 16.0 0.0 16.0 2.5
 pnode node_2878 2878
 pnode node_2872 2872
 pnode node_2871 2871
 pnode node_2870 2870
+phev phev_2870 worker1 16.0 0.0 16.0 2.5
 pnode node_2869 2869
-phev phev_2869 worker3 16.0 0.0 16.0 2.5
 pnode node_2868 2868
+pnode node_2867 2867
+pnode node_2866 2866
+phev phev_2866 worker4 16.0 0.0 16.0 2.5
+pnode node_2865 2865
+phev phev_2865 worker2 16.0 0.0 16.0 2.5
+pnode node_2864 2864
+phev phev_2864 worker1 16.0 0.0 16.0 2.5
 }
-trf med_13 57.600000 0.000000 {
-pnode node_2903 2903
-pnode node_2902 2902
-phev phev_2902 worker4 16.0 0.0 16.0 2.5
-pnode node_2901 2901
-phev phev_2901 worker3 16.0 0.0 16.0 2.5
-pnode node_2900 2900
-pnode node_2899 2899
-phev phev_2899 worker3 16.0 0.0 16.0 2.5
-pnode node_2895 2895
-pnode node_2894 2894
-phev phev_2894 worker4 16.0 0.0 16.0 2.5
-pnode node_2893 2893
-phev phev_2893 worker3 16.0 0.0 16.0 2.5
-pnode node_2891 2891
-phev phev_2891 worker2 16.0 0.0 16.0 2.5
-pnode node_2890 2890
-phev phev_2890 worker4 16.0 0.0 16.0 2.5
-pnode node_289 289
-}
-trf med_14 57.600000 0.000000 {
-pnode node_292 292
-pnode node_2919 2919
-pnode node_2918 2918
-phev phev_2918 worker2 16.0 0.0 16.0 2.5
-pnode node_2917 2917
-phev phev_2917 worker2 16.0 0.0 16.0 2.5
-pnode node_2916 2916
-pnode node_2915 2915
+trf med_9 57.600000 0.000000 {
 pnode node_2913 2913
-phev phev_2913 worker2 16.0 0.0 16.0 2.5
 pnode node_2912 2912
-phev phev_2912 worker3 16.0 0.0 16.0 2.5
+phev phev_2912 worker1 16.0 0.0 16.0 2.5
 pnode node_291 291
-phev phev_291 worker2 16.0 0.0 16.0 2.5
+phev phev_291 worker3 16.0 0.0 16.0 2.5
 pnode node_2907 2907
 pnode node_2904 2904
+pnode node_2903 2903
+pnode node_2902 2902
+pnode node_2901 2901
+pnode node_2900 2900
+phev phev_2900 worker4 16.0 0.0 16.0 2.5
+pnode node_2899 2899
+pnode node_2895 2895
+phev phev_2895 worker1 16.0 0.0 16.0 2.5
+pnode node_2894 2894
+phev phev_2894 worker2 16.0 0.0 16.0 2.5
+pnode node_2893 2893
+pnode node_2891 2891
+pnode node_2890 2890
+pnode node_289 289
 }
-trf med_15 57.600000 0.000000 {
-pnode node_2931 2931
+trf med_10 57.600000 0.000000 {
 pnode node_2930 2930
+phev phev_2930 worker3 16.0 0.0 16.0 2.5
 pnode node_293 293
-phev phev_293 worker1 16.0 0.0 16.0 2.5
 pnode node_2929 2929
+phev phev_2929 worker1 16.0 0.0 16.0 2.5
 pnode node_2928 2928
 pnode node_2927 2927
+phev phev_2927 worker4 16.0 0.0 16.0 2.5
 pnode node_2926 2926
-phev phev_2926 worker1 16.0 0.0 16.0 2.5
 pnode node_2925 2925
 pnode node_2924 2924
 pnode node_2923 2923
+phev phev_2923 worker2 16.0 0.0 16.0 2.5
 pnode node_2922 2922
+phev phev_2922 worker3 16.0 0.0 16.0 2.5
 pnode node_2921 2921
-phev phev_2921 worker2 16.0 0.0 16.0 2.5
+phev phev_2921 worker1 16.0 0.0 16.0 2.5
+pnode node_292 292
+phev phev_292 worker1 16.0 0.0 16.0 2.5
+pnode node_2919 2919
+pnode node_2918 2918
+phev phev_2918 worker4 16.0 0.0 16.0 2.5
+pnode node_2917 2917
+pnode node_2916 2916
+pnode node_2915 2915
+phev phev_2915 worker4 16.0 0.0 16.0 2.5
 }
-trf med_16 57.600000 0.000000 {
+trf med_11 57.600000 0.000000 {
+pnode node_2946 2946
+pnode node_2945 2945
+pnode node_2944 2944
+phev phev_2944 worker3 16.0 0.0 16.0 2.5
+pnode node_2943 2943
 pnode node_2941 2941
 pnode node_2940 2940
 pnode node_2939 2939
 pnode node_2938 2938
-phev phev_2938 worker1 16.0 0.0 16.0 2.5
 pnode node_2937 2937
 pnode node_2936 2936
 pnode node_2935 2935
-phev phev_2935 worker4 16.0 0.0 16.0 2.5
 pnode node_2934 2934
-phev phev_2934 worker3 16.0 0.0 16.0 2.5
 pnode node_2933 2933
 pnode node_2932 2932
-phev phev_2932 worker4 16.0 0.0 16.0 2.5
+pnode node_2931 2931
 }
-trf med_17 57.600000 0.000000 {
-pnode node_2954 2954
-pnode node_2952 2952
-phev phev_2952 worker4 16.0 0.0 16.0 2.5
-pnode node_295 295
-pnode node_2949 2949
-pnode node_2947 2947
-pnode node_2946 2946
-pnode node_2945 2945
-phev phev_2945 worker3 16.0 0.0 16.0 2.5
-pnode node_2944 2944
-phev phev_2944 worker1 16.0 0.0 16.0 2.5
-pnode node_2943 2943
-phev phev_2943 worker2 16.0 0.0 16.0 2.5
-}
-trf med_18 57.600000 0.000000 {
-pnode node_2969 2969
-pnode node_2968 2968
-phev phev_2968 worker4 16.0 0.0 16.0 2.5
+trf med_12 57.600000 0.000000 {
 pnode node_2967 2967
+phev phev_2967 worker4 16.0 0.0 16.0 2.5
 pnode node_2966 2966
 phev phev_2966 worker4 16.0 0.0 16.0 2.5
 pnode node_2963 2963
 pnode node_2962 2962
+phev phev_2962 worker4 16.0 0.0 16.0 2.5
 pnode node_2961 2961
 pnode node_296 296
-phev phev_296 worker4 16.0 0.0 16.0 2.5
 pnode node_2959 2959
 pnode node_2958 2958
-phev phev_2958 worker4 16.0 0.0 16.0 2.5
 pnode node_2957 2957
-phev phev_2957 worker1 16.0 0.0 16.0 2.5
 pnode node_2956 2956
+pnode node_2954 2954
+pnode node_2952 2952
+pnode node_295 295
+phev phev_295 worker2 16.0 0.0 16.0 2.5
+pnode node_2949 2949
+pnode node_2947 2947
 }
-trf med_19 57.600000 0.000000 {
+trf med_13 57.600000 0.000000 {
+pnode node_2994 2994
+pnode node_2993 2993
+pnode node_2992 2992
+pnode node_2991 2991
 pnode node_2986 2986
 pnode node_2985 2985
-phev phev_2985 worker2 16.0 0.0 16.0 2.5
+phev phev_2985 worker3 16.0 0.0 16.0 2.5
 pnode node_2982 2982
+phev phev_2982 worker4 16.0 0.0 16.0 2.5
 pnode node_2980 2980
 pnode node_2979 2979
-phev phev_2979 worker1 16.0 0.0 16.0 2.5
+phev phev_2979 worker2 16.0 0.0 16.0 2.5
 pnode node_2975 2975
 pnode node_2974 2974
 phev phev_2974 worker3 16.0 0.0 16.0 2.5
 pnode node_2973 2973
 pnode node_2972 2972
+pnode node_2969 2969
+pnode node_2968 2968
 }
-trf med_20 57.600000 0.000000 {
+trf med_14 57.600000 0.000000 {
+pnode node_3018 3018
+phev phev_3018 worker2 16.0 0.0 16.0 2.5
+pnode node_3017 3017
+pnode node_3016 3016
+phev phev_3016 worker3 16.0 0.0 16.0 2.5
+pnode node_3013 3013
+pnode node_3012 3012
+pnode node_3011 3011
+pnode node_3008 3008
+phev phev_3008 worker2 16.0 0.0 16.0 2.5
 pnode node_3007 3007
-phev phev_3007 worker4 16.0 0.0 16.0 2.5
+phev phev_3007 worker1 16.0 0.0 16.0 2.5
 pnode node_3006 3006
 phev phev_3006 worker1 16.0 0.0 16.0 2.5
 pnode node_3005 3005
-phev phev_3005 worker2 16.0 0.0 16.0 2.5
+phev phev_3005 worker4 16.0 0.0 16.0 2.5
 pnode node_3003 3003
 pnode node_3001 3001
-phev phev_3001 worker4 16.0 0.0 16.0 2.5
 pnode node_3000 3000
+phev phev_3000 worker4 16.0 0.0 16.0 2.5
 pnode node_2998 2998
+phev phev_2998 worker1 16.0 0.0 16.0 2.5
 pnode node_2995 2995
-pnode node_2994 2994
-pnode node_2993 2993
-pnode node_2992 2992
-phev phev_2992 worker3 16.0 0.0 16.0 2.5
-pnode node_2991 2991
+phev phev_2995 worker3 16.0 0.0 16.0 2.5
 }
-trf med_21 57.600000 0.000000 {
-pnode node_3022 3022
-phev phev_3022 worker3 16.0 0.0 16.0 2.5
-pnode node_3021 3021
-phev phev_3021 worker1 16.0 0.0 16.0 2.5
-pnode node_3018 3018
-pnode node_3017 3017
-pnode node_3016 3016
-pnode node_3013 3013
-phev phev_3013 worker3 16.0 0.0 16.0 2.5
-pnode node_3012 3012
-phev phev_3012 worker1 16.0 0.0 16.0 2.5
-pnode node_3011 3011
-phev phev_3011 worker1 16.0 0.0 16.0 2.5
-pnode node_3008 3008
-}
-trf med_22 57.600000 0.000000 {
+trf med_15 57.600000 0.000000 {
+pnode node_3040 3040
+phev phev_3040 worker2 16.0 0.0 16.0 2.5
+pnode node_304 304
+pnode node_3039 3039
 pnode node_3037 3037
-phev phev_3037 worker1 16.0 0.0 16.0 2.5
 pnode node_3036 3036
+phev phev_3036 worker2 16.0 0.0 16.0 2.5
 pnode node_3035 3035
-phev phev_3035 worker1 16.0 0.0 16.0 2.5
 pnode node_3033 3033
-phev phev_3033 worker3 16.0 0.0 16.0 2.5
 pnode node_3032 3032
-phev phev_3032 worker3 16.0 0.0 16.0 2.5
 pnode node_3030 3030
+phev phev_3030 worker1 16.0 0.0 16.0 2.5
 pnode node_303 303
+phev phev_303 worker4 16.0 0.0 16.0 2.5
 pnode node_3028 3028
+phev phev_3028 worker3 16.0 0.0 16.0 2.5
 pnode node_3025 3025
 pnode node_3024 3024
-phev phev_3024 worker3 16.0 0.0 16.0 2.5
 pnode node_3023 3023
-phev phev_3023 worker3 16.0 0.0 16.0 2.5
+pnode node_3022 3022
+phev phev_3022 worker2 16.0 0.0 16.0 2.5
+pnode node_3021 3021
 }
-trf med_23 57.600000 0.000000 {
+trf med_16 57.600000 0.000000 {
+pnode node_3063 3063
+pnode node_3062 3062
+phev phev_3062 worker1 16.0 0.0 16.0 2.5
+pnode node_3061 3061
+pnode node_3059 3059
+phev phev_3059 worker3 16.0 0.0 16.0 2.5
+pnode node_3058 3058
+pnode node_3057 3057
+pnode node_3056 3056
+pnode node_3055 3055
+pnode node_3054 3054
 pnode node_3053 3053
 phev phev_3053 worker3 16.0 0.0 16.0 2.5
 pnode node_3050 3050
 pnode node_3049 3049
-phev phev_3049 worker3 16.0 0.0 16.0 2.5
 pnode node_3048 3048
+phev phev_3048 worker4 16.0 0.0 16.0 2.5
 pnode node_3047 3047
-phev phev_3047 worker2 16.0 0.0 16.0 2.5
+phev phev_3047 worker3 16.0 0.0 16.0 2.5
 pnode node_3046 3046
-phev phev_3046 worker3 16.0 0.0 16.0 2.5
+phev phev_3046 worker1 16.0 0.0 16.0 2.5
 pnode node_3041 3041
-phev phev_3041 worker3 16.0 0.0 16.0 2.5
-pnode node_3040 3040
-pnode node_304 304
-phev phev_304 worker1 16.0 0.0 16.0 2.5
-pnode node_3039 3039
-phev phev_3039 worker2 16.0 0.0 16.0 2.5
+phev phev_3041 worker2 16.0 0.0 16.0 2.5
 }
-trf med_24 57.600000 0.000000 {
-pnode node_3066 3066
-pnode node_3065 3065
-pnode node_3064 3064
-phev phev_3064 worker1 16.0 0.0 16.0 2.5
-pnode node_3063 3063
-phev phev_3063 worker4 16.0 0.0 16.0 2.5
-pnode node_3062 3062
-pnode node_3061 3061
-phev phev_3061 worker1 16.0 0.0 16.0 2.5
-pnode node_3059 3059
-pnode node_3058 3058
-pnode node_3057 3057
-phev phev_3057 worker4 16.0 0.0 16.0 2.5
-pnode node_3056 3056
-phev phev_3056 worker4 16.0 0.0 16.0 2.5
-pnode node_3055 3055
-pnode node_3054 3054
-phev phev_3054 worker4 16.0 0.0 16.0 2.5
-}
-trf med_25 57.600000 0.000000 {
+trf med_17 57.600000 0.000000 {
+pnode node_3077 3077
 pnode node_3076 3076
-phev phev_3076 worker2 16.0 0.0 16.0 2.5
+phev phev_3076 worker4 16.0 0.0 16.0 2.5
 pnode node_3075 3075
 phev phev_3075 worker3 16.0 0.0 16.0 2.5
 pnode node_3074 3074
@@ -442,458 +410,396 @@ phev phev_3074 worker4 16.0 0.0 16.0 2.5
 pnode node_3073 3073
 pnode node_3072 3072
 pnode node_3071 3071
-phev phev_3071 worker2 16.0 0.0 16.0 2.5
+phev phev_3071 worker4 16.0 0.0 16.0 2.5
 pnode node_3070 3070
 pnode node_307 307
-phev phev_307 worker3 16.0 0.0 16.0 2.5
 pnode node_3069 3069
-phev phev_3069 worker4 16.0 0.0 16.0 2.5
+phev phev_3069 worker1 16.0 0.0 16.0 2.5
 pnode node_3068 3068
 pnode node_3067 3067
-phev phev_3067 worker1 16.0 0.0 16.0 2.5
+pnode node_3066 3066
+phev phev_3066 worker2 16.0 0.0 16.0 2.5
+pnode node_3065 3065
+phev phev_3065 worker1 16.0 0.0 16.0 2.5
+pnode node_3064 3064
+phev phev_3064 worker3 16.0 0.0 16.0 2.5
 }
-trf med_26 57.600000 0.000000 {
-pnode node_3085 3085
-phev phev_3085 worker4 16.0 0.0 16.0 2.5
-pnode node_3084 3084
-pnode node_3083 3083
-phev phev_3083 worker2 16.0 0.0 16.0 2.5
-pnode node_3082 3082
-pnode node_3081 3081
-pnode node_3080 3080
-phev phev_3080 worker4 16.0 0.0 16.0 2.5
-pnode node_308 308
-pnode node_3079 3079
-phev phev_3079 worker2 16.0 0.0 16.0 2.5
-pnode node_3078 3078
-phev phev_3078 worker3 16.0 0.0 16.0 2.5
-pnode node_3077 3077
-}
-trf med_27 57.600000 0.000000 {
-pnode node_3097 3097
-pnode node_3096 3096
-phev phev_3096 worker1 16.0 0.0 16.0 2.5
-pnode node_3095 3095
-pnode node_3094 3094
-phev phev_3094 worker3 16.0 0.0 16.0 2.5
-pnode node_3093 3093
-phev phev_3093 worker4 16.0 0.0 16.0 2.5
+trf med_18 57.600000 0.000000 {
 pnode node_3092 3092
 pnode node_309 309
 pnode node_3089 3089
 pnode node_3088 3088
 pnode node_3087 3087
+phev phev_3087 worker4 16.0 0.0 16.0 2.5
 pnode node_3086 3086
+pnode node_3085 3085
+pnode node_3084 3084
+pnode node_3083 3083
+phev phev_3083 worker1 16.0 0.0 16.0 2.5
+pnode node_3082 3082
+pnode node_3081 3081
+pnode node_3080 3080
+pnode node_308 308
+pnode node_3079 3079
+pnode node_3078 3078
 }
-}
-trf high_5 1240.000000 0.000000 {
-trf med_28 57.600000 0.000000 {
+trf med_19 57.600000 0.000000 {
 pnode node_3108 3108
 pnode node_3107 3107
-phev phev_3107 worker3 16.0 0.0 16.0 2.5
 pnode node_3106 3106
+phev phev_3106 worker3 16.0 0.0 16.0 2.5
 pnode node_3105 3105
-phev phev_3105 worker4 16.0 0.0 16.0 2.5
 pnode node_3104 3104
-phev phev_3104 worker3 16.0 0.0 16.0 2.5
+phev phev_3104 worker4 16.0 0.0 16.0 2.5
 pnode node_3103 3103
-phev phev_3103 worker2 16.0 0.0 16.0 2.5
+phev phev_3103 worker3 16.0 0.0 16.0 2.5
 pnode node_3102 3102
+phev phev_3102 worker2 16.0 0.0 16.0 2.5
 pnode node_3101 3101
 pnode node_3099 3099
 pnode node_3098 3098
+pnode node_3097 3097
+pnode node_3096 3096
+pnode node_3095 3095
+pnode node_3094 3094
+pnode node_3093 3093
 }
-trf med_29 57.600000 0.000000 {
+}
+trf high_3 1240.000000 0.000000 {
+trf med_20 57.600000 0.000000 {
+pnode node_3128 3128
+pnode node_3127 3127
+pnode node_3126 3126
+pnode node_3125 3125
 pnode node_3124 3124
-phev phev_3124 worker2 16.0 0.0 16.0 2.5
+phev phev_3124 worker4 16.0 0.0 16.0 2.5
 pnode node_3123 3123
 pnode node_3122 3122
-phev phev_3122 worker1 16.0 0.0 16.0 2.5
+phev phev_3122 worker2 16.0 0.0 16.0 2.5
 pnode node_3121 3121
 pnode node_3120 3120
+phev phev_3120 worker4 16.0 0.0 16.0 2.5
 pnode node_3118 3118
 pnode node_3116 3116
 pnode node_3115 3115
-phev phev_3115 worker2 16.0 0.0 16.0 2.5
+phev phev_3115 worker1 16.0 0.0 16.0 2.5
 pnode node_3114 3114
-phev phev_3114 worker3 16.0 0.0 16.0 2.5
+phev phev_3114 worker2 16.0 0.0 16.0 2.5
 pnode node_3113 3113
-phev phev_3113 worker4 16.0 0.0 16.0 2.5
 pnode node_3110 3110
-phev phev_3110 worker3 16.0 0.0 16.0 2.5
+phev phev_3110 worker2 16.0 0.0 16.0 2.5
 pnode node_311 311
-phev phev_311 worker4 16.0 0.0 16.0 2.5
 }
-trf med_30 57.600000 0.000000 {
-pnode node_3137 3137
-pnode node_3135 3135
-pnode node_3132 3132
-pnode node_3131 3131
-phev phev_3131 worker3 16.0 0.0 16.0 2.5
-pnode node_313 313
-phev phev_313 worker4 16.0 0.0 16.0 2.5
-pnode node_3129 3129
-pnode node_3128 3128
-pnode node_3127 3127
-phev phev_3127 worker2 16.0 0.0 16.0 2.5
-pnode node_3126 3126
-pnode node_3125 3125
-phev phev_3125 worker4 16.0 0.0 16.0 2.5
-}
-trf med_31 57.600000 0.000000 {
+trf med_21 57.600000 0.000000 {
 pnode node_3149 3149
 pnode node_3148 3148
+phev phev_3148 worker3 16.0 0.0 16.0 2.5
 pnode node_3147 3147
-phev phev_3147 worker2 16.0 0.0 16.0 2.5
+phev phev_3147 worker4 16.0 0.0 16.0 2.5
 pnode node_3146 3146
-phev phev_3146 worker3 16.0 0.0 16.0 2.5
+phev phev_3146 worker2 16.0 0.0 16.0 2.5
 pnode node_3145 3145
+phev phev_3145 worker3 16.0 0.0 16.0 2.5
 pnode node_3144 3144
 pnode node_3143 3143
-phev phev_3143 worker1 16.0 0.0 16.0 2.5
 pnode node_3139 3139
-phev phev_3139 worker4 16.0 0.0 16.0 2.5
 pnode node_3138 3138
-phev phev_3138 worker3 16.0 0.0 16.0 2.5
+pnode node_3137 3137
+pnode node_3135 3135
+phev phev_3135 worker4 16.0 0.0 16.0 2.5
+pnode node_3132 3132
+phev phev_3132 worker2 16.0 0.0 16.0 2.5
+pnode node_3131 3131
+pnode node_313 313
+pnode node_3129 3129
 }
-trf med_32 57.600000 0.000000 {
+trf med_22 57.600000 0.000000 {
+pnode node_3172 3172
+pnode node_3170 3170
+pnode node_3169 3169
+pnode node_3168 3168
+pnode node_3167 3167
+pnode node_3165 3165
 pnode node_3161 3161
-phev phev_3161 worker2 16.0 0.0 16.0 2.5
 pnode node_3160 3160
-phev phev_3160 worker1 16.0 0.0 16.0 2.5
+phev phev_3160 worker3 16.0 0.0 16.0 2.5
 pnode node_316 316
-phev phev_316 worker3 16.0 0.0 16.0 2.5
 pnode node_3159 3159
 pnode node_3157 3157
-phev phev_3157 worker1 16.0 0.0 16.0 2.5
 pnode node_3156 3156
-phev phev_3156 worker3 16.0 0.0 16.0 2.5
 pnode node_3154 3154
 pnode node_3153 3153
 pnode node_3152 3152
 pnode node_3150 3150
-phev phev_3150 worker2 16.0 0.0 16.0 2.5
 pnode node_315 315
+phev phev_315 worker3 16.0 0.0 16.0 2.5
 }
-trf med_33 57.600000 0.000000 {
-pnode node_3181 3181
-pnode node_3180 3180
-phev phev_3180 worker4 16.0 0.0 16.0 2.5
-pnode node_3179 3179
-phev phev_3179 worker2 16.0 0.0 16.0 2.5
-pnode node_3178 3178
-pnode node_3177 3177
-pnode node_3174 3174
-pnode node_3173 3173
-pnode node_3172 3172
-phev phev_3172 worker4 16.0 0.0 16.0 2.5
-pnode node_3170 3170
-phev phev_3170 worker1 16.0 0.0 16.0 2.5
-pnode node_3169 3169
-phev phev_3169 worker4 16.0 0.0 16.0 2.5
-pnode node_3168 3168
-phev phev_3168 worker3 16.0 0.0 16.0 2.5
-pnode node_3167 3167
-pnode node_3165 3165
-}
-trf med_34 57.600000 0.000000 {
+trf med_23 57.600000 0.000000 {
 pnode node_3191 3191
+phev phev_3191 worker4 16.0 0.0 16.0 2.5
 pnode node_3190 3190
-phev phev_3190 worker3 16.0 0.0 16.0 2.5
+phev phev_3190 worker4 16.0 0.0 16.0 2.5
 pnode node_319 319
 pnode node_3189 3189
 pnode node_3188 3188
-phev phev_3188 worker3 16.0 0.0 16.0 2.5
 pnode node_3187 3187
+phev phev_3187 worker1 16.0 0.0 16.0 2.5
 pnode node_3186 3186
-phev phev_3186 worker2 16.0 0.0 16.0 2.5
 pnode node_3185 3185
 phev phev_3185 worker4 16.0 0.0 16.0 2.5
 pnode node_3184 3184
 pnode node_3182 3182
+pnode node_3181 3181
+pnode node_3180 3180
+pnode node_3179 3179
+pnode node_3178 3178
+phev phev_3178 worker3 16.0 0.0 16.0 2.5
+pnode node_3177 3177
+phev phev_3177 worker1 16.0 0.0 16.0 2.5
+pnode node_3174 3174
+pnode node_3173 3173
 }
-trf med_35 57.600000 0.000000 {
+trf med_24 57.600000 0.000000 {
+pnode node_3207 3207
+pnode node_3206 3206
+phev phev_3206 worker4 16.0 0.0 16.0 2.5
+pnode node_3205 3205
+pnode node_3203 3203
+phev phev_3203 worker3 16.0 0.0 16.0 2.5
+pnode node_3201 3201
 pnode node_3200 3200
-phev phev_3200 worker2 16.0 0.0 16.0 2.5
+phev phev_3200 worker1 16.0 0.0 16.0 2.5
 pnode node_3199 3199
+phev phev_3199 worker2 16.0 0.0 16.0 2.5
 pnode node_3198 3198
+phev phev_3198 worker3 16.0 0.0 16.0 2.5
 pnode node_3197 3197
-phev phev_3197 worker3 16.0 0.0 16.0 2.5
 pnode node_3196 3196
-phev phev_3196 worker3 16.0 0.0 16.0 2.5
 pnode node_3195 3195
+phev phev_3195 worker3 16.0 0.0 16.0 2.5
 pnode node_3194 3194
 pnode node_3193 3193
 pnode node_3192 3192
 }
-trf med_36 57.600000 0.000000 {
-pnode node_3214 3214
-pnode node_3213 3213
-pnode node_3212 3212
-phev phev_3212 worker4 16.0 0.0 16.0 2.5
-pnode node_3211 3211
-pnode node_3210 3210
-phev phev_3210 worker1 16.0 0.0 16.0 2.5
-pnode node_3207 3207
-phev phev_3207 worker1 16.0 0.0 16.0 2.5
-pnode node_3206 3206
-pnode node_3205 3205
-pnode node_3203 3203
-phev phev_3203 worker4 16.0 0.0 16.0 2.5
-pnode node_3201 3201
-}
-trf med_37 57.600000 0.000000 {
-pnode node_3228 3228
-phev phev_3228 worker4 16.0 0.0 16.0 2.5
+trf med_25 57.600000 0.000000 {
 pnode node_3226 3226
-phev phev_3226 worker3 16.0 0.0 16.0 2.5
 pnode node_3224 3224
+phev phev_3224 worker4 16.0 0.0 16.0 2.5
 pnode node_3223 3223
-phev phev_3223 worker1 16.0 0.0 16.0 2.5
 pnode node_3222 3222
-phev phev_3222 worker2 16.0 0.0 16.0 2.5
 pnode node_3218 3218
-phev phev_3218 worker2 16.0 0.0 16.0 2.5
+phev phev_3218 worker1 16.0 0.0 16.0 2.5
 pnode node_3217 3217
 pnode node_3216 3216
 pnode node_3215 3215
+phev phev_3215 worker3 16.0 0.0 16.0 2.5
+pnode node_3214 3214
+pnode node_3213 3213
+pnode node_3212 3212
+pnode node_3211 3211
+pnode node_3210 3210
 }
-trf med_38 57.600000 0.000000 {
+trf med_26 57.600000 0.000000 {
+pnode node_3255 3255
+pnode node_3253 3253
+phev phev_3253 worker2 16.0 0.0 16.0 2.5
+pnode node_3250 3250
 pnode node_3246 3246
-phev phev_3246 worker2 16.0 0.0 16.0 2.5
 pnode node_3245 3245
+phev phev_3245 worker3 16.0 0.0 16.0 2.5
 pnode node_3244 3244
-phev phev_3244 worker2 16.0 0.0 16.0 2.5
+phev phev_3244 worker4 16.0 0.0 16.0 2.5
 pnode node_3243 3243
-phev phev_3243 worker3 16.0 0.0 16.0 2.5
 pnode node_3242 3242
-phev phev_3242 worker3 16.0 0.0 16.0 2.5
+phev phev_3242 worker4 16.0 0.0 16.0 2.5
 pnode node_3241 3241
 pnode node_3240 3240
+phev phev_3240 worker4 16.0 0.0 16.0 2.5
 pnode node_3239 3239
 pnode node_3238 3238
 pnode node_3237 3237
-phev phev_3237 worker1 16.0 0.0 16.0 2.5
+pnode node_3228 3228
+phev phev_3228 worker1 16.0 0.0 16.0 2.5
 }
-trf med_39 57.600000 0.000000 {
+trf med_27 57.600000 0.000000 {
+pnode node_3298 3298
+pnode node_3297 3297
+phev phev_3297 worker1 16.0 0.0 16.0 2.5
+pnode node_3296 3296
+pnode node_3295 3295
+phev phev_3295 worker4 16.0 0.0 16.0 2.5
+pnode node_3292 3292
+phev phev_3292 worker4 16.0 0.0 16.0 2.5
+pnode node_3291 3291
+pnode node_3287 3287
+pnode node_3286 3286
+phev phev_3286 worker2 16.0 0.0 16.0 2.5
+pnode node_3285 3285
 pnode node_3277 3277
 pnode node_3276 3276
 pnode node_3271 3271
 pnode node_3264 3264
 pnode node_3261 3261
 pnode node_326 326
+phev phev_326 worker4 16.0 0.0 16.0 2.5
 pnode node_3258 3258
 phev phev_3258 worker4 16.0 0.0 16.0 2.5
-pnode node_3255 3255
-phev phev_3255 worker2 16.0 0.0 16.0 2.5
-pnode node_3253 3253
-phev phev_3253 worker2 16.0 0.0 16.0 2.5
-pnode node_3250 3250
-phev phev_3250 worker2 16.0 0.0 16.0 2.5
 }
-trf med_40 57.600000 0.000000 {
-pnode node_3300 3300
-phev phev_3300 worker3 16.0 0.0 16.0 2.5
-pnode node_3298 3298
-pnode node_3297 3297
-phev phev_3297 worker3 16.0 0.0 16.0 2.5
-pnode node_3296 3296
-pnode node_3295 3295
-phev phev_3295 worker4 16.0 0.0 16.0 2.5
-pnode node_3292 3292
-phev phev_3292 worker1 16.0 0.0 16.0 2.5
-pnode node_3291 3291
-phev phev_3291 worker4 16.0 0.0 16.0 2.5
-pnode node_3287 3287
-phev phev_3287 worker4 16.0 0.0 16.0 2.5
-pnode node_3286 3286
-pnode node_3285 3285
-phev phev_3285 worker4 16.0 0.0 16.0 2.5
-}
-trf med_41 57.600000 0.000000 {
-pnode node_3323 3323
-pnode node_3322 3322
-pnode node_3321 3321
-phev phev_3321 worker4 16.0 0.0 16.0 2.5
-pnode node_3318 3318
-pnode node_3310 3310
-pnode node_3309 3309
-pnode node_3307 3307
-pnode node_3306 3306
-pnode node_3303 3303
-}
-trf med_42 57.600000 0.000000 {
-pnode node_3340 3340
-pnode node_3334 3334
-pnode node_3333 3333
-phev phev_3333 worker1 16.0 0.0 16.0 2.5
-pnode node_3332 3332
-phev phev_3332 worker1 16.0 0.0 16.0 2.5
-pnode node_3331 3331
-pnode node_3330 3330
+trf med_28 57.600000 0.000000 {
 pnode node_3328 3328
 pnode node_3326 3326
 pnode node_3324 3324
-phev phev_3324 worker1 16.0 0.0 16.0 2.5
+pnode node_3323 3323
+pnode node_3322 3322
+phev phev_3322 worker4 16.0 0.0 16.0 2.5
+pnode node_3321 3321
+phev phev_3321 worker2 16.0 0.0 16.0 2.5
+pnode node_3318 3318
+pnode node_3310 3310
+pnode node_3309 3309
+phev phev_3309 worker2 16.0 0.0 16.0 2.5
+pnode node_3307 3307
+pnode node_3306 3306
+pnode node_3303 3303
+pnode node_3300 3300
 }
-trf med_43 57.600000 0.000000 {
-pnode node_3356 3356
-pnode node_3354 3354
+trf med_29 57.600000 0.000000 {
 pnode node_3353 3353
-phev phev_3353 worker4 16.0 0.0 16.0 2.5
 pnode node_3352 3352
+phev phev_3352 worker1 16.0 0.0 16.0 2.5
 pnode node_3351 3351
-phev phev_3351 worker4 16.0 0.0 16.0 2.5
 pnode node_3346 3346
-phev phev_3346 worker4 16.0 0.0 16.0 2.5
 pnode node_3345 3345
-phev phev_3345 worker1 16.0 0.0 16.0 2.5
 pnode node_3344 3344
+phev phev_3344 worker4 16.0 0.0 16.0 2.5
 pnode node_3343 3343
 pnode node_3341 3341
+pnode node_3340 3340
+pnode node_3334 3334
+phev phev_3334 worker3 16.0 0.0 16.0 2.5
+pnode node_3333 3333
+phev phev_3333 worker3 16.0 0.0 16.0 2.5
+pnode node_3332 3332
+phev phev_3332 worker3 16.0 0.0 16.0 2.5
+pnode node_3331 3331
+pnode node_3330 3330
 }
-trf med_44 57.600000 0.000000 {
+trf med_30 57.600000 0.000000 {
+pnode node_3380 3380
+pnode node_3372 3372
+phev phev_3372 worker4 16.0 0.0 16.0 2.5
+pnode node_3370 3370
 pnode node_3369 3369
 pnode node_3367 3367
 pnode node_3366 3366
 pnode node_3365 3365
 pnode node_3364 3364
+phev phev_3364 worker1 16.0 0.0 16.0 2.5
 pnode node_3363 3363
-phev phev_3363 worker3 16.0 0.0 16.0 2.5
+phev phev_3363 worker4 16.0 0.0 16.0 2.5
 pnode node_3362 3362
 pnode node_3361 3361
 pnode node_3359 3359
 pnode node_3358 3358
 pnode node_3357 3357
-phev phev_3357 worker4 16.0 0.0 16.0 2.5
+phev phev_3357 worker2 16.0 0.0 16.0 2.5
+pnode node_3356 3356
+phev phev_3356 worker3 16.0 0.0 16.0 2.5
+pnode node_3354 3354
+phev phev_3354 worker3 16.0 0.0 16.0 2.5
 }
-trf med_45 57.600000 0.000000 {
-pnode node_3397 3397
-phev phev_3397 worker3 16.0 0.0 16.0 2.5
-pnode node_3396 3396
-phev phev_3396 worker2 16.0 0.0 16.0 2.5
-pnode node_3393 3393
-phev phev_3393 worker1 16.0 0.0 16.0 2.5
-pnode node_3390 3390
-pnode node_3383 3383
-phev phev_3383 worker4 16.0 0.0 16.0 2.5
-pnode node_3382 3382
-pnode node_3380 3380
-pnode node_3372 3372
-phev phev_3372 worker2 16.0 0.0 16.0 2.5
-pnode node_3370 3370
-phev phev_3370 worker2 16.0 0.0 16.0 2.5
-}
-trf med_46 57.600000 0.000000 {
-pnode node_3434 3434
-phev phev_3434 worker1 16.0 0.0 16.0 2.5
-pnode node_3433 3433
-pnode node_3429 3429
+trf med_31 57.600000 0.000000 {
 pnode node_3416 3416
 phev phev_3416 worker2 16.0 0.0 16.0 2.5
 pnode node_3415 3415
 pnode node_3414 3414
 pnode node_3413 3413
 pnode node_3412 3412
-phev phev_3412 worker4 16.0 0.0 16.0 2.5
 pnode node_3411 3411
-phev phev_3411 worker2 16.0 0.0 16.0 2.5
 pnode node_3410 3410
 phev phev_3410 worker2 16.0 0.0 16.0 2.5
 pnode node_3402 3402
-phev phev_3402 worker2 16.0 0.0 16.0 2.5
 pnode node_3399 3399
+phev phev_3399 worker3 16.0 0.0 16.0 2.5
+pnode node_3397 3397
+pnode node_3396 3396
+pnode node_3393 3393
+phev phev_3393 worker2 16.0 0.0 16.0 2.5
+pnode node_3390 3390
+pnode node_3383 3383
+pnode node_3382 3382
 }
-trf med_47 57.600000 0.000000 {
+trf med_32 57.600000 0.000000 {
+pnode node_3501 3501
+phev phev_3501 worker3 16.0 0.0 16.0 2.5
+pnode node_350 350
 pnode node_35 35
 pnode node_3489 3489
-phev phev_3489 worker3 16.0 0.0 16.0 2.5
 pnode node_3488 3488
 pnode node_3487 3487
-phev phev_3487 worker3 16.0 0.0 16.0 2.5
+phev phev_3487 worker2 16.0 0.0 16.0 2.5
 pnode node_3486 3486
-phev phev_3486 worker1 16.0 0.0 16.0 2.5
+phev phev_3486 worker2 16.0 0.0 16.0 2.5
 pnode node_3485 3485
+phev phev_3485 worker2 16.0 0.0 16.0 2.5
 pnode node_3484 3484
-phev phev_3484 worker1 16.0 0.0 16.0 2.5
 pnode node_346 346
+phev phev_346 worker4 16.0 0.0 16.0 2.5
 pnode node_3455 3455
+phev phev_3455 worker1 16.0 0.0 16.0 2.5
 pnode node_3435 3435
+phev phev_3435 worker1 16.0 0.0 16.0 2.5
+pnode node_3434 3434
+phev phev_3434 worker3 16.0 0.0 16.0 2.5
+pnode node_3433 3433
+pnode node_3429 3429
+phev phev_3429 worker3 16.0 0.0 16.0 2.5
 }
-trf med_48 57.600000 0.000000 {
-pnode node_3514 3514
-pnode node_3513 3513
-pnode node_3512 3512
-phev phev_3512 worker3 16.0 0.0 16.0 2.5
-pnode node_3511 3511
-phev phev_3511 worker4 16.0 0.0 16.0 2.5
-pnode node_3510 3510
-pnode node_3509 3509
-pnode node_3506 3506
-pnode node_3505 3505
-pnode node_3501 3501
-phev phev_3501 worker1 16.0 0.0 16.0 2.5
-pnode node_350 350
-}
-}
-trf high_4 1240.000000 0.000000 {
-trf med_49 57.600000 0.000000 {
-pnode node_3556 3556
-phev phev_3556 worker4 16.0 0.0 16.0 2.5
-pnode node_3555 3555
-pnode node_3552 3552
-pnode node_3551 3551
+trf med_33 57.600000 0.000000 {
 pnode node_3548 3548
 pnode node_3547 3547
-phev phev_3547 worker3 16.0 0.0 16.0 2.5
 pnode node_3546 3546
+phev phev_3546 worker2 16.0 0.0 16.0 2.5
 pnode node_3544 3544
-phev phev_3544 worker2 16.0 0.0 16.0 2.5
+phev phev_3544 worker4 16.0 0.0 16.0 2.5
 pnode node_3535 3535
 pnode node_3534 3534
-phev phev_3534 worker2 16.0 0.0 16.0 2.5
 pnode node_352 352
 phev phev_352 worker1 16.0 0.0 16.0 2.5
+pnode node_3514 3514
+phev phev_3514 worker1 16.0 0.0 16.0 2.5
+pnode node_3513 3513
+pnode node_3512 3512
+phev phev_3512 worker2 16.0 0.0 16.0 2.5
+pnode node_3511 3511
+pnode node_3510 3510
+pnode node_3509 3509
+phev phev_3509 worker3 16.0 0.0 16.0 2.5
+pnode node_3506 3506
+pnode node_3505 3505
 }
-trf med_50 57.600000 0.000000 {
+trf med_34 57.600000 0.000000 {
+pnode node_3579 3579
+phev phev_3579 worker1 16.0 0.0 16.0 2.5
 pnode node_3578 3578
 pnode node_3576 3576
-phev phev_3576 worker1 16.0 0.0 16.0 2.5
 pnode node_3573 3573
+phev phev_3573 worker4 16.0 0.0 16.0 2.5
 pnode node_3570 3570
 pnode node_357 357
 pnode node_3564 3564
 pnode node_3563 3563
+phev phev_3563 worker2 16.0 0.0 16.0 2.5
 pnode node_3560 3560
 pnode node_356 356
 pnode node_3558 3558
-phev phev_3558 worker2 16.0 0.0 16.0 2.5
 pnode node_3557 3557
+pnode node_3556 3556
+pnode node_3555 3555
+pnode node_3552 3552
+pnode node_3551 3551
 }
-trf med_51 57.600000 0.000000 {
-pnode node_3596 3596
-phev phev_3596 worker1 16.0 0.0 16.0 2.5
-pnode node_3591 3591
-phev phev_3591 worker1 16.0 0.0 16.0 2.5
-pnode node_3590 3590
-pnode node_3588 3588
-pnode node_3587 3587
-pnode node_3586 3586
-phev phev_3586 worker3 16.0 0.0 16.0 2.5
-pnode node_3585 3585
-phev phev_3585 worker3 16.0 0.0 16.0 2.5
-pnode node_3584 3584
-phev phev_3584 worker2 16.0 0.0 16.0 2.5
-pnode node_358 358
-pnode node_3579 3579
-phev phev_3579 worker3 16.0 0.0 16.0 2.5
-}
-trf med_52 57.600000 0.000000 {
-pnode node_3608 3608
-pnode node_3607 3607
-pnode node_3606 3606
-pnode node_3605 3605
-pnode node_3604 3604
+trf med_35 57.600000 0.000000 {
 pnode node_3603 3603
 pnode node_3602 3602
 pnode node_3601 3601
@@ -901,1456 +807,1390 @@ pnode node_3600 3600
 pnode node_3598 3598
 pnode node_3597 3597
 phev phev_3597 worker4 16.0 0.0 16.0 2.5
+pnode node_3596 3596
+pnode node_3591 3591
+phev phev_3591 worker1 16.0 0.0 16.0 2.5
+pnode node_3590 3590
+pnode node_3588 3588
+pnode node_3587 3587
+phev phev_3587 worker4 16.0 0.0 16.0 2.5
+pnode node_3586 3586
+phev phev_3586 worker4 16.0 0.0 16.0 2.5
+pnode node_3585 3585
+phev phev_3585 worker1 16.0 0.0 16.0 2.5
+pnode node_3584 3584
+phev phev_3584 worker2 16.0 0.0 16.0 2.5
+pnode node_358 358
 }
-trf med_53 57.600000 0.000000 {
+trf med_36 57.600000 0.000000 {
+pnode node_3621 3621
 pnode node_3619 3619
 pnode node_3617 3617
+phev phev_3617 worker3 16.0 0.0 16.0 2.5
 pnode node_3615 3615
 pnode node_3614 3614
+phev phev_3614 worker2 16.0 0.0 16.0 2.5
 pnode node_3613 3613
-phev phev_3613 worker1 16.0 0.0 16.0 2.5
+phev phev_3613 worker3 16.0 0.0 16.0 2.5
 pnode node_3612 3612
 phev phev_3612 worker2 16.0 0.0 16.0 2.5
 pnode node_3611 3611
-phev phev_3611 worker1 16.0 0.0 16.0 2.5
+phev phev_3611 worker2 16.0 0.0 16.0 2.5
 pnode node_3610 3610
+phev phev_3610 worker2 16.0 0.0 16.0 2.5
 pnode node_361 361
 pnode node_3609 3609
-phev phev_3609 worker2 16.0 0.0 16.0 2.5
+phev phev_3609 worker4 16.0 0.0 16.0 2.5
+pnode node_3608 3608
+phev phev_3608 worker3 16.0 0.0 16.0 2.5
+pnode node_3607 3607
+pnode node_3606 3606
+phev phev_3606 worker1 16.0 0.0 16.0 2.5
+pnode node_3605 3605
+phev phev_3605 worker3 16.0 0.0 16.0 2.5
+pnode node_3604 3604
 }
-trf med_54 57.600000 0.000000 {
-pnode node_3633 3633
-phev phev_3633 worker2 16.0 0.0 16.0 2.5
-pnode node_3632 3632
-pnode node_3631 3631
-pnode node_3630 3630
-phev phev_3630 worker1 16.0 0.0 16.0 2.5
-pnode node_3629 3629
-pnode node_3628 3628
-pnode node_3627 3627
-pnode node_3626 3626
-pnode node_3625 3625
-pnode node_3624 3624
-phev phev_3624 worker1 16.0 0.0 16.0 2.5
-pnode node_3623 3623
-pnode node_3622 3622
-pnode node_3621 3621
-}
-trf med_55 57.600000 0.000000 {
-pnode node_3654 3654
-pnode node_3652 3652
-phev phev_3652 worker4 16.0 0.0 16.0 2.5
-pnode node_3650 3650
-phev phev_3650 worker4 16.0 0.0 16.0 2.5
-pnode node_3649 3649
-pnode node_3648 3648
+trf med_37 57.600000 0.000000 {
 pnode node_3647 3647
 pnode node_3645 3645
 pnode node_3637 3637
 pnode node_3635 3635
-phev phev_3635 worker4 16.0 0.0 16.0 2.5
 pnode node_3634 3634
+phev phev_3634 worker3 16.0 0.0 16.0 2.5
+pnode node_3633 3633
+pnode node_3632 3632
+pnode node_3631 3631
+pnode node_3630 3630
+pnode node_3629 3629
+pnode node_3628 3628
+pnode node_3627 3627
+phev phev_3627 worker2 16.0 0.0 16.0 2.5
+pnode node_3626 3626
+phev phev_3626 worker2 16.0 0.0 16.0 2.5
+pnode node_3625 3625
+pnode node_3624 3624
+phev phev_3624 worker3 16.0 0.0 16.0 2.5
+pnode node_3623 3623
+phev phev_3623 worker2 16.0 0.0 16.0 2.5
+pnode node_3622 3622
+phev phev_3622 worker1 16.0 0.0 16.0 2.5
 }
-trf med_56 57.600000 0.000000 {
+trf med_38 57.600000 0.000000 {
 pnode node_3677 3677
 pnode node_3676 3676
-phev phev_3676 worker2 16.0 0.0 16.0 2.5
 pnode node_3675 3675
 pnode node_3674 3674
+phev phev_3674 worker1 16.0 0.0 16.0 2.5
 pnode node_3673 3673
-phev phev_3673 worker3 16.0 0.0 16.0 2.5
 pnode node_3672 3672
 pnode node_3668 3668
+phev phev_3668 worker2 16.0 0.0 16.0 2.5
 pnode node_3663 3663
+phev phev_3663 worker1 16.0 0.0 16.0 2.5
 pnode node_3658 3658
+phev phev_3658 worker2 16.0 0.0 16.0 2.5
 pnode node_3655 3655
+pnode node_3654 3654
+pnode node_3652 3652
+phev phev_3652 worker4 16.0 0.0 16.0 2.5
+pnode node_3650 3650
+phev phev_3650 worker3 16.0 0.0 16.0 2.5
+pnode node_3649 3649
+phev phev_3649 worker1 16.0 0.0 16.0 2.5
+pnode node_3648 3648
 }
-trf med_57 57.600000 0.000000 {
+trf med_39 57.600000 0.000000 {
+pnode node_3723 3723
+pnode node_3721 3721
+pnode node_3717 3717
+pnode node_3711 3711
+pnode node_3706 3706
+pnode node_3705 3705
 pnode node_3703 3703
+phev phev_3703 worker2 16.0 0.0 16.0 2.5
 pnode node_3694 3694
 pnode node_3692 3692
 pnode node_3691 3691
+phev phev_3691 worker3 16.0 0.0 16.0 2.5
 pnode node_3690 3690
+phev phev_3690 worker2 16.0 0.0 16.0 2.5
 pnode node_3689 3689
 pnode node_3688 3688
-phev phev_3688 worker2 16.0 0.0 16.0 2.5
 pnode node_3687 3687
 pnode node_3683 3683
-phev phev_3683 worker3 16.0 0.0 16.0 2.5
 pnode node_3681 3681
-phev phev_3681 worker2 16.0 0.0 16.0 2.5
+phev phev_3681 worker4 16.0 0.0 16.0 2.5
 pnode node_368 368
 pnode node_3678 3678
-phev phev_3678 worker1 16.0 0.0 16.0 2.5
+phev phev_3678 worker4 16.0 0.0 16.0 2.5
 }
-trf med_58 57.600000 0.000000 {
-pnode node_374 374
-phev phev_374 worker4 16.0 0.0 16.0 2.5
-pnode node_3739 3739
-phev phev_3739 worker1 16.0 0.0 16.0 2.5
-pnode node_3732 3732
-pnode node_3731 3731
-phev phev_3731 worker1 16.0 0.0 16.0 2.5
-pnode node_3730 3730
-phev phev_3730 worker1 16.0 0.0 16.0 2.5
-pnode node_3729 3729
-pnode node_3727 3727
-pnode node_3726 3726
-pnode node_3725 3725
-pnode node_3723 3723
-phev phev_3723 worker3 16.0 0.0 16.0 2.5
-pnode node_3721 3721
-pnode node_3717 3717
-phev phev_3717 worker2 16.0 0.0 16.0 2.5
-pnode node_3711 3711
-phev phev_3711 worker1 16.0 0.0 16.0 2.5
-pnode node_3706 3706
-phev phev_3706 worker4 16.0 0.0 16.0 2.5
-pnode node_3705 3705
-}
-trf med_59 57.600000 0.000000 {
-pnode node_3762 3762
-phev phev_3762 worker1 16.0 0.0 16.0 2.5
+trf med_40 57.600000 0.000000 {
 pnode node_3759 3759
 pnode node_3758 3758
-phev phev_3758 worker3 16.0 0.0 16.0 2.5
 pnode node_3752 3752
+phev phev_3752 worker2 16.0 0.0 16.0 2.5
 pnode node_3749 3749
-phev phev_3749 worker1 16.0 0.0 16.0 2.5
+phev phev_3749 worker2 16.0 0.0 16.0 2.5
 pnode node_3748 3748
-phev phev_3748 worker2 16.0 0.0 16.0 2.5
 pnode node_3747 3747
+phev phev_3747 worker2 16.0 0.0 16.0 2.5
 pnode node_3745 3745
+phev phev_3745 worker4 16.0 0.0 16.0 2.5
 pnode node_3744 3744
-phev phev_3744 worker4 16.0 0.0 16.0 2.5
+phev phev_3744 worker1 16.0 0.0 16.0 2.5
+pnode node_374 374
+pnode node_3739 3739
+pnode node_3732 3732
+phev phev_3732 worker1 16.0 0.0 16.0 2.5
+pnode node_3731 3731
+pnode node_3730 3730
+pnode node_3729 3729
+pnode node_3727 3727
+phev phev_3727 worker3 16.0 0.0 16.0 2.5
+pnode node_3726 3726
+pnode node_3725 3725
+phev phev_3725 worker3 16.0 0.0 16.0 2.5
 }
-trf med_60 57.600000 0.000000 {
+}
+trf high_2 1240.000000 0.000000 {
+trf med_41 57.600000 0.000000 {
+pnode node_3791 3791
+phev phev_3791 worker3 16.0 0.0 16.0 2.5
+pnode node_3788 3788
+pnode node_3786 3786
+phev phev_3786 worker3 16.0 0.0 16.0 2.5
+pnode node_3784 3784
+phev phev_3784 worker1 16.0 0.0 16.0 2.5
+pnode node_3783 3783
 pnode node_3782 3782
-phev phev_3782 worker4 16.0 0.0 16.0 2.5
 pnode node_3778 3778
+phev phev_3778 worker2 16.0 0.0 16.0 2.5
 pnode node_3776 3776
 pnode node_3775 3775
 pnode node_3773 3773
-phev phev_3773 worker2 16.0 0.0 16.0 2.5
 pnode node_3769 3769
+phev phev_3769 worker2 16.0 0.0 16.0 2.5
 pnode node_3768 3768
+phev phev_3768 worker1 16.0 0.0 16.0 2.5
 pnode node_3767 3767
 pnode node_3766 3766
 pnode node_3764 3764
+phev phev_3764 worker1 16.0 0.0 16.0 2.5
+pnode node_3762 3762
 }
-trf med_61 57.600000 0.000000 {
+trf med_42 57.600000 0.000000 {
+pnode node_3828 3828
+phev phev_3828 worker2 16.0 0.0 16.0 2.5
+pnode node_3827 3827
+pnode node_3825 3825
+phev phev_3825 worker3 16.0 0.0 16.0 2.5
+pnode node_3823 3823
+phev phev_3823 worker2 16.0 0.0 16.0 2.5
+pnode node_3819 3819
+phev phev_3819 worker4 16.0 0.0 16.0 2.5
+pnode node_3818 3818
+pnode node_3816 3816
+pnode node_3812 3812
+pnode node_3810 3810
+pnode node_3808 3808
 pnode node_3804 3804
-phev phev_3804 worker4 16.0 0.0 16.0 2.5
 pnode node_38 38
-phev phev_38 worker3 16.0 0.0 16.0 2.5
 pnode node_3798 3798
 pnode node_3797 3797
 pnode node_3794 3794
 pnode node_3793 3793
 pnode node_3792 3792
-pnode node_3791 3791
-pnode node_3788 3788
-pnode node_3786 3786
-pnode node_3784 3784
-phev phev_3784 worker2 16.0 0.0 16.0 2.5
-pnode node_3783 3783
-phev phev_3783 worker2 16.0 0.0 16.0 2.5
 }
-trf med_62 57.600000 0.000000 {
-pnode node_3829 3829
-phev phev_3829 worker1 16.0 0.0 16.0 2.5
-pnode node_3828 3828
-pnode node_3827 3827
-pnode node_3825 3825
-pnode node_3823 3823
-pnode node_3819 3819
-pnode node_3818 3818
-pnode node_3816 3816
-phev phev_3816 worker4 16.0 0.0 16.0 2.5
-pnode node_3812 3812
-pnode node_3810 3810
-phev phev_3810 worker3 16.0 0.0 16.0 2.5
-pnode node_3808 3808
-}
-trf med_63 57.600000 0.000000 {
+trf med_43 57.600000 0.000000 {
+pnode node_3854 3854
+pnode node_3853 3853
 pnode node_3851 3851
+phev phev_3851 worker1 16.0 0.0 16.0 2.5
 pnode node_3850 3850
-phev phev_3850 worker2 16.0 0.0 16.0 2.5
 pnode node_3849 3849
 pnode node_3845 3845
 pnode node_3840 3840
-phev phev_3840 worker3 16.0 0.0 16.0 2.5
 pnode node_3839 3839
 pnode node_3837 3837
 pnode node_3831 3831
-phev phev_3831 worker4 16.0 0.0 16.0 2.5
 pnode node_3830 3830
+pnode node_3829 3829
+phev phev_3829 worker1 16.0 0.0 16.0 2.5
 }
-trf med_64 57.600000 0.000000 {
+trf med_44 57.600000 0.000000 {
+pnode node_3892 3892
+pnode node_389 389
+phev phev_389 worker4 16.0 0.0 16.0 2.5
+pnode node_3888 3888
+pnode node_3885 3885
+pnode node_3884 3884
+pnode node_3883 3883
+pnode node_3881 3881
 pnode node_3880 3880
+phev phev_3880 worker1 16.0 0.0 16.0 2.5
 pnode node_388 388
-phev phev_388 worker4 16.0 0.0 16.0 2.5
 pnode node_3879 3879
 pnode node_3877 3877
 pnode node_387 387
 pnode node_3869 3869
 pnode node_386 386
 pnode node_3856 3856
-pnode node_3854 3854
-pnode node_3853 3853
-phev phev_3853 worker4 16.0 0.0 16.0 2.5
+phev phev_3856 worker3 16.0 0.0 16.0 2.5
 }
-trf med_65 57.600000 0.000000 {
-pnode node_3901 3901
-pnode node_3899 3899
-phev phev_3899 worker2 16.0 0.0 16.0 2.5
-pnode node_3893 3893
-pnode node_3892 3892
-phev phev_3892 worker4 16.0 0.0 16.0 2.5
-pnode node_389 389
-phev phev_389 worker2 16.0 0.0 16.0 2.5
-pnode node_3888 3888
-pnode node_3885 3885
-pnode node_3884 3884
-pnode node_3883 3883
-phev phev_3883 worker3 16.0 0.0 16.0 2.5
-pnode node_3881 3881
-}
-trf med_66 57.600000 0.000000 {
+trf med_45 57.600000 0.000000 {
+pnode node_3921 3921
+phev phev_3921 worker4 16.0 0.0 16.0 2.5
 pnode node_3919 3919
 pnode node_3917 3917
 pnode node_3916 3916
 pnode node_3915 3915
 pnode node_3914 3914
+phev phev_3914 worker4 16.0 0.0 16.0 2.5
 pnode node_3913 3913
 phev phev_3913 worker3 16.0 0.0 16.0 2.5
 pnode node_3912 3912
 pnode node_3911 3911
-phev phev_3911 worker3 16.0 0.0 16.0 2.5
 pnode node_391 391
 pnode node_3908 3908
+phev phev_3908 worker4 16.0 0.0 16.0 2.5
+pnode node_3901 3901
+pnode node_3899 3899
+pnode node_3893 3893
 }
-trf med_67 57.600000 0.000000 {
+trf med_46 57.600000 0.000000 {
+pnode node_3950 3950
+phev phev_3950 worker1 16.0 0.0 16.0 2.5
+pnode node_395 395
+pnode node_3943 3943
+pnode node_3940 3940
+pnode node_394 394
 pnode node_3939 3939
-phev phev_3939 worker4 16.0 0.0 16.0 2.5
 pnode node_3938 3938
 pnode node_3937 3937
 pnode node_3936 3936
 pnode node_3930 3930
 pnode node_393 393
-phev phev_393 worker4 16.0 0.0 16.0 2.5
 pnode node_3928 3928
 pnode node_3925 3925
 pnode node_3924 3924
-pnode node_3921 3921
+phev phev_3924 worker1 16.0 0.0 16.0 2.5
 }
-trf med_68 57.600000 0.000000 {
-pnode node_3962 3962
-pnode node_3958 3958
-pnode node_3954 3954
-phev phev_3954 worker3 16.0 0.0 16.0 2.5
-pnode node_3953 3953
-pnode node_3952 3952
-phev phev_3952 worker1 16.0 0.0 16.0 2.5
-pnode node_3951 3951
-pnode node_3950 3950
-pnode node_395 395
-phev phev_395 worker3 16.0 0.0 16.0 2.5
-pnode node_3943 3943
-phev phev_3943 worker1 16.0 0.0 16.0 2.5
-pnode node_3940 3940
-phev phev_3940 worker4 16.0 0.0 16.0 2.5
-pnode node_394 394
-}
-}
-trf high_3 1240.000000 0.000000 {
-trf med_69 57.600000 0.000000 {
-pnode node_4000 4000
-phev phev_4000 worker1 16.0 0.0 16.0 2.5
+trf med_47 57.600000 0.000000 {
 pnode node_3999 3999
-phev phev_3999 worker1 16.0 0.0 16.0 2.5
 pnode node_3997 3997
 pnode node_3992 3992
 pnode node_3989 3989
-phev phev_3989 worker1 16.0 0.0 16.0 2.5
 pnode node_3979 3979
 pnode node_3975 3975
 pnode node_3972 3972
-phev phev_3972 worker3 16.0 0.0 16.0 2.5
 pnode node_3970 3970
-phev phev_3970 worker1 16.0 0.0 16.0 2.5
 pnode node_3967 3967
-phev phev_3967 worker4 16.0 0.0 16.0 2.5
+phev phev_3967 worker3 16.0 0.0 16.0 2.5
+pnode node_3962 3962
+phev phev_3962 worker4 16.0 0.0 16.0 2.5
+pnode node_3958 3958
+pnode node_3954 3954
+pnode node_3953 3953
+phev phev_3953 worker3 16.0 0.0 16.0 2.5
+pnode node_3952 3952
+phev phev_3952 worker1 16.0 0.0 16.0 2.5
+pnode node_3951 3951
 }
-trf med_70 57.600000 0.000000 {
+trf med_48 57.600000 0.000000 {
+pnode node_4044 4044
+pnode node_4040 4040
+pnode node_4035 4035
+phev phev_4035 worker2 16.0 0.0 16.0 2.5
+pnode node_4034 4034
+phev phev_4034 worker4 16.0 0.0 16.0 2.5
 pnode node_4033 4033
-phev phev_4033 worker1 16.0 0.0 16.0 2.5
 pnode node_4031 4031
 pnode node_4029 4029
 pnode node_4028 4028
-phev phev_4028 worker4 16.0 0.0 16.0 2.5
 pnode node_4027 4027
-phev phev_4027 worker3 16.0 0.0 16.0 2.5
 pnode node_4025 4025
-phev phev_4025 worker2 16.0 0.0 16.0 2.5
 pnode node_4024 4024
+phev phev_4024 worker2 16.0 0.0 16.0 2.5
 pnode node_4021 4021
 pnode node_4019 4019
+phev phev_4019 worker4 16.0 0.0 16.0 2.5
 pnode node_4018 4018
-phev phev_4018 worker4 16.0 0.0 16.0 2.5
 pnode node_4015 4015
+phev phev_4015 worker1 16.0 0.0 16.0 2.5
 pnode node_4012 4012
-phev phev_4012 worker1 16.0 0.0 16.0 2.5
+phev phev_4012 worker2 16.0 0.0 16.0 2.5
+pnode node_4000 4000
 }
-trf med_71 57.600000 0.000000 {
-pnode node_4060 4060
-phev phev_4060 worker2 16.0 0.0 16.0 2.5
-pnode node_4055 4055
-pnode node_4054 4054
-pnode node_4051 4051
-pnode node_405 405
-pnode node_4049 4049
-pnode node_4048 4048
-phev phev_4048 worker1 16.0 0.0 16.0 2.5
-pnode node_4044 4044
-phev phev_4044 worker2 16.0 0.0 16.0 2.5
-pnode node_4040 4040
-pnode node_4035 4035
-phev phev_4035 worker1 16.0 0.0 16.0 2.5
-pnode node_4034 4034
-phev phev_4034 worker4 16.0 0.0 16.0 2.5
-}
-trf med_72 57.600000 0.000000 {
-pnode node_4074 4074
-phev phev_4074 worker3 16.0 0.0 16.0 2.5
-pnode node_4073 4073
+trf med_49 57.600000 0.000000 {
 pnode node_4072 4072
 pnode node_4071 4071
 pnode node_4070 4070
-phev phev_4070 worker1 16.0 0.0 16.0 2.5
+phev phev_4070 worker4 16.0 0.0 16.0 2.5
 pnode node_407 407
 pnode node_4066 4066
 pnode node_4064 4064
 pnode node_4063 4063
+phev phev_4063 worker4 16.0 0.0 16.0 2.5
 pnode node_4061 4061
-phev phev_4061 worker4 16.0 0.0 16.0 2.5
+phev phev_4061 worker3 16.0 0.0 16.0 2.5
+pnode node_4060 4060
+phev phev_4060 worker2 16.0 0.0 16.0 2.5
+pnode node_4055 4055
+phev phev_4055 worker1 16.0 0.0 16.0 2.5
+pnode node_4054 4054
+pnode node_4051 4051
+phev phev_4051 worker3 16.0 0.0 16.0 2.5
+pnode node_405 405
+pnode node_4049 4049
+pnode node_4048 4048
 }
-trf med_73 57.600000 0.000000 {
-pnode node_4090 4090
-pnode node_4089 4089
-pnode node_4088 4088
-phev phev_4088 worker3 16.0 0.0 16.0 2.5
-pnode node_4087 4087
-phev phev_4087 worker4 16.0 0.0 16.0 2.5
-pnode node_4086 4086
-phev phev_4086 worker1 16.0 0.0 16.0 2.5
-pnode node_4085 4085
-pnode node_4084 4084
-phev phev_4084 worker3 16.0 0.0 16.0 2.5
-pnode node_4078 4078
-pnode node_4075 4075
-}
-trf med_74 57.600000 0.000000 {
-pnode node_4102 4102
-phev phev_4102 worker1 16.0 0.0 16.0 2.5
-pnode node_4101 4101
-phev phev_4101 worker2 16.0 0.0 16.0 2.5
-pnode node_4099 4099
-pnode node_4098 4098
-pnode node_4097 4097
-pnode node_4096 4096
-phev phev_4096 worker3 16.0 0.0 16.0 2.5
-pnode node_4095 4095
-phev phev_4095 worker4 16.0 0.0 16.0 2.5
+trf med_50 57.600000 0.000000 {
 pnode node_4093 4093
 pnode node_4092 4092
 pnode node_4091 4091
+pnode node_4090 4090
+pnode node_4089 4089
+phev phev_4089 worker4 16.0 0.0 16.0 2.5
+pnode node_4088 4088
+pnode node_4087 4087
+phev phev_4087 worker3 16.0 0.0 16.0 2.5
+pnode node_4086 4086
+pnode node_4085 4085
+pnode node_4084 4084
+pnode node_4078 4078
+phev phev_4078 worker3 16.0 0.0 16.0 2.5
+pnode node_4075 4075
+pnode node_4074 4074
+phev phev_4074 worker3 16.0 0.0 16.0 2.5
+pnode node_4073 4073
 }
-trf med_75 57.600000 0.000000 {
-pnode node_4122 4122
-pnode node_4121 4121
-phev phev_4121 worker4 16.0 0.0 16.0 2.5
+trf med_51 57.600000 0.000000 {
 pnode node_412 412
-phev phev_412 worker4 16.0 0.0 16.0 2.5
 pnode node_4115 4115
 phev phev_4115 worker4 16.0 0.0 16.0 2.5
 pnode node_4112 4112
-phev phev_4112 worker4 16.0 0.0 16.0 2.5
+phev phev_4112 worker2 16.0 0.0 16.0 2.5
 pnode node_4111 4111
-phev phev_4111 worker1 16.0 0.0 16.0 2.5
+phev phev_4111 worker2 16.0 0.0 16.0 2.5
 pnode node_411 411
-phev phev_411 worker3 16.0 0.0 16.0 2.5
 pnode node_4108 4108
+phev phev_4108 worker3 16.0 0.0 16.0 2.5
 pnode node_4107 4107
+phev phev_4107 worker4 16.0 0.0 16.0 2.5
 pnode node_4105 4105
 pnode node_4103 4103
-phev phev_4103 worker1 16.0 0.0 16.0 2.5
+phev phev_4103 worker3 16.0 0.0 16.0 2.5
+pnode node_4102 4102
+pnode node_4101 4101
+phev phev_4101 worker2 16.0 0.0 16.0 2.5
+pnode node_4099 4099
+phev phev_4099 worker3 16.0 0.0 16.0 2.5
+pnode node_4098 4098
+pnode node_4097 4097
+pnode node_4096 4096
+phev phev_4096 worker4 16.0 0.0 16.0 2.5
+pnode node_4095 4095
+phev phev_4095 worker2 16.0 0.0 16.0 2.5
 }
-trf med_76 57.600000 0.000000 {
+trf med_52 57.600000 0.000000 {
+pnode node_414 414
+phev phev_414 worker2 16.0 0.0 16.0 2.5
+pnode node_4139 4139
+pnode node_4138 4138
 pnode node_4136 4136
 phev phev_4136 worker3 16.0 0.0 16.0 2.5
 pnode node_4135 4135
+phev phev_4135 worker2 16.0 0.0 16.0 2.5
 pnode node_4134 4134
-phev phev_4134 worker2 16.0 0.0 16.0 2.5
 pnode node_4133 4133
-phev phev_4133 worker3 16.0 0.0 16.0 2.5
 pnode node_4131 4131
 pnode node_4129 4129
 pnode node_4128 4128
 pnode node_4127 4127
 pnode node_4125 4125
 pnode node_4124 4124
-phev phev_4124 worker2 16.0 0.0 16.0 2.5
 pnode node_4123 4123
+pnode node_4122 4122
+phev phev_4122 worker2 16.0 0.0 16.0 2.5
+pnode node_4121 4121
+phev phev_4121 worker1 16.0 0.0 16.0 2.5
 }
-trf med_77 57.600000 0.000000 {
+trf med_53 57.600000 0.000000 {
+pnode node_4160 4160
+phev phev_4160 worker2 16.0 0.0 16.0 2.5
+pnode node_416 416
+pnode node_4159 4159
+pnode node_4158 4158
+pnode node_4156 4156
+phev phev_4156 worker4 16.0 0.0 16.0 2.5
+pnode node_4155 4155
+pnode node_4154 4154
+pnode node_4153 4153
+pnode node_4152 4152
+phev phev_4152 worker2 16.0 0.0 16.0 2.5
+pnode node_4150 4150
+phev phev_4150 worker4 16.0 0.0 16.0 2.5
 pnode node_415 415
+phev phev_415 worker1 16.0 0.0 16.0 2.5
 pnode node_4149 4149
 phev phev_4149 worker4 16.0 0.0 16.0 2.5
 pnode node_4148 4148
 pnode node_4146 4146
+phev phev_4146 worker4 16.0 0.0 16.0 2.5
 pnode node_4144 4144
 pnode node_4143 4143
 pnode node_4142 4142
-pnode node_414 414
-pnode node_4139 4139
-phev phev_4139 worker4 16.0 0.0 16.0 2.5
-pnode node_4138 4138
+phev phev_4142 worker2 16.0 0.0 16.0 2.5
 }
-trf med_78 57.600000 0.000000 {
-pnode node_4163 4163
-pnode node_4162 4162
-pnode node_4160 4160
-phev phev_4160 worker4 16.0 0.0 16.0 2.5
-pnode node_416 416
-phev phev_416 worker4 16.0 0.0 16.0 2.5
-pnode node_4159 4159
-pnode node_4158 4158
-pnode node_4156 4156
-phev phev_4156 worker2 16.0 0.0 16.0 2.5
-pnode node_4155 4155
-phev phev_4155 worker3 16.0 0.0 16.0 2.5
-pnode node_4154 4154
-pnode node_4153 4153
-pnode node_4152 4152
-pnode node_4150 4150
-}
-trf med_79 57.600000 0.000000 {
+trf med_54 57.600000 0.000000 {
+pnode node_4181 4181
+phev phev_4181 worker3 16.0 0.0 16.0 2.5
+pnode node_4178 4178
+pnode node_4177 4177
+phev phev_4177 worker1 16.0 0.0 16.0 2.5
 pnode node_4176 4176
-phev phev_4176 worker2 16.0 0.0 16.0 2.5
 pnode node_4175 4175
-phev phev_4175 worker2 16.0 0.0 16.0 2.5
+phev phev_4175 worker1 16.0 0.0 16.0 2.5
 pnode node_4173 4173
-phev phev_4173 worker3 16.0 0.0 16.0 2.5
 pnode node_4172 4172
 pnode node_4171 4171
-phev phev_4171 worker3 16.0 0.0 16.0 2.5
+phev phev_4171 worker1 16.0 0.0 16.0 2.5
 pnode node_417 417
+phev phev_417 worker3 16.0 0.0 16.0 2.5
 pnode node_4167 4167
+phev phev_4167 worker3 16.0 0.0 16.0 2.5
 pnode node_4165 4165
-phev phev_4165 worker3 16.0 0.0 16.0 2.5
 pnode node_4164 4164
+phev phev_4164 worker1 16.0 0.0 16.0 2.5
+pnode node_4163 4163
+phev phev_4163 worker4 16.0 0.0 16.0 2.5
+pnode node_4162 4162
 }
-trf med_80 57.600000 0.000000 {
+trf med_55 57.600000 0.000000 {
+pnode node_4200 4200
+pnode node_4199 4199
+pnode node_4197 4197
+phev phev_4197 worker1 16.0 0.0 16.0 2.5
+pnode node_4195 4195
+pnode node_4194 4194
+pnode node_4192 4192
+phev phev_4192 worker2 16.0 0.0 16.0 2.5
+pnode node_4191 4191
+pnode node_4190 4190
+pnode node_419 419
+phev phev_419 worker3 16.0 0.0 16.0 2.5
+pnode node_4189 4189
+phev phev_4189 worker2 16.0 0.0 16.0 2.5
 pnode node_4187 4187
 pnode node_4186 4186
 pnode node_4185 4185
 pnode node_4184 4184
-phev phev_4184 worker3 16.0 0.0 16.0 2.5
+phev phev_4184 worker2 16.0 0.0 16.0 2.5
 pnode node_4183 4183
-phev phev_4183 worker3 16.0 0.0 16.0 2.5
-pnode node_4181 4181
-pnode node_4178 4178
-pnode node_4177 4177
 }
-trf med_81 57.600000 0.000000 {
-pnode node_4201 4201
-pnode node_4200 4200
-phev phev_4200 worker3 16.0 0.0 16.0 2.5
-pnode node_4199 4199
-pnode node_4197 4197
-pnode node_4195 4195
-pnode node_4194 4194
-phev phev_4194 worker2 16.0 0.0 16.0 2.5
-pnode node_4192 4192
-phev phev_4192 worker1 16.0 0.0 16.0 2.5
-pnode node_4191 4191
-phev phev_4191 worker2 16.0 0.0 16.0 2.5
-pnode node_4190 4190
-pnode node_419 419
-pnode node_4189 4189
-phev phev_4189 worker1 16.0 0.0 16.0 2.5
-}
-trf med_82 57.600000 0.000000 {
+trf med_56 57.600000 0.000000 {
+pnode node_4222 4222
+phev phev_4222 worker3 16.0 0.0 16.0 2.5
+pnode node_4220 4220
+pnode node_4218 4218
 pnode node_4217 4217
 pnode node_4214 4214
+phev phev_4214 worker4 16.0 0.0 16.0 2.5
 pnode node_4213 4213
+phev phev_4213 worker1 16.0 0.0 16.0 2.5
 pnode node_4211 4211
 pnode node_4209 4209
 pnode node_4208 4208
-phev phev_4208 worker3 16.0 0.0 16.0 2.5
+phev phev_4208 worker4 16.0 0.0 16.0 2.5
 pnode node_4207 4207
+phev phev_4207 worker3 16.0 0.0 16.0 2.5
 pnode node_4206 4206
-phev phev_4206 worker3 16.0 0.0 16.0 2.5
 pnode node_4204 4204
+phev phev_4204 worker4 16.0 0.0 16.0 2.5
 pnode node_4202 4202
+pnode node_4201 4201
 }
-trf med_83 57.600000 0.000000 {
-pnode node_4234 4234
-phev phev_4234 worker4 16.0 0.0 16.0 2.5
-pnode node_4233 4233
-phev phev_4233 worker2 16.0 0.0 16.0 2.5
-pnode node_4232 4232
-pnode node_4231 4231
-phev phev_4231 worker1 16.0 0.0 16.0 2.5
-pnode node_4229 4229
-pnode node_4224 4224
-pnode node_4223 4223
-pnode node_4222 4222
-pnode node_4220 4220
-pnode node_4218 4218
-}
-trf med_84 57.600000 0.000000 {
-pnode node_4248 4248
-phev phev_4248 worker4 16.0 0.0 16.0 2.5
-pnode node_4246 4246
+trf med_57 57.600000 0.000000 {
 pnode node_4245 4245
-phev phev_4245 worker3 16.0 0.0 16.0 2.5
+phev phev_4245 worker4 16.0 0.0 16.0 2.5
 pnode node_4244 4244
-phev phev_4244 worker3 16.0 0.0 16.0 2.5
 pnode node_4243 4243
-phev phev_4243 worker1 16.0 0.0 16.0 2.5
+phev phev_4243 worker3 16.0 0.0 16.0 2.5
 pnode node_4242 4242
-phev phev_4242 worker1 16.0 0.0 16.0 2.5
+phev phev_4242 worker4 16.0 0.0 16.0 2.5
 pnode node_4241 4241
 pnode node_4240 4240
-phev phev_4240 worker4 16.0 0.0 16.0 2.5
+phev phev_4240 worker2 16.0 0.0 16.0 2.5
 pnode node_4239 4239
 pnode node_4238 4238
 pnode node_4237 4237
 pnode node_4236 4236
-phev phev_4236 worker1 16.0 0.0 16.0 2.5
 pnode node_4235 4235
+phev phev_4235 worker2 16.0 0.0 16.0 2.5
+pnode node_4234 4234
+pnode node_4233 4233
+pnode node_4232 4232
+phev phev_4232 worker2 16.0 0.0 16.0 2.5
+pnode node_4231 4231
+pnode node_4229 4229
+phev phev_4229 worker2 16.0 0.0 16.0 2.5
+pnode node_4224 4224
+pnode node_4223 4223
+phev phev_4223 worker4 16.0 0.0 16.0 2.5
 }
-trf med_85 57.600000 0.000000 {
+trf med_58 57.600000 0.000000 {
+pnode node_43 43
+pnode node_4299 4299
+pnode node_4298 4298
+pnode node_4297 4297
 pnode node_4295 4295
-phev phev_4295 worker4 16.0 0.0 16.0 2.5
 pnode node_428 428
-phev phev_428 worker3 16.0 0.0 16.0 2.5
 pnode node_4270 4270
-phev phev_4270 worker1 16.0 0.0 16.0 2.5
 pnode node_427 427
 pnode node_4267 4267
-phev phev_4267 worker1 16.0 0.0 16.0 2.5
+phev phev_4267 worker4 16.0 0.0 16.0 2.5
 pnode node_4266 4266
 pnode node_4264 4264
 pnode node_426 426
 pnode node_4251 4251
-phev phev_4251 worker2 16.0 0.0 16.0 2.5
 pnode node_4250 4250
+phev phev_4250 worker3 16.0 0.0 16.0 2.5
 pnode node_4249 4249
 phev phev_4249 worker4 16.0 0.0 16.0 2.5
+pnode node_4248 4248
+pnode node_4246 4246
 }
-trf med_86 57.600000 0.000000 {
+trf med_59 57.600000 0.000000 {
+pnode node_4328 4328
+pnode node_4327 4327
+pnode node_4325 4325
+pnode node_4324 4324
+pnode node_4323 4323
+phev phev_4323 worker2 16.0 0.0 16.0 2.5
+pnode node_4322 4322
+pnode node_4321 4321
+phev phev_4321 worker4 16.0 0.0 16.0 2.5
 pnode node_4320 4320
-phev phev_4320 worker3 16.0 0.0 16.0 2.5
+phev phev_4320 worker4 16.0 0.0 16.0 2.5
 pnode node_4319 4319
+phev phev_4319 worker4 16.0 0.0 16.0 2.5
 pnode node_4318 4318
 pnode node_4314 4314
-phev phev_4314 worker4 16.0 0.0 16.0 2.5
 pnode node_4313 4313
 phev phev_4313 worker3 16.0 0.0 16.0 2.5
 pnode node_431 431
-phev phev_431 worker1 16.0 0.0 16.0 2.5
 pnode node_4306 4306
 pnode node_4302 4302
-phev phev_4302 worker4 16.0 0.0 16.0 2.5
 pnode node_4301 4301
 pnode node_4300 4300
-phev phev_4300 worker4 16.0 0.0 16.0 2.5
-pnode node_43 43
-phev phev_43 worker4 16.0 0.0 16.0 2.5
-pnode node_4299 4299
-phev phev_4299 worker2 16.0 0.0 16.0 2.5
-pnode node_4298 4298
-pnode node_4297 4297
 }
-trf med_87 57.600000 0.000000 {
-pnode node_4331 4331
-pnode node_4330 4330
-pnode node_4328 4328
-pnode node_4327 4327
-phev phev_4327 worker2 16.0 0.0 16.0 2.5
-pnode node_4325 4325
-phev phev_4325 worker1 16.0 0.0 16.0 2.5
-pnode node_4324 4324
-pnode node_4323 4323
-phev phev_4323 worker1 16.0 0.0 16.0 2.5
-pnode node_4322 4322
-phev phev_4322 worker2 16.0 0.0 16.0 2.5
-pnode node_4321 4321
-}
-trf med_88 57.600000 0.000000 {
+trf med_60 57.600000 0.000000 {
+pnode node_4353 4353
+phev phev_4353 worker2 16.0 0.0 16.0 2.5
+pnode node_4352 4352
+phev phev_4352 worker3 16.0 0.0 16.0 2.5
 pnode node_4351 4351
 pnode node_4350 4350
+phev phev_4350 worker2 16.0 0.0 16.0 2.5
 pnode node_4349 4349
-phev phev_4349 worker3 16.0 0.0 16.0 2.5
 pnode node_4338 4338
-phev phev_4338 worker2 16.0 0.0 16.0 2.5
+phev phev_4338 worker3 16.0 0.0 16.0 2.5
 pnode node_4337 4337
-phev phev_4337 worker3 16.0 0.0 16.0 2.5
+phev phev_4337 worker4 16.0 0.0 16.0 2.5
 pnode node_4336 4336
+phev phev_4336 worker4 16.0 0.0 16.0 2.5
 pnode node_4335 4335
+phev phev_4335 worker2 16.0 0.0 16.0 2.5
 pnode node_4334 4334
+phev phev_4334 worker1 16.0 0.0 16.0 2.5
 pnode node_4333 4333
-phev phev_4333 worker3 16.0 0.0 16.0 2.5
+phev phev_4333 worker2 16.0 0.0 16.0 2.5
+pnode node_4331 4331
+pnode node_4330 4330
 }
-trf med_89 57.600000 0.000000 {
+trf med_61 57.600000 0.000000 {
+pnode node_4573 4573
+pnode node_4572 4572
+pnode node_457 457
+phev phev_457 worker4 16.0 0.0 16.0 2.5
+pnode node_4560 4560
+pnode node_4558 4558
+pnode node_453 453
+pnode node_452 452
 pnode node_448 448
 phev phev_448 worker4 16.0 0.0 16.0 2.5
 pnode node_4476 4476
-phev phev_4476 worker1 16.0 0.0 16.0 2.5
 pnode node_446 446
 pnode node_4446 4446
-phev phev_4446 worker3 16.0 0.0 16.0 2.5
 pnode node_437 437
 pnode node_4360 4360
-phev phev_4360 worker2 16.0 0.0 16.0 2.5
 pnode node_4356 4356
+phev phev_4356 worker3 16.0 0.0 16.0 2.5
 pnode node_4355 4355
-pnode node_4353 4353
-pnode node_4352 4352
 }
 }
-trf high_2 1240.000000 0.000000 {
-trf med_90 57.600000 0.000000 {
-pnode node_4577 4577
-pnode node_4576 4576
-pnode node_4574 4574
-pnode node_4573 4573
-phev phev_4573 worker4 16.0 0.0 16.0 2.5
-pnode node_4572 4572
-pnode node_457 457
-pnode node_4560 4560
-pnode node_4558 4558
-phev phev_4558 worker4 16.0 0.0 16.0 2.5
-pnode node_453 453
-phev phev_453 worker2 16.0 0.0 16.0 2.5
-pnode node_452 452
-}
-trf med_91 57.600000 0.000000 {
+trf high_1 1240.000000 0.000000 {
+trf med_62 57.600000 0.000000 {
 pnode node_459 459
 pnode node_4589 4589
 pnode node_4586 4586
 pnode node_4585 4585
 pnode node_4584 4584
 pnode node_4583 4583
-phev phev_4583 worker4 16.0 0.0 16.0 2.5
 pnode node_4582 4582
-phev phev_4582 worker2 16.0 0.0 16.0 2.5
+phev phev_4582 worker3 16.0 0.0 16.0 2.5
 pnode node_4581 4581
-phev phev_4581 worker2 16.0 0.0 16.0 2.5
 pnode node_4580 4580
+phev phev_4580 worker4 16.0 0.0 16.0 2.5
 pnode node_458 458
+phev phev_458 worker1 16.0 0.0 16.0 2.5
 pnode node_4578 4578
+pnode node_4577 4577
+pnode node_4576 4576
+pnode node_4574 4574
+phev phev_4574 worker1 16.0 0.0 16.0 2.5
 }
-trf med_92 57.600000 0.000000 {
-pnode node_4611 4611
-pnode node_4610 4610
-pnode node_4609 4609
-phev phev_4609 worker3 16.0 0.0 16.0 2.5
-pnode node_4608 4608
-phev phev_4608 worker2 16.0 0.0 16.0 2.5
-pnode node_4607 4607
-pnode node_4606 4606
-phev phev_4606 worker3 16.0 0.0 16.0 2.5
-pnode node_4605 4605
-pnode node_4603 4603
-pnode node_4600 4600
-pnode node_4598 4598
-}
-trf med_93 57.600000 0.000000 {
-pnode node_4630 4630
-pnode node_463 463
-phev phev_463 worker1 16.0 0.0 16.0 2.5
-pnode node_4629 4629
-pnode node_4621 4621
+trf med_63 57.600000 0.000000 {
 pnode node_4620 4620
 pnode node_4619 4619
 phev phev_4619 worker3 16.0 0.0 16.0 2.5
 pnode node_4618 4618
-phev phev_4618 worker3 16.0 0.0 16.0 2.5
 pnode node_4615 4615
-phev phev_4615 worker2 16.0 0.0 16.0 2.5
+phev phev_4615 worker1 16.0 0.0 16.0 2.5
 pnode node_4613 4613
-phev phev_4613 worker2 16.0 0.0 16.0 2.5
+phev phev_4613 worker4 16.0 0.0 16.0 2.5
+pnode node_4611 4611
+phev phev_4611 worker3 16.0 0.0 16.0 2.5
+pnode node_4610 4610
+pnode node_4609 4609
+pnode node_4608 4608
+pnode node_4607 4607
+phev phev_4607 worker3 16.0 0.0 16.0 2.5
+pnode node_4606 4606
+phev phev_4606 worker4 16.0 0.0 16.0 2.5
+pnode node_4605 4605
+pnode node_4603 4603
+phev phev_4603 worker4 16.0 0.0 16.0 2.5
+pnode node_4600 4600
+pnode node_4598 4598
 }
-trf med_94 57.600000 0.000000 {
+trf med_64 57.600000 0.000000 {
 pnode node_4653 4653
+phev phev_4653 worker4 16.0 0.0 16.0 2.5
 pnode node_4650 4650
+phev phev_4650 worker1 16.0 0.0 16.0 2.5
 pnode node_4649 4649
-phev phev_4649 worker3 16.0 0.0 16.0 2.5
 pnode node_4647 4647
-phev phev_4647 worker3 16.0 0.0 16.0 2.5
 pnode node_4644 4644
 pnode node_4642 4642
 pnode node_4641 4641
 pnode node_4634 4634
+phev phev_4634 worker4 16.0 0.0 16.0 2.5
 pnode node_4633 4633
-phev phev_4633 worker2 16.0 0.0 16.0 2.5
+pnode node_4630 4630
+pnode node_463 463
+pnode node_4629 4629
+pnode node_4621 4621
 }
-trf med_95 57.600000 0.000000 {
+trf med_65 57.600000 0.000000 {
+pnode node_4691 4691
+phev phev_4691 worker1 16.0 0.0 16.0 2.5
+pnode node_4690 4690
+pnode node_469 469
+pnode node_4682 4682
+phev phev_4682 worker2 16.0 0.0 16.0 2.5
 pnode node_4681 4681
 pnode node_468 468
-phev phev_468 worker3 16.0 0.0 16.0 2.5
+phev phev_468 worker2 16.0 0.0 16.0 2.5
 pnode node_4671 4671
 pnode node_4668 4668
+phev phev_4668 worker4 16.0 0.0 16.0 2.5
 pnode node_4667 4667
 pnode node_4665 4665
-phev phev_4665 worker3 16.0 0.0 16.0 2.5
 pnode node_4664 4664
+phev phev_4664 worker3 16.0 0.0 16.0 2.5
 pnode node_4663 4663
-phev phev_4663 worker4 16.0 0.0 16.0 2.5
 pnode node_4662 4662
 pnode node_4656 4656
 }
-trf med_96 57.600000 0.000000 {
-pnode node_470 470
-phev phev_470 worker2 16.0 0.0 16.0 2.5
-pnode node_4695 4695
-pnode node_4694 4694
-pnode node_4693 4693
-pnode node_4692 4692
-pnode node_4691 4691
-phev phev_4691 worker3 16.0 0.0 16.0 2.5
-pnode node_4690 4690
-pnode node_469 469
-phev phev_469 worker3 16.0 0.0 16.0 2.5
-pnode node_4682 4682
-}
-trf med_97 57.600000 0.000000 {
-pnode node_4722 4722
-phev phev_4722 worker2 16.0 0.0 16.0 2.5
+trf med_66 57.600000 0.000000 {
 pnode node_4721 4721
+phev phev_4721 worker2 16.0 0.0 16.0 2.5
 pnode node_4717 4717
 pnode node_4716 4716
 pnode node_4714 4714
 pnode node_4710 4710
 pnode node_4708 4708
-phev phev_4708 worker2 16.0 0.0 16.0 2.5
 pnode node_4703 4703
+phev phev_4703 worker2 16.0 0.0 16.0 2.5
 pnode node_4702 4702
+pnode node_470 470
+pnode node_4695 4695
+pnode node_4694 4694
+pnode node_4693 4693
+pnode node_4692 4692
 }
-trf med_98 57.600000 0.000000 {
+trf med_67 57.600000 0.000000 {
+pnode node_4764 4764
+phev phev_4764 worker4 16.0 0.0 16.0 2.5
+pnode node_4763 4763
+phev phev_4763 worker2 16.0 0.0 16.0 2.5
+pnode node_4760 4760
 pnode node_4757 4757
-phev phev_4757 worker3 16.0 0.0 16.0 2.5
 pnode node_4753 4753
 pnode node_4752 4752
-phev phev_4752 worker2 16.0 0.0 16.0 2.5
 pnode node_4750 4750
-phev phev_4750 worker2 16.0 0.0 16.0 2.5
 pnode node_4745 4745
-phev phev_4745 worker3 16.0 0.0 16.0 2.5
 pnode node_4738 4738
 pnode node_4733 4733
 pnode node_4730 4730
+phev phev_4730 worker3 16.0 0.0 16.0 2.5
 pnode node_4729 4729
 pnode node_4724 4724
-phev phev_4724 worker2 16.0 0.0 16.0 2.5
 pnode node_4723 4723
+pnode node_4722 4722
 }
-trf med_99 57.600000 0.000000 {
-pnode node_4776 4776
-pnode node_4775 4775
-pnode node_4774 4774
-phev phev_4774 worker4 16.0 0.0 16.0 2.5
-pnode node_4773 4773
-pnode node_4768 4768
-pnode node_4767 4767
-pnode node_4766 4766
-pnode node_4764 4764
-pnode node_4763 4763
-phev phev_4763 worker4 16.0 0.0 16.0 2.5
-pnode node_4760 4760
-}
-trf med_100 57.600000 0.000000 {
-pnode node_4789 4789
+trf med_68 57.600000 0.000000 {
 pnode node_4786 4786
 pnode node_4784 4784
 pnode node_4783 4783
-phev phev_4783 worker2 16.0 0.0 16.0 2.5
 pnode node_4782 4782
 pnode node_4781 4781
-phev phev_4781 worker4 16.0 0.0 16.0 2.5
+phev phev_4781 worker2 16.0 0.0 16.0 2.5
 pnode node_4780 4780
 pnode node_4778 4778
-phev phev_4778 worker1 16.0 0.0 16.0 2.5
 pnode node_4777 4777
-phev phev_4777 worker3 16.0 0.0 16.0 2.5
+pnode node_4776 4776
+phev phev_4776 worker4 16.0 0.0 16.0 2.5
+pnode node_4775 4775
+pnode node_4774 4774
+pnode node_4773 4773
+phev phev_4773 worker4 16.0 0.0 16.0 2.5
+pnode node_4768 4768
+pnode node_4767 4767
+phev phev_4767 worker1 16.0 0.0 16.0 2.5
+pnode node_4766 4766
+phev phev_4766 worker2 16.0 0.0 16.0 2.5
 }
-trf med_101 57.600000 0.000000 {
-pnode node_4832 4832
-phev phev_4832 worker3 16.0 0.0 16.0 2.5
-pnode node_4829 4829
-pnode node_4824 4824
-phev phev_4824 worker4 16.0 0.0 16.0 2.5
-pnode node_4819 4819
-pnode node_4816 4816
-pnode node_4815 4815
-phev phev_4815 worker3 16.0 0.0 16.0 2.5
-pnode node_4808 4808
-pnode node_4807 4807
-pnode node_4806 4806
-pnode node_4792 4792
-phev phev_4792 worker3 16.0 0.0 16.0 2.5
-pnode node_4790 4790
-}
-trf med_102 57.600000 0.000000 {
-pnode node_4862 4862
-pnode node_4861 4861
-pnode node_4857 4857
-phev phev_4857 worker2 16.0 0.0 16.0 2.5
-pnode node_4854 4854
-phev phev_4854 worker3 16.0 0.0 16.0 2.5
-pnode node_485 485
-phev phev_485 worker3 16.0 0.0 16.0 2.5
-pnode node_4846 4846
-pnode node_4845 4845
-pnode node_4843 4843
+trf med_69 57.600000 0.000000 {
 pnode node_4842 4842
-phev phev_4842 worker2 16.0 0.0 16.0 2.5
+phev phev_4842 worker4 16.0 0.0 16.0 2.5
 pnode node_4841 4841
+phev phev_4841 worker4 16.0 0.0 16.0 2.5
 pnode node_4840 4840
-phev phev_4840 worker3 16.0 0.0 16.0 2.5
 pnode node_4836 4836
 phev phev_4836 worker3 16.0 0.0 16.0 2.5
 pnode node_4833 4833
+pnode node_4832 4832
+pnode node_4829 4829
+pnode node_4824 4824
+pnode node_4819 4819
+phev phev_4819 worker2 16.0 0.0 16.0 2.5
+pnode node_4816 4816
+pnode node_4815 4815
+pnode node_4808 4808
+phev phev_4808 worker3 16.0 0.0 16.0 2.5
+pnode node_4807 4807
+phev phev_4807 worker1 16.0 0.0 16.0 2.5
+pnode node_4806 4806
+pnode node_4792 4792
+pnode node_4790 4790
+pnode node_4789 4789
+phev phev_4789 worker4 16.0 0.0 16.0 2.5
 }
-trf med_103 57.600000 0.000000 {
-pnode node_4928 4928
-pnode node_4926 4926
+trf med_70 57.600000 0.000000 {
 pnode node_492 492
-phev phev_492 worker1 16.0 0.0 16.0 2.5
+phev phev_492 worker2 16.0 0.0 16.0 2.5
 pnode node_4899 4899
-phev phev_4899 worker1 16.0 0.0 16.0 2.5
 pnode node_4892 4892
-phev phev_4892 worker4 16.0 0.0 16.0 2.5
 pnode node_4890 4890
 pnode node_4882 4882
 pnode node_4875 4875
+phev phev_4875 worker3 16.0 0.0 16.0 2.5
 pnode node_4874 4874
-phev phev_4874 worker1 16.0 0.0 16.0 2.5
 pnode node_4867 4867
 pnode node_4863 4863
+pnode node_4862 4862
+pnode node_4861 4861
+phev phev_4861 worker4 16.0 0.0 16.0 2.5
+pnode node_4857 4857
+pnode node_4854 4854
+phev phev_4854 worker3 16.0 0.0 16.0 2.5
+pnode node_485 485
+pnode node_4846 4846
+pnode node_4845 4845
+phev phev_4845 worker1 16.0 0.0 16.0 2.5
+pnode node_4843 4843
+phev phev_4843 worker1 16.0 0.0 16.0 2.5
 }
-trf med_104 57.600000 0.000000 {
+trf med_71 57.600000 0.000000 {
+pnode node_4971 4971
+pnode node_497 497
+phev phev_497 worker1 16.0 0.0 16.0 2.5
+pnode node_4969 4969
+pnode node_4968 4968
+phev phev_4968 worker3 16.0 0.0 16.0 2.5
 pnode node_4967 4967
-phev phev_4967 worker1 16.0 0.0 16.0 2.5
 pnode node_4966 4966
 pnode node_4965 4965
-phev phev_4965 worker2 16.0 0.0 16.0 2.5
+phev phev_4965 worker4 16.0 0.0 16.0 2.5
 pnode node_4964 4964
 pnode node_4961 4961
 pnode node_4954 4954
 pnode node_4953 4953
-phev phev_4953 worker2 16.0 0.0 16.0 2.5
 pnode node_4946 4946
 pnode node_4944 4944
-phev phev_4944 worker4 16.0 0.0 16.0 2.5
 pnode node_4939 4939
 pnode node_4937 4937
-phev phev_4937 worker1 16.0 0.0 16.0 2.5
+phev phev_4937 worker2 16.0 0.0 16.0 2.5
 pnode node_4936 4936
+pnode node_4928 4928
+pnode node_4926 4926
+phev phev_4926 worker2 16.0 0.0 16.0 2.5
 }
-trf med_105 57.600000 0.000000 {
-pnode node_4985 4985
-phev phev_4985 worker1 16.0 0.0 16.0 2.5
-pnode node_4984 4984
-pnode node_4979 4979
-pnode node_4978 4978
-phev phev_4978 worker2 16.0 0.0 16.0 2.5
-pnode node_4976 4976
-pnode node_4973 4973
-phev phev_4973 worker4 16.0 0.0 16.0 2.5
-pnode node_4972 4972
-phev phev_4972 worker2 16.0 0.0 16.0 2.5
-pnode node_4971 4971
-phev phev_4971 worker4 16.0 0.0 16.0 2.5
-pnode node_497 497
-pnode node_4969 4969
-phev phev_4969 worker4 16.0 0.0 16.0 2.5
-pnode node_4968 4968
-}
-trf med_106 57.600000 0.000000 {
-pnode node_5 5
-phev phev_5 worker1 16.0 0.0 16.0 2.5
+trf med_72 57.600000 0.000000 {
 pnode node_4996 4996
 pnode node_4995 4995
-phev phev_4995 worker4 16.0 0.0 16.0 2.5
+phev phev_4995 worker1 16.0 0.0 16.0 2.5
 pnode node_4993 4993
-phev phev_4993 worker2 16.0 0.0 16.0 2.5
+phev phev_4993 worker3 16.0 0.0 16.0 2.5
 pnode node_4992 4992
 pnode node_4990 4990
 phev phev_4990 worker1 16.0 0.0 16.0 2.5
 pnode node_499 499
 pnode node_4989 4989
 pnode node_4987 4987
-phev phev_4987 worker3 16.0 0.0 16.0 2.5
 pnode node_4986 4986
+pnode node_4985 4985
+phev phev_4985 worker4 16.0 0.0 16.0 2.5
+pnode node_4984 4984
+pnode node_4979 4979
+pnode node_4978 4978
+phev phev_4978 worker2 16.0 0.0 16.0 2.5
+pnode node_4976 4976
+phev phev_4976 worker1 16.0 0.0 16.0 2.5
+pnode node_4973 4973
+phev phev_4973 worker2 16.0 0.0 16.0 2.5
+pnode node_4972 4972
 }
-trf med_107 57.600000 0.000000 {
+trf med_73 57.600000 0.000000 {
+pnode node_5030 5030
+phev phev_5030 worker1 16.0 0.0 16.0 2.5
+pnode node_5027 5027
+pnode node_5026 5026
+pnode node_5021 5021
+phev phev_5021 worker4 16.0 0.0 16.0 2.5
 pnode node_5015 5015
 pnode node_5013 5013
 pnode node_5012 5012
+phev phev_5012 worker2 16.0 0.0 16.0 2.5
 pnode node_501 501
 pnode node_5007 5007
+phev phev_5007 worker3 16.0 0.0 16.0 2.5
 pnode node_5004 5004
 pnode node_5003 5003
+phev phev_5003 worker3 16.0 0.0 16.0 2.5
 pnode node_5002 5002
-phev phev_5002 worker1 16.0 0.0 16.0 2.5
 pnode node_5001 5001
+phev phev_5001 worker3 16.0 0.0 16.0 2.5
 pnode node_5000 5000
 pnode node_500 500
+pnode node_5 5
 }
-trf med_108 57.600000 0.000000 {
-pnode node_5049 5049
-pnode node_5048 5048
-phev phev_5048 worker2 16.0 0.0 16.0 2.5
-pnode node_5045 5045
-pnode node_5035 5035
-phev phev_5035 worker2 16.0 0.0 16.0 2.5
-pnode node_5033 5033
-pnode node_5032 5032
-pnode node_5030 5030
-phev phev_5030 worker4 16.0 0.0 16.0 2.5
-pnode node_5027 5027
-phev phev_5027 worker4 16.0 0.0 16.0 2.5
-pnode node_5026 5026
-phev phev_5026 worker2 16.0 0.0 16.0 2.5
-pnode node_5021 5021
-phev phev_5021 worker4 16.0 0.0 16.0 2.5
-}
-trf med_109 57.600000 0.000000 {
-pnode node_5067 5067
-phev phev_5067 worker1 16.0 0.0 16.0 2.5
+trf med_74 57.600000 0.000000 {
 pnode node_5064 5064
-phev phev_5064 worker2 16.0 0.0 16.0 2.5
 pnode node_5062 5062
 pnode node_5061 5061
+phev phev_5061 worker2 16.0 0.0 16.0 2.5
 pnode node_5060 5060
+phev phev_5060 worker3 16.0 0.0 16.0 2.5
 pnode node_5058 5058
+phev phev_5058 worker2 16.0 0.0 16.0 2.5
 pnode node_5057 5057
 phev phev_5057 worker4 16.0 0.0 16.0 2.5
 pnode node_5052 5052
+phev phev_5052 worker4 16.0 0.0 16.0 2.5
 pnode node_5051 5051
+pnode node_5049 5049
+phev phev_5049 worker2 16.0 0.0 16.0 2.5
+pnode node_5048 5048
+pnode node_5045 5045
+pnode node_5035 5035
+pnode node_5033 5033
+phev phev_5033 worker3 16.0 0.0 16.0 2.5
+pnode node_5032 5032
 }
-trf med_110 57.600000 0.000000 {
-pnode node_509 509
-phev phev_509 worker1 16.0 0.0 16.0 2.5
-pnode node_5089 5089
-phev phev_5089 worker2 16.0 0.0 16.0 2.5
-pnode node_5087 5087
-phev phev_5087 worker4 16.0 0.0 16.0 2.5
-pnode node_5084 5084
-phev phev_5084 worker4 16.0 0.0 16.0 2.5
-pnode node_5081 5081
-pnode node_508 508
-phev phev_508 worker3 16.0 0.0 16.0 2.5
-pnode node_5078 5078
-pnode node_5073 5073
-phev phev_5073 worker2 16.0 0.0 16.0 2.5
-pnode node_507 507
-phev phev_507 worker3 16.0 0.0 16.0 2.5
-pnode node_5069 5069
-}
-}
-trf high_1 1240.000000 0.000000 {
-trf med_111 57.600000 0.000000 {
-pnode node_5145 5145
-phev phev_5145 worker2 16.0 0.0 16.0 2.5
-pnode node_5142 5142
-pnode node_5130 5130
-pnode node_5128 5128
-pnode node_5126 5126
-pnode node_5124 5124
-pnode node_510 510
-pnode node_5099 5099
+trf med_75 57.600000 0.000000 {
 pnode node_5098 5098
 pnode node_5096 5096
-phev phev_5096 worker1 16.0 0.0 16.0 2.5
 pnode node_5095 5095
-phev phev_5095 worker3 16.0 0.0 16.0 2.5
 pnode node_5093 5093
 pnode node_5092 5092
 phev phev_5092 worker3 16.0 0.0 16.0 2.5
+pnode node_509 509
+pnode node_5089 5089
+pnode node_5087 5087
+phev phev_5087 worker4 16.0 0.0 16.0 2.5
+pnode node_5084 5084
+pnode node_5081 5081
+phev phev_5081 worker1 16.0 0.0 16.0 2.5
+pnode node_508 508
+pnode node_5078 5078
+pnode node_5073 5073
+phev phev_5073 worker4 16.0 0.0 16.0 2.5
+pnode node_507 507
+pnode node_5069 5069
+pnode node_5067 5067
 }
-trf med_112 57.600000 0.000000 {
+trf med_76 57.600000 0.000000 {
+pnode node_519 519
+pnode node_5180 5180
+pnode node_5178 5178
+phev phev_5178 worker3 16.0 0.0 16.0 2.5
+pnode node_517 517
+pnode node_5158 5158
+pnode node_5150 5150
+pnode node_5146 5146
+pnode node_5145 5145
+pnode node_5142 5142
+phev phev_5142 worker4 16.0 0.0 16.0 2.5
+pnode node_5130 5130
+pnode node_5128 5128
+phev phev_5128 worker1 16.0 0.0 16.0 2.5
+pnode node_5126 5126
+phev phev_5126 worker2 16.0 0.0 16.0 2.5
+pnode node_5124 5124
+phev phev_5124 worker2 16.0 0.0 16.0 2.5
+pnode node_510 510
+pnode node_5099 5099
+}
+trf med_77 57.600000 0.000000 {
+pnode node_5225 5225
+pnode node_5224 5224
+phev phev_5224 worker4 16.0 0.0 16.0 2.5
+pnode node_5223 5223
+phev phev_5223 worker4 16.0 0.0 16.0 2.5
+pnode node_5222 5222
+pnode node_5218 5218
+phev phev_5218 worker4 16.0 0.0 16.0 2.5
+pnode node_5216 5216
+pnode node_5215 5215
+phev phev_5215 worker1 16.0 0.0 16.0 2.5
+pnode node_5214 5214
+pnode node_5213 5213
+pnode node_5209 5209
+phev phev_5209 worker3 16.0 0.0 16.0 2.5
+pnode node_5208 5208
 pnode node_5205 5205
 phev phev_5205 worker3 16.0 0.0 16.0 2.5
 pnode node_5204 5204
 phev phev_5204 worker3 16.0 0.0 16.0 2.5
 pnode node_5201 5201
-phev phev_5201 worker4 16.0 0.0 16.0 2.5
-pnode node_519 519
-phev phev_519 worker2 16.0 0.0 16.0 2.5
-pnode node_5180 5180
-phev phev_5180 worker4 16.0 0.0 16.0 2.5
-pnode node_5178 5178
-pnode node_517 517
-phev phev_517 worker3 16.0 0.0 16.0 2.5
-pnode node_5158 5158
-pnode node_5150 5150
-pnode node_5146 5146
-phev phev_5146 worker4 16.0 0.0 16.0 2.5
 }
-trf med_113 57.600000 0.000000 {
-pnode node_5223 5223
-pnode node_5222 5222
-pnode node_5218 5218
-pnode node_5216 5216
-pnode node_5215 5215
-pnode node_5214 5214
-pnode node_5213 5213
-phev phev_5213 worker3 16.0 0.0 16.0 2.5
-pnode node_5209 5209
-pnode node_5208 5208
-phev phev_5208 worker2 16.0 0.0 16.0 2.5
-}
-trf med_114 57.600000 0.000000 {
-pnode node_5247 5247
-phev phev_5247 worker4 16.0 0.0 16.0 2.5
-pnode node_5246 5246
-phev phev_5246 worker1 16.0 0.0 16.0 2.5
-pnode node_5242 5242
-pnode node_5241 5241
-phev phev_5241 worker1 16.0 0.0 16.0 2.5
-pnode node_5235 5235
-pnode node_5234 5234
-phev phev_5234 worker4 16.0 0.0 16.0 2.5
-pnode node_5231 5231
-pnode node_5228 5228
-pnode node_5227 5227
-phev phev_5227 worker3 16.0 0.0 16.0 2.5
-pnode node_5225 5225
-pnode node_5224 5224
-}
-trf med_115 57.600000 0.000000 {
-pnode node_5270 5270
-pnode node_5266 5266
-phev phev_5266 worker3 16.0 0.0 16.0 2.5
-pnode node_5265 5265
-pnode node_5264 5264
+trf med_78 57.600000 0.000000 {
 pnode node_5263 5263
-phev phev_5263 worker4 16.0 0.0 16.0 2.5
 pnode node_5257 5257
 pnode node_5256 5256
-phev phev_5256 worker4 16.0 0.0 16.0 2.5
 pnode node_5254 5254
 pnode node_5251 5251
+phev phev_5251 worker1 16.0 0.0 16.0 2.5
 pnode node_5248 5248
+phev phev_5248 worker1 16.0 0.0 16.0 2.5
+pnode node_5247 5247
+pnode node_5246 5246
+pnode node_5242 5242
+pnode node_5241 5241
+pnode node_5235 5235
+phev phev_5235 worker2 16.0 0.0 16.0 2.5
+pnode node_5234 5234
+phev phev_5234 worker2 16.0 0.0 16.0 2.5
+pnode node_5231 5231
+phev phev_5231 worker4 16.0 0.0 16.0 2.5
+pnode node_5228 5228
+pnode node_5227 5227
 }
-trf med_116 57.600000 0.000000 {
+trf med_79 57.600000 0.000000 {
+pnode node_543 543
+phev phev_543 worker3 16.0 0.0 16.0 2.5
 pnode node_542 542
+phev phev_542 worker1 16.0 0.0 16.0 2.5
 pnode node_5373 5373
 pnode node_5363 5363
 pnode node_5362 5362
-phev phev_5362 worker1 16.0 0.0 16.0 2.5
 pnode node_5361 5361
 pnode node_536 536
-phev phev_536 worker3 16.0 0.0 16.0 2.5
 pnode node_5344 5344
 pnode node_5339 5339
 pnode node_5280 5280
-phev phev_5280 worker2 16.0 0.0 16.0 2.5
 pnode node_5279 5279
-phev phev_5279 worker1 16.0 0.0 16.0 2.5
+pnode node_5270 5270
+pnode node_5266 5266
+pnode node_5265 5265
+pnode node_5264 5264
 }
-trf med_117 57.600000 0.000000 {
+trf med_80 57.600000 0.000000 {
+pnode node_5491 5491
+phev phev_5491 worker3 16.0 0.0 16.0 2.5
+pnode node_549 549
+pnode node_548 548
+pnode node_5479 5479
+pnode node_5476 5476
+pnode node_5474 5474
 pnode node_547 547
 pnode node_5469 5469
+phev phev_5469 worker4 16.0 0.0 16.0 2.5
 pnode node_5468 5468
-phev phev_5468 worker2 16.0 0.0 16.0 2.5
 pnode node_5467 5467
 pnode node_546 546
 pnode node_5459 5459
 pnode node_5454 5454
-phev phev_5454 worker2 16.0 0.0 16.0 2.5
+phev phev_5454 worker1 16.0 0.0 16.0 2.5
 pnode node_545 545
-phev phev_545 worker1 16.0 0.0 16.0 2.5
+phev phev_545 worker2 16.0 0.0 16.0 2.5
 pnode node_544 544
-pnode node_543 543
 }
-trf med_118 57.600000 0.000000 {
-pnode node_5503 5503
-phev phev_5503 worker4 16.0 0.0 16.0 2.5
-pnode node_5502 5502
-phev phev_5502 worker4 16.0 0.0 16.0 2.5
-pnode node_5498 5498
-phev phev_5498 worker2 16.0 0.0 16.0 2.5
-pnode node_5497 5497
-phev phev_5497 worker2 16.0 0.0 16.0 2.5
-pnode node_5496 5496
-pnode node_5491 5491
-pnode node_549 549
-pnode node_548 548
-phev phev_548 worker2 16.0 0.0 16.0 2.5
-pnode node_5479 5479
-phev phev_5479 worker2 16.0 0.0 16.0 2.5
-pnode node_5476 5476
-phev phev_5476 worker2 16.0 0.0 16.0 2.5
-pnode node_5474 5474
-phev phev_5474 worker2 16.0 0.0 16.0 2.5
-}
-trf med_119 57.600000 0.000000 {
+trf med_81 57.600000 0.000000 {
 pnode node_5610 5610
+phev phev_5610 worker2 16.0 0.0 16.0 2.5
 pnode node_5606 5606
-phev phev_5606 worker3 16.0 0.0 16.0 2.5
 pnode node_5591 5591
 pnode node_5567 5567
-phev phev_5567 worker1 16.0 0.0 16.0 2.5
+phev phev_5567 worker2 16.0 0.0 16.0 2.5
 pnode node_5553 5553
-phev phev_5553 worker3 16.0 0.0 16.0 2.5
 pnode node_5529 5529
+phev phev_5529 worker3 16.0 0.0 16.0 2.5
 pnode node_5517 5517
 pnode node_5514 5514
+phev phev_5514 worker1 16.0 0.0 16.0 2.5
 pnode node_551 551
 pnode node_5507 5507
-phev phev_5507 worker4 16.0 0.0 16.0 2.5
 pnode node_5504 5504
-phev phev_5504 worker2 16.0 0.0 16.0 2.5
+pnode node_5503 5503
+phev phev_5503 worker3 16.0 0.0 16.0 2.5
+pnode node_5502 5502
+phev phev_5502 worker2 16.0 0.0 16.0 2.5
+pnode node_5498 5498
+pnode node_5497 5497
+phev phev_5497 worker3 16.0 0.0 16.0 2.5
+pnode node_5496 5496
 }
-trf med_120 57.600000 0.000000 {
+trf med_82 57.600000 0.000000 {
+pnode node_5691 5691
+pnode node_5688 5688
+pnode node_5687 5687
+pnode node_5684 5684
+pnode node_5677 5677
+phev phev_5677 worker4 16.0 0.0 16.0 2.5
 pnode node_5670 5670
 pnode node_5667 5667
+phev phev_5667 worker2 16.0 0.0 16.0 2.5
 pnode node_5657 5657
 phev phev_5657 worker2 16.0 0.0 16.0 2.5
 pnode node_5654 5654
 pnode node_5649 5649
 phev phev_5649 worker1 16.0 0.0 16.0 2.5
 pnode node_5639 5639
+phev phev_5639 worker1 16.0 0.0 16.0 2.5
 pnode node_5637 5637
-phev phev_5637 worker4 16.0 0.0 16.0 2.5
 pnode node_5629 5629
 pnode node_5626 5626
+phev phev_5626 worker3 16.0 0.0 16.0 2.5
 pnode node_5625 5625
 phev phev_5625 worker1 16.0 0.0 16.0 2.5
 pnode node_5624 5624
-phev phev_5624 worker2 16.0 0.0 16.0 2.5
 pnode node_5616 5616
 pnode node_5614 5614
 pnode node_5613 5613
-phev phev_5613 worker1 16.0 0.0 16.0 2.5
 }
-trf med_121 57.600000 0.000000 {
-pnode node_5706 5706
-phev phev_5706 worker4 16.0 0.0 16.0 2.5
-pnode node_5705 5705
-phev phev_5705 worker4 16.0 0.0 16.0 2.5
-pnode node_5704 5704
-phev phev_5704 worker1 16.0 0.0 16.0 2.5
-pnode node_5703 5703
-pnode node_5702 5702
-pnode node_5692 5692
-phev phev_5692 worker1 16.0 0.0 16.0 2.5
-pnode node_5691 5691
-pnode node_5688 5688
-phev phev_5688 worker2 16.0 0.0 16.0 2.5
-pnode node_5687 5687
-phev phev_5687 worker4 16.0 0.0 16.0 2.5
-pnode node_5684 5684
-pnode node_5677 5677
-phev phev_5677 worker3 16.0 0.0 16.0 2.5
 }
-trf med_122 57.600000 0.000000 {
-pnode node_5726 5726
+trf high_0 1240.000000 0.000000 {
+trf med_83 57.600000 0.000000 {
 pnode node_5725 5725
-phev phev_5725 worker4 16.0 0.0 16.0 2.5
 pnode node_5724 5724
-phev phev_5724 worker1 16.0 0.0 16.0 2.5
 pnode node_5723 5723
 pnode node_5721 5721
 pnode node_5717 5717
 pnode node_5716 5716
 pnode node_5715 5715
-phev phev_5715 worker3 16.0 0.0 16.0 2.5
 pnode node_5709 5709
-phev phev_5709 worker1 16.0 0.0 16.0 2.5
 pnode node_5708 5708
-phev phev_5708 worker2 16.0 0.0 16.0 2.5
+phev phev_5708 worker1 16.0 0.0 16.0 2.5
 pnode node_5707 5707
-phev phev_5707 worker1 16.0 0.0 16.0 2.5
+pnode node_5706 5706
+pnode node_5705 5705
+pnode node_5704 5704
+pnode node_5703 5703
+phev phev_5703 worker4 16.0 0.0 16.0 2.5
+pnode node_5702 5702
+pnode node_5692 5692
+phev phev_5692 worker1 16.0 0.0 16.0 2.5
 }
-trf med_123 57.600000 0.000000 {
+trf med_84 57.600000 0.000000 {
+pnode node_5758 5758
+pnode node_5757 5757
+pnode node_5756 5756
+pnode node_5752 5752
 pnode node_5749 5749
+phev phev_5749 worker3 16.0 0.0 16.0 2.5
 pnode node_5748 5748
-phev phev_5748 worker2 16.0 0.0 16.0 2.5
 pnode node_5745 5745
+phev phev_5745 worker4 16.0 0.0 16.0 2.5
 pnode node_5741 5741
-phev phev_5741 worker4 16.0 0.0 16.0 2.5
+phev phev_5741 worker2 16.0 0.0 16.0 2.5
 pnode node_5740 5740
 pnode node_5738 5738
-phev phev_5738 worker2 16.0 0.0 16.0 2.5
 pnode node_5730 5730
+phev phev_5730 worker1 16.0 0.0 16.0 2.5
 pnode node_5729 5729
+phev phev_5729 worker3 16.0 0.0 16.0 2.5
 pnode node_5727 5727
+pnode node_5726 5726
 }
-trf med_124 57.600000 0.000000 {
+trf med_85 57.600000 0.000000 {
+pnode node_5831 5831
+phev phev_5831 worker1 16.0 0.0 16.0 2.5
+pnode node_5829 5829
+pnode node_5827 5827
+phev phev_5827 worker2 16.0 0.0 16.0 2.5
+pnode node_5826 5826
+pnode node_5819 5819
+phev phev_5819 worker4 16.0 0.0 16.0 2.5
+pnode node_5814 5814
+pnode node_5807 5807
+pnode node_5804 5804
+phev phev_5804 worker3 16.0 0.0 16.0 2.5
+pnode node_5801 5801
+phev phev_5801 worker1 16.0 0.0 16.0 2.5
 pnode node_5795 5795
 pnode node_5793 5793
-phev phev_5793 worker1 16.0 0.0 16.0 2.5
+phev phev_5793 worker4 16.0 0.0 16.0 2.5
 pnode node_5790 5790
-phev phev_5790 worker1 16.0 0.0 16.0 2.5
 pnode node_5779 5779
-phev phev_5779 worker3 16.0 0.0 16.0 2.5
 pnode node_5778 5778
-phev phev_5778 worker2 16.0 0.0 16.0 2.5
 pnode node_5776 5776
 phev phev_5776 worker4 16.0 0.0 16.0 2.5
 pnode node_5767 5767
-pnode node_5758 5758
-phev phev_5758 worker3 16.0 0.0 16.0 2.5
-pnode node_5757 5757
-pnode node_5756 5756
-phev phev_5756 worker4 16.0 0.0 16.0 2.5
-pnode node_5752 5752
 }
-trf med_125 57.600000 0.000000 {
-pnode node_5868 5868
-pnode node_5866 5866
-phev phev_5866 worker3 16.0 0.0 16.0 2.5
-pnode node_5857 5857
-pnode node_5856 5856
-pnode node_5851 5851
-phev phev_5851 worker4 16.0 0.0 16.0 2.5
-pnode node_5850 5850
-pnode node_5841 5841
-pnode node_5831 5831
-phev phev_5831 worker4 16.0 0.0 16.0 2.5
-pnode node_5829 5829
-phev phev_5829 worker4 16.0 0.0 16.0 2.5
-pnode node_5827 5827
-pnode node_5826 5826
-pnode node_5819 5819
-phev phev_5819 worker2 16.0 0.0 16.0 2.5
-pnode node_5814 5814
-phev phev_5814 worker2 16.0 0.0 16.0 2.5
-pnode node_5807 5807
-pnode node_5804 5804
-phev phev_5804 worker1 16.0 0.0 16.0 2.5
-pnode node_5801 5801
-phev phev_5801 worker4 16.0 0.0 16.0 2.5
-}
-trf med_126 57.600000 0.000000 {
+trf med_86 57.600000 0.000000 {
+pnode node_5927 5927
+pnode node_5926 5926
+phev phev_5926 worker3 16.0 0.0 16.0 2.5
 pnode node_5924 5924
 pnode node_5923 5923
+phev phev_5923 worker3 16.0 0.0 16.0 2.5
 pnode node_5913 5913
 pnode node_5912 5912
 pnode node_5911 5911
-phev phev_5911 worker2 16.0 0.0 16.0 2.5
 pnode node_5910 5910
 pnode node_5894 5894
 pnode node_5885 5885
-phev phev_5885 worker3 16.0 0.0 16.0 2.5
 pnode node_5879 5879
+phev phev_5879 worker1 16.0 0.0 16.0 2.5
 pnode node_5875 5875
+phev phev_5875 worker2 16.0 0.0 16.0 2.5
+pnode node_5868 5868
+pnode node_5866 5866
+pnode node_5857 5857
+pnode node_5856 5856
+phev phev_5856 worker3 16.0 0.0 16.0 2.5
+pnode node_5851 5851
+pnode node_5850 5850
+pnode node_5841 5841
 }
-trf med_127 57.600000 0.000000 {
+trf med_87 57.600000 0.000000 {
+pnode node_615 615
+phev phev_615 worker4 16.0 0.0 16.0 2.5
+pnode node_6132 6132
+phev phev_6132 worker4 16.0 0.0 16.0 2.5
+pnode node_613 613
+phev phev_613 worker3 16.0 0.0 16.0 2.5
+pnode node_6125 6125
+pnode node_6124 6124
+pnode node_6122 6122
+phev phev_6122 worker3 16.0 0.0 16.0 2.5
+pnode node_6112 6112
 pnode node_611 611
 pnode node_610 610
 pnode node_6095 6095
 pnode node_6 6
 pnode node_5958 5958
-phev phev_5958 worker2 16.0 0.0 16.0 2.5
 pnode node_5957 5957
-phev phev_5957 worker2 16.0 0.0 16.0 2.5
 pnode node_5952 5952
-phev phev_5952 worker1 16.0 0.0 16.0 2.5
 pnode node_5951 5951
-phev phev_5951 worker4 16.0 0.0 16.0 2.5
+phev phev_5951 worker2 16.0 0.0 16.0 2.5
 pnode node_5945 5945
 pnode node_5941 5941
+phev phev_5941 worker2 16.0 0.0 16.0 2.5
 pnode node_5935 5935
-pnode node_5927 5927
-pnode node_5926 5926
 }
-trf med_128 57.600000 0.000000 {
-pnode node_627 627
-pnode node_618 618
-phev phev_618 worker3 16.0 0.0 16.0 2.5
-pnode node_615 615
-pnode node_6132 6132
-pnode node_613 613
-pnode node_6125 6125
-pnode node_6124 6124
-pnode node_6122 6122
-phev phev_6122 worker1 16.0 0.0 16.0 2.5
-pnode node_6112 6112
-phev phev_6112 worker2 16.0 0.0 16.0 2.5
-}
-trf med_129 57.600000 0.000000 {
+trf med_88 57.600000 0.000000 {
+pnode node_6430 6430
+phev phev_6430 worker3 16.0 0.0 16.0 2.5
+pnode node_6420 6420
+phev phev_6420 worker3 16.0 0.0 16.0 2.5
+pnode node_6414 6414
+pnode node_6396 6396
+phev phev_6396 worker2 16.0 0.0 16.0 2.5
 pnode node_639 639
 pnode node_6388 6388
-phev phev_6388 worker4 16.0 0.0 16.0 2.5
 pnode node_6385 6385
-phev phev_6385 worker3 16.0 0.0 16.0 2.5
+phev phev_6385 worker1 16.0 0.0 16.0 2.5
 pnode node_638 638
 pnode node_6364 6364
 pnode node_6362 6362
 pnode node_6357 6357
 pnode node_6355 6355
+phev phev_6355 worker1 16.0 0.0 16.0 2.5
 pnode node_6347 6347
-phev phev_6347 worker1 16.0 0.0 16.0 2.5
 pnode node_631 631
+pnode node_627 627
+pnode node_618 618
 }
-trf med_130 57.600000 0.000000 {
+trf med_89 57.600000 0.000000 {
+pnode node_6526 6526
+pnode node_6524 6524
+phev phev_6524 worker4 16.0 0.0 16.0 2.5
+pnode node_652 652
+phev phev_652 worker4 16.0 0.0 16.0 2.5
+pnode node_6519 6519
+phev phev_6519 worker2 16.0 0.0 16.0 2.5
+pnode node_6500 6500
+phev phev_6500 worker3 16.0 0.0 16.0 2.5
+pnode node_6492 6492
+phev phev_6492 worker3 16.0 0.0 16.0 2.5
+pnode node_6488 6488
+phev phev_6488 worker1 16.0 0.0 16.0 2.5
+pnode node_6486 6486
+phev phev_6486 worker4 16.0 0.0 16.0 2.5
+pnode node_6484 6484
+pnode node_6468 6468
+phev phev_6468 worker4 16.0 0.0 16.0 2.5
+pnode node_6464 6464
+pnode node_646 646
+pnode node_6453 6453
 pnode node_6452 6452
-phev phev_6452 worker3 16.0 0.0 16.0 2.5
+phev phev_6452 worker4 16.0 0.0 16.0 2.5
 pnode node_6451 6451
 phev phev_6451 worker2 16.0 0.0 16.0 2.5
 pnode node_6440 6440
 phev phev_6440 worker3 16.0 0.0 16.0 2.5
 pnode node_6438 6438
-phev phev_6438 worker3 16.0 0.0 16.0 2.5
+phev phev_6438 worker1 16.0 0.0 16.0 2.5
 pnode node_6437 6437
+phev phev_6437 worker2 16.0 0.0 16.0 2.5
 pnode node_6432 6432
-pnode node_6430 6430
-phev phev_6430 worker2 16.0 0.0 16.0 2.5
-pnode node_6420 6420
-pnode node_6414 6414
-pnode node_6396 6396
-phev phev_6396 worker2 16.0 0.0 16.0 2.5
+phev phev_6432 worker2 16.0 0.0 16.0 2.5
 }
-trf med_131 57.600000 0.000000 {
-pnode node_6528 6528
-phev phev_6528 worker4 16.0 0.0 16.0 2.5
-pnode node_6526 6526
-phev phev_6526 worker1 16.0 0.0 16.0 2.5
-pnode node_6524 6524
-phev phev_6524 worker3 16.0 0.0 16.0 2.5
-pnode node_652 652
-pnode node_6519 6519
-pnode node_6500 6500
-pnode node_6492 6492
-phev phev_6492 worker2 16.0 0.0 16.0 2.5
-pnode node_6488 6488
-phev phev_6488 worker1 16.0 0.0 16.0 2.5
-pnode node_6486 6486
-phev phev_6486 worker1 16.0 0.0 16.0 2.5
-pnode node_6484 6484
-pnode node_6468 6468
-phev phev_6468 worker2 16.0 0.0 16.0 2.5
-pnode node_6464 6464
-pnode node_646 646
-pnode node_6453 6453
-}
-}
-trf high_0 1240.000000 0.000000 {
-trf med_132 57.600000 0.000000 {
+trf med_90 57.600000 0.000000 {
+pnode node_6582 6582
+pnode node_658 658
+phev phev_658 worker1 16.0 0.0 16.0 2.5
+pnode node_6579 6579
+pnode node_6569 6569
+pnode node_6568 6568
 pnode node_6560 6560
 pnode node_6553 6553
-phev phev_6553 worker4 16.0 0.0 16.0 2.5
+phev phev_6553 worker2 16.0 0.0 16.0 2.5
 pnode node_655 655
-phev phev_655 worker3 16.0 0.0 16.0 2.5
 pnode node_6541 6541
 pnode node_6540 6540
 pnode node_6539 6539
 pnode node_6537 6537
+phev phev_6537 worker4 16.0 0.0 16.0 2.5
 pnode node_6536 6536
-phev phev_6536 worker2 16.0 0.0 16.0 2.5
+phev phev_6536 worker4 16.0 0.0 16.0 2.5
 pnode node_6532 6532
-phev phev_6532 worker2 16.0 0.0 16.0 2.5
 pnode node_6529 6529
+pnode node_6528 6528
+phev phev_6528 worker4 16.0 0.0 16.0 2.5
 }
-trf med_133 57.600000 0.000000 {
-pnode node_6601 6601
-phev phev_6601 worker1 16.0 0.0 16.0 2.5
-pnode node_66 66
-phev phev_66 worker1 16.0 0.0 16.0 2.5
-pnode node_6590 6590
-pnode node_659 659
-pnode node_6586 6586
-pnode node_6584 6584
-phev phev_6584 worker2 16.0 0.0 16.0 2.5
-pnode node_6583 6583
-phev phev_6583 worker1 16.0 0.0 16.0 2.5
-pnode node_6582 6582
-phev phev_6582 worker3 16.0 0.0 16.0 2.5
-pnode node_658 658
-pnode node_6579 6579
-phev phev_6579 worker4 16.0 0.0 16.0 2.5
-pnode node_6569 6569
-pnode node_6568 6568
-phev phev_6568 worker3 16.0 0.0 16.0 2.5
-}
-trf med_134 57.600000 0.000000 {
+trf med_91 57.600000 0.000000 {
 pnode node_6631 6631
-phev phev_6631 worker3 16.0 0.0 16.0 2.5
 pnode node_6626 6626
 pnode node_6625 6625
 pnode node_6622 6622
 pnode node_6620 6620
-phev phev_6620 worker1 16.0 0.0 16.0 2.5
+phev phev_6620 worker3 16.0 0.0 16.0 2.5
 pnode node_662 662
 pnode node_6612 6612
-phev phev_6612 worker4 16.0 0.0 16.0 2.5
 pnode node_6604 6604
 pnode node_6602 6602
+pnode node_6601 6601
+phev phev_6601 worker4 16.0 0.0 16.0 2.5
+pnode node_66 66
+phev phev_66 worker3 16.0 0.0 16.0 2.5
+pnode node_6590 6590
+phev phev_6590 worker4 16.0 0.0 16.0 2.5
+pnode node_659 659
+phev phev_659 worker2 16.0 0.0 16.0 2.5
+pnode node_6586 6586
+phev phev_6586 worker1 16.0 0.0 16.0 2.5
+pnode node_6584 6584
+phev phev_6584 worker1 16.0 0.0 16.0 2.5
+pnode node_6583 6583
 }
-trf med_135 57.600000 0.000000 {
+trf med_92 57.600000 0.000000 {
+pnode node_6691 6691
+pnode node_6683 6683
+phev phev_6683 worker2 16.0 0.0 16.0 2.5
+pnode node_6682 6682
+pnode node_6677 6677
+phev phev_6677 worker2 16.0 0.0 16.0 2.5
+pnode node_6675 6675
 pnode node_6672 6672
 pnode node_6667 6667
 pnode node_6662 6662
 pnode node_6661 6661
 pnode node_666 666
+phev phev_666 worker2 16.0 0.0 16.0 2.5
 pnode node_6658 6658
 pnode node_6657 6657
 pnode node_6654 6654
 pnode node_6653 6653
-phev phev_6653 worker3 16.0 0.0 16.0 2.5
+phev phev_6653 worker4 16.0 0.0 16.0 2.5
 pnode node_6647 6647
+phev phev_6647 worker2 16.0 0.0 16.0 2.5
 pnode node_6646 6646
+phev phev_6646 worker2 16.0 0.0 16.0 2.5
 pnode node_6641 6641
 pnode node_6640 6640
+phev phev_6640 worker4 16.0 0.0 16.0 2.5
 }
-trf med_136 57.600000 0.000000 {
-pnode node_6703 6703
-pnode node_6701 6701
-pnode node_67 67
-pnode node_6697 6697
-pnode node_6694 6694
-phev phev_6694 worker2 16.0 0.0 16.0 2.5
-pnode node_6693 6693
-phev phev_6693 worker1 16.0 0.0 16.0 2.5
-pnode node_6692 6692
-pnode node_6691 6691
-phev phev_6691 worker1 16.0 0.0 16.0 2.5
-pnode node_6683 6683
-phev phev_6683 worker2 16.0 0.0 16.0 2.5
-pnode node_6682 6682
-pnode node_6677 6677
-pnode node_6675 6675
-}
-trf med_137 57.600000 0.000000 {
+trf med_93 57.600000 0.000000 {
 pnode node_6730 6730
 pnode node_673 673
-phev phev_673 worker2 16.0 0.0 16.0 2.5
 pnode node_6727 6727
 pnode node_6723 6723
-phev phev_6723 worker2 16.0 0.0 16.0 2.5
 pnode node_6721 6721
 pnode node_6717 6717
+phev phev_6717 worker1 16.0 0.0 16.0 2.5
 pnode node_6716 6716
-phev phev_6716 worker1 16.0 0.0 16.0 2.5
 pnode node_6711 6711
 pnode node_6709 6709
 pnode node_6708 6708
+phev phev_6708 worker1 16.0 0.0 16.0 2.5
 pnode node_6704 6704
+pnode node_6703 6703
+pnode node_6701 6701
+phev phev_6701 worker3 16.0 0.0 16.0 2.5
+pnode node_67 67
+pnode node_6697 6697
+phev phev_6697 worker4 16.0 0.0 16.0 2.5
+pnode node_6694 6694
+phev phev_6694 worker1 16.0 0.0 16.0 2.5
+pnode node_6693 6693
+pnode node_6692 6692
 }
-trf med_138 57.600000 0.000000 {
+trf med_94 57.600000 0.000000 {
+pnode node_6778 6778
+pnode node_6777 6777
+phev phev_6777 worker2 16.0 0.0 16.0 2.5
+pnode node_6776 6776
+phev phev_6776 worker2 16.0 0.0 16.0 2.5
+pnode node_6773 6773
 pnode node_6770 6770
 pnode node_6764 6764
 pnode node_6763 6763
-phev phev_6763 worker1 16.0 0.0 16.0 2.5
 pnode node_6757 6757
 pnode node_6755 6755
 pnode node_6749 6749
@@ -2358,32 +2198,11 @@ pnode node_6748 6748
 pnode node_6741 6741
 pnode node_6740 6740
 }
-trf med_139 57.600000 0.000000 {
-pnode node_6807 6807
-pnode node_6801 6801
-phev phev_6801 worker1 16.0 0.0 16.0 2.5
-pnode node_6800 6800
-pnode node_6795 6795
-phev phev_6795 worker2 16.0 0.0 16.0 2.5
-pnode node_6792 6792
-phev phev_6792 worker3 16.0 0.0 16.0 2.5
-pnode node_6787 6787
-phev phev_6787 worker4 16.0 0.0 16.0 2.5
-pnode node_6784 6784
-pnode node_6778 6778
-pnode node_6777 6777
-pnode node_6776 6776
-pnode node_6773 6773
-}
-trf med_140 57.600000 0.000000 {
+trf med_95 57.600000 0.000000 {
 pnode node_6838 6838
-phev phev_6838 worker2 16.0 0.0 16.0 2.5
 pnode node_6837 6837
-phev phev_6837 worker4 16.0 0.0 16.0 2.5
 pnode node_6834 6834
-phev phev_6834 worker1 16.0 0.0 16.0 2.5
 pnode node_6833 6833
-phev phev_6833 worker4 16.0 0.0 16.0 2.5
 pnode node_683 683
 phev phev_683 worker3 16.0 0.0 16.0 2.5
 pnode node_6828 6828
@@ -2392,187 +2211,191 @@ pnode node_6821 6821
 pnode node_6814 6814
 pnode node_6813 6813
 phev phev_6813 worker1 16.0 0.0 16.0 2.5
+pnode node_6807 6807
+phev phev_6807 worker3 16.0 0.0 16.0 2.5
+pnode node_6801 6801
+phev phev_6801 worker2 16.0 0.0 16.0 2.5
+pnode node_6800 6800
+pnode node_6795 6795
+phev phev_6795 worker1 16.0 0.0 16.0 2.5
+pnode node_6792 6792
+phev phev_6792 worker4 16.0 0.0 16.0 2.5
+pnode node_6787 6787
+phev phev_6787 worker2 16.0 0.0 16.0 2.5
+pnode node_6784 6784
 }
-trf med_141 57.600000 0.000000 {
+trf med_96 57.600000 0.000000 {
+pnode node_6964 6964
+pnode node_6953 6953
+pnode node_6946 6946
+pnode node_6940 6940
+pnode node_694 694
+pnode node_6923 6923
+phev phev_6923 worker2 16.0 0.0 16.0 2.5
+pnode node_692 692
+pnode node_6919 6919
+pnode node_691 691
 pnode node_690 690
 pnode node_6887 6887
+phev phev_6887 worker1 16.0 0.0 16.0 2.5
 pnode node_6882 6882
-phev phev_6882 worker1 16.0 0.0 16.0 2.5
 pnode node_6880 6880
+phev phev_6880 worker4 16.0 0.0 16.0 2.5
 pnode node_6878 6878
 pnode node_6877 6877
+phev phev_6877 worker3 16.0 0.0 16.0 2.5
 pnode node_6868 6868
+phev phev_6868 worker3 16.0 0.0 16.0 2.5
 pnode node_6866 6866
-phev phev_6866 worker1 16.0 0.0 16.0 2.5
+phev phev_6866 worker3 16.0 0.0 16.0 2.5
 pnode node_6860 6860
-phev phev_6860 worker1 16.0 0.0 16.0 2.5
+phev phev_6860 worker3 16.0 0.0 16.0 2.5
 pnode node_6855 6855
+phev phev_6855 worker1 16.0 0.0 16.0 2.5
 pnode node_6850 6850
-phev phev_6850 worker2 16.0 0.0 16.0 2.5
+phev phev_6850 worker1 16.0 0.0 16.0 2.5
 pnode node_6849 6849
-phev phev_6849 worker4 16.0 0.0 16.0 2.5
 }
-trf med_142 57.600000 0.000000 {
+trf med_97 57.600000 0.000000 {
+pnode node_7030 7030
+pnode node_7020 7020
+phev phev_7020 worker1 16.0 0.0 16.0 2.5
+pnode node_702 702
+pnode node_7016 7016
+pnode node_7015 7015
+phev phev_7015 worker4 16.0 0.0 16.0 2.5
+pnode node_701 701
+pnode node_7002 7002
+phev phev_7002 worker3 16.0 0.0 16.0 2.5
+pnode node_6999 6999
 pnode node_6996 6996
+phev phev_6996 worker3 16.0 0.0 16.0 2.5
 pnode node_6993 6993
+phev phev_6993 worker3 16.0 0.0 16.0 2.5
 pnode node_6991 6991
-phev phev_6991 worker2 16.0 0.0 16.0 2.5
 pnode node_6989 6989
 pnode node_6984 6984
 pnode node_698 698
 pnode node_6973 6973
+phev phev_6973 worker3 16.0 0.0 16.0 2.5
 pnode node_6971 6971
+phev phev_6971 worker2 16.0 0.0 16.0 2.5
 pnode node_6965 6965
-pnode node_6964 6964
-phev phev_6964 worker3 16.0 0.0 16.0 2.5
-pnode node_6953 6953
-pnode node_6946 6946
-phev phev_6946 worker2 16.0 0.0 16.0 2.5
-pnode node_6940 6940
-pnode node_694 694
-pnode node_6923 6923
-phev phev_6923 worker1 16.0 0.0 16.0 2.5
-pnode node_692 692
-phev phev_692 worker1 16.0 0.0 16.0 2.5
-pnode node_6919 6919
-phev phev_6919 worker3 16.0 0.0 16.0 2.5
-pnode node_691 691
-phev phev_691 worker1 16.0 0.0 16.0 2.5
+phev phev_6965 worker4 16.0 0.0 16.0 2.5
 }
-trf med_143 57.600000 0.000000 {
-pnode node_7031 7031
-pnode node_7030 7030
-phev phev_7030 worker4 16.0 0.0 16.0 2.5
-pnode node_7020 7020
-pnode node_702 702
-phev phev_702 worker2 16.0 0.0 16.0 2.5
-pnode node_7016 7016
-phev phev_7016 worker3 16.0 0.0 16.0 2.5
-pnode node_7015 7015
-pnode node_701 701
-pnode node_7002 7002
-pnode node_6999 6999
-}
-trf med_144 57.600000 0.000000 {
+trf med_98 57.600000 0.000000 {
+pnode node_7194 7194
+pnode node_7193 7193
+phev phev_7193 worker4 16.0 0.0 16.0 2.5
+pnode node_7192 7192
+pnode node_7190 7190
+pnode node_7189 7189
 pnode node_7187 7187
 phev phev_7187 worker2 16.0 0.0 16.0 2.5
 pnode node_7175 7175
-phev phev_7175 worker4 16.0 0.0 16.0 2.5
 pnode node_7173 7173
-phev phev_7173 worker3 16.0 0.0 16.0 2.5
 pnode node_716 716
 pnode node_7151 7151
 pnode node_714 714
 pnode node_712 712
-phev phev_712 worker2 16.0 0.0 16.0 2.5
+phev phev_712 worker1 16.0 0.0 16.0 2.5
 pnode node_711 711
+phev phev_711 worker1 16.0 0.0 16.0 2.5
 pnode node_7088 7088
 pnode node_7076 7076
 pnode node_7069 7069
 pnode node_7057 7057
-phev phev_7057 worker4 16.0 0.0 16.0 2.5
+phev phev_7057 worker2 16.0 0.0 16.0 2.5
 pnode node_7041 7041
+phev phev_7041 worker2 16.0 0.0 16.0 2.5
 pnode node_704 704
-phev phev_704 worker4 16.0 0.0 16.0 2.5
+pnode node_7031 7031
 }
-trf med_145 57.600000 0.000000 {
-pnode node_7267 7267
-pnode node_7266 7266
-phev phev_7266 worker4 16.0 0.0 16.0 2.5
-pnode node_724 724
-phev phev_724 worker4 16.0 0.0 16.0 2.5
-pnode node_721 721
-pnode node_7205 7205
-phev phev_7205 worker2 16.0 0.0 16.0 2.5
-pnode node_7203 7203
-phev phev_7203 worker2 16.0 0.0 16.0 2.5
-pnode node_720 720
-pnode node_7194 7194
-pnode node_7193 7193
-pnode node_7192 7192
-pnode node_7190 7190
-pnode node_7189 7189
-}
-trf med_146 57.600000 0.000000 {
-pnode node_730 730
+trf med_99 57.600000 0.000000 {
 pnode node_7287 7287
-phev phev_7287 worker4 16.0 0.0 16.0 2.5
 pnode node_7284 7284
 pnode node_7283 7283
 pnode node_7282 7282
-phev phev_7282 worker2 16.0 0.0 16.0 2.5
+phev phev_7282 worker3 16.0 0.0 16.0 2.5
 pnode node_728 728
 pnode node_7279 7279
 pnode node_7275 7275
 pnode node_7274 7274
-phev phev_7274 worker2 16.0 0.0 16.0 2.5
 pnode node_7273 7273
 pnode node_7269 7269
 pnode node_7268 7268
+phev phev_7268 worker4 16.0 0.0 16.0 2.5
+pnode node_7267 7267
+phev phev_7267 worker3 16.0 0.0 16.0 2.5
+pnode node_7266 7266
+phev phev_7266 worker2 16.0 0.0 16.0 2.5
+pnode node_724 724
+pnode node_721 721
+phev phev_721 worker4 16.0 0.0 16.0 2.5
+pnode node_7205 7205
+pnode node_7203 7203
+pnode node_720 720
 }
-trf med_147 57.600000 0.000000 {
-pnode node_7503 7503
-pnode node_750 750
-pnode node_748 748
-pnode node_747 747
-phev phev_747 worker4 16.0 0.0 16.0 2.5
-pnode node_7467 7467
-pnode node_744 744
-phev phev_744 worker1 16.0 0.0 16.0 2.5
-pnode node_739 739
-pnode node_7379 7379
-pnode node_734 734
-pnode node_7323 7323
-}
-trf med_148 57.600000 0.000000 {
-pnode node_7665 7665
-phev phev_7665 worker3 16.0 0.0 16.0 2.5
-pnode node_762 762
-phev phev_762 worker4 16.0 0.0 16.0 2.5
-pnode node_7615 7615
-phev phev_7615 worker1 16.0 0.0 16.0 2.5
-pnode node_7612 7612
-phev phev_7612 worker2 16.0 0.0 16.0 2.5
-pnode node_7586 7586
-phev phev_7586 worker4 16.0 0.0 16.0 2.5
-pnode node_7583 7583
-pnode node_7575 7575
+trf med_100 57.600000 0.000000 {
 pnode node_7563 7563
 phev phev_7563 worker3 16.0 0.0 16.0 2.5
 pnode node_7559 7559
 pnode node_754 754
-phev phev_754 worker2 16.0 0.0 16.0 2.5
 pnode node_7539 7539
 pnode node_751 751
-phev phev_751 worker1 16.0 0.0 16.0 2.5
+pnode node_7503 7503
+pnode node_750 750
+pnode node_748 748
+pnode node_747 747
+pnode node_7467 7467
+phev phev_7467 worker4 16.0 0.0 16.0 2.5
+pnode node_744 744
+pnode node_739 739
+pnode node_7379 7379
+pnode node_734 734
+phev phev_734 worker3 16.0 0.0 16.0 2.5
+pnode node_7323 7323
+pnode node_730 730
 }
-trf med_149 57.600000 0.000000 {
-pnode node_7740 7740
+trf med_101 57.600000 0.000000 {
 pnode node_7738 7738
-phev phev_7738 worker2 16.0 0.0 16.0 2.5
 pnode node_7733 7733
 pnode node_773 773
 pnode node_7710 7710
-phev phev_7710 worker4 16.0 0.0 16.0 2.5
 pnode node_770 770
 pnode node_7690 7690
-phev phev_7690 worker3 16.0 0.0 16.0 2.5
+phev phev_7690 worker1 16.0 0.0 16.0 2.5
 pnode node_7687 7687
 pnode node_7677 7677
 pnode node_767 767
-phev phev_767 worker1 16.0 0.0 16.0 2.5
+pnode node_7665 7665
+phev phev_7665 worker2 16.0 0.0 16.0 2.5
+pnode node_762 762
+phev phev_762 worker4 16.0 0.0 16.0 2.5
+pnode node_7615 7615
+pnode node_7612 7612
+pnode node_7586 7586
+phev phev_7586 worker1 16.0 0.0 16.0 2.5
+pnode node_7583 7583
+phev phev_7583 worker1 16.0 0.0 16.0 2.5
+pnode node_7575 7575
 }
-trf med_150 57.600000 0.000000 {
+trf med_102 57.600000 0.000000 {
+pnode node_809 809
+pnode node_802 802
+pnode node_798 798
+phev phev_798 worker3 16.0 0.0 16.0 2.5
+pnode node_795 795
+pnode node_790 790
+phev phev_790 worker2 16.0 0.0 16.0 2.5
 pnode node_788 788
-phev phev_788 worker2 16.0 0.0 16.0 2.5
 pnode node_786 786
+phev phev_786 worker3 16.0 0.0 16.0 2.5
 pnode node_784 784
-phev phev_784 worker1 16.0 0.0 16.0 2.5
 pnode node_781 781
 pnode node_7786 7786
-phev phev_7786 worker3 16.0 0.0 16.0 2.5
 pnode node_7785 7785
-phev phev_7785 worker1 16.0 0.0 16.0 2.5
+phev phev_7785 worker4 16.0 0.0 16.0 2.5
 pnode node_777 777
 pnode node_7758 7758
 pnode node_7751 7751
@@ -2581,45 +2404,41 @@ pnode node_7747 7747
 phev phev_7747 worker2 16.0 0.0 16.0 2.5
 pnode node_7744 7744
 pnode node_7742 7742
+phev phev_7742 worker4 16.0 0.0 16.0 2.5
+pnode node_7740 7740
 }
-trf med_151 57.600000 0.000000 {
-pnode node_827 827
-pnode node_819 819
-pnode node_816 816
-pnode node_815 815
-pnode node_813 813
-pnode node_810 810
-pnode node_809 809
-phev phev_809 worker2 16.0 0.0 16.0 2.5
-pnode node_802 802
-phev phev_802 worker1 16.0 0.0 16.0 2.5
-pnode node_798 798
-phev phev_798 worker1 16.0 0.0 16.0 2.5
-pnode node_795 795
-pnode node_790 790
-}
-trf med_152 57.600000 0.000000 {
-pnode node_854 854
+trf med_103 57.600000 0.000000 {
 pnode node_853 853
-phev phev_853 worker1 16.0 0.0 16.0 2.5
+phev phev_853 worker4 16.0 0.0 16.0 2.5
 pnode node_847 847
-phev phev_847 worker3 16.0 0.0 16.0 2.5
 pnode node_846 846
 pnode node_843 843
 pnode node_842 842
 pnode node_839 839
+phev phev_839 worker3 16.0 0.0 16.0 2.5
 pnode node_835 835
+phev phev_835 worker4 16.0 0.0 16.0 2.5
 pnode node_834 834
-phev phev_834 worker3 16.0 0.0 16.0 2.5
 pnode node_832 832
+phev phev_832 worker2 16.0 0.0 16.0 2.5
 pnode node_829 829
 pnode node_828 828
+pnode node_827 827
+pnode node_819 819
+pnode node_816 816
+phev phev_816 worker3 16.0 0.0 16.0 2.5
+pnode node_815 815
+phev phev_815 worker4 16.0 0.0 16.0 2.5
+pnode node_813 813
+pnode node_810 810
 }
-trf med_153 57.600000 0.000000 {
+trf med_104 57.600000 0.000000 {
 pnode node_97 97
 pnode node_93 93
+phev phev_93 worker1 16.0 0.0 16.0 2.5
 pnode node_88 88
-phev phev_88 worker3 16.0 0.0 16.0 2.5
 pnode node_855 855
+pnode node_854 854
+phev phev_854 worker4 16.0 0.0 16.0 2.5
 }
 }

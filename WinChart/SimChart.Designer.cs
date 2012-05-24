@@ -28,18 +28,18 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea5 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend5 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series5 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea6 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend6 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series6 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea7 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend7 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series7 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea8 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend8 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series8 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea3 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend3 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea4 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend4 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series4 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.chart1 = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.chart2 = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.chart3 = new System.Windows.Forms.DataVisualization.Charting.Chart();
@@ -65,6 +65,9 @@
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.label8 = new System.Windows.Forms.Label();
             this.textBoxDays = new System.Windows.Forms.TextBox();
+            this.textLog = new System.Windows.Forms.TextBox();
+            this.textBoxDebug = new System.Windows.Forms.TextBox();
+            this.progressBar1 = new System.Windows.Forms.ProgressBar();
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.chart2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.chart3)).BeginInit();
@@ -77,64 +80,64 @@
             // 
             // chart1
             // 
-            chartArea5.Name = "ChartArea1";
-            this.chart1.ChartAreas.Add(chartArea5);
-            legend5.Name = "Legend1";
-            this.chart1.Legends.Add(legend5);
+            chartArea1.Name = "ChartArea1";
+            this.chart1.ChartAreas.Add(chartArea1);
+            legend1.Name = "Legend1";
+            this.chart1.Legends.Add(legend1);
             this.chart1.Location = new System.Drawing.Point(-4, -5);
             this.chart1.Name = "chart1";
-            series5.ChartArea = "ChartArea1";
-            series5.Legend = "Legend1";
-            series5.Name = "Series1";
-            this.chart1.Series.Add(series5);
-            this.chart1.Size = new System.Drawing.Size(537, 276);
+            series1.ChartArea = "ChartArea1";
+            series1.Legend = "Legend1";
+            series1.Name = "Series1";
+            this.chart1.Series.Add(series1);
+            this.chart1.Size = new System.Drawing.Size(471, 276);
             this.chart1.TabIndex = 0;
             this.chart1.Text = "chart1";
             // 
             // chart2
             // 
-            chartArea6.Name = "ChartArea1";
-            this.chart2.ChartAreas.Add(chartArea6);
-            legend6.Name = "Legend1";
-            this.chart2.Legends.Add(legend6);
-            this.chart2.Location = new System.Drawing.Point(529, -5);
+            chartArea2.Name = "ChartArea1";
+            this.chart2.ChartAreas.Add(chartArea2);
+            legend2.Name = "Legend1";
+            this.chart2.Legends.Add(legend2);
+            this.chart2.Location = new System.Drawing.Point(449, -5);
             this.chart2.Name = "chart2";
-            series6.ChartArea = "ChartArea1";
-            series6.Legend = "Legend1";
-            series6.Name = "Series1";
-            this.chart2.Series.Add(series6);
-            this.chart2.Size = new System.Drawing.Size(457, 276);
+            series2.ChartArea = "ChartArea1";
+            series2.Legend = "Legend1";
+            series2.Name = "Series1";
+            this.chart2.Series.Add(series2);
+            this.chart2.Size = new System.Drawing.Size(537, 276);
             this.chart2.TabIndex = 1;
             this.chart2.Text = "chart2";
             // 
             // chart3
             // 
-            chartArea7.Name = "ChartArea1";
-            this.chart3.ChartAreas.Add(chartArea7);
-            legend7.Name = "Legend1";
-            this.chart3.Legends.Add(legend7);
+            chartArea3.Name = "ChartArea1";
+            this.chart3.ChartAreas.Add(chartArea3);
+            legend3.Name = "Legend1";
+            this.chart3.Legends.Add(legend3);
             this.chart3.Location = new System.Drawing.Point(-4, 268);
             this.chart3.Name = "chart3";
-            series7.ChartArea = "ChartArea1";
-            series7.Legend = "Legend1";
-            series7.Name = "Series1";
-            this.chart3.Series.Add(series7);
-            this.chart3.Size = new System.Drawing.Size(537, 276);
+            series3.ChartArea = "ChartArea1";
+            series3.Legend = "Legend1";
+            series3.Name = "Series1";
+            this.chart3.Series.Add(series3);
+            this.chart3.Size = new System.Drawing.Size(471, 276);
             this.chart3.TabIndex = 2;
             this.chart3.Text = "chart3";
             // 
             // chartDayahead
             // 
-            chartArea8.Name = "ChartArea1";
-            this.chartDayahead.ChartAreas.Add(chartArea8);
-            legend8.Name = "Legend1";
-            this.chartDayahead.Legends.Add(legend8);
+            chartArea4.Name = "ChartArea1";
+            this.chartDayahead.ChartAreas.Add(chartArea4);
+            legend4.Name = "Legend1";
+            this.chartDayahead.Legends.Add(legend4);
             this.chartDayahead.Location = new System.Drawing.Point(449, 268);
             this.chartDayahead.Name = "chartDayahead";
-            series8.ChartArea = "ChartArea1";
-            series8.Legend = "Legend1";
-            series8.Name = "Series1";
-            this.chartDayahead.Series.Add(series8);
+            series4.ChartArea = "ChartArea1";
+            series4.Legend = "Legend1";
+            series4.Name = "Series1";
+            this.chartDayahead.Series.Add(series4);
             this.chartDayahead.Size = new System.Drawing.Size(537, 276);
             this.chartDayahead.TabIndex = 3;
             this.chartDayahead.Text = "chartDayahead";
@@ -145,9 +148,10 @@
             this.comboBox1.Items.AddRange(new object[] {
             "Peak-shaving",
             "Distance-rule",
-            "Swarm",
             "Mixed",
-            "Random"});
+            "Random",
+            "Superposition",
+            "None"});
             this.comboBox1.Location = new System.Drawing.Point(990, 25);
             this.comboBox1.Name = "comboBox1";
             this.comboBox1.Size = new System.Drawing.Size(121, 21);
@@ -160,7 +164,8 @@
             "Reactive",
             "Proactive",
             "Random",
-            "Mixed"});
+            "Mixed",
+            "None"});
             this.comboBox2.Location = new System.Drawing.Point(992, 67);
             this.comboBox2.Name = "comboBox2";
             this.comboBox2.Size = new System.Drawing.Size(121, 21);
@@ -182,7 +187,8 @@
             this.comboBox3.FormattingEnabled = true;
             this.comboBox3.Items.AddRange(new object[] {
             "Expected",
-            "Simulated"});
+            "Simulated",
+            "None"});
             this.comboBox3.Location = new System.Drawing.Point(992, 107);
             this.comboBox3.Name = "comboBox3";
             this.comboBox3.Size = new System.Drawing.Size(121, 21);
@@ -318,7 +324,7 @@
             this.textBoxPhevLearning.Name = "textBoxPhevLearning";
             this.textBoxPhevLearning.Size = new System.Drawing.Size(40, 20);
             this.textBoxPhevLearning.TabIndex = 0;
-            this.textBoxPhevLearning.Text = "76";
+            this.textBoxPhevLearning.Text = "40";
             // 
             // groupBox4
             // 
@@ -348,11 +354,41 @@
             this.textBoxDays.TabIndex = 0;
             this.textBoxDays.Text = "10";
             // 
+            // textLog
+            // 
+            this.textLog.Location = new System.Drawing.Point(-4, 540);
+            this.textLog.Multiline = true;
+            this.textLog.Name = "textLog";
+            this.textLog.ReadOnly = true;
+            this.textLog.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textLog.Size = new System.Drawing.Size(493, 110);
+            this.textLog.TabIndex = 15;
+            // 
+            // textBoxDebug
+            // 
+            this.textBoxDebug.Location = new System.Drawing.Point(486, 540);
+            this.textBoxDebug.Multiline = true;
+            this.textBoxDebug.Name = "textBoxDebug";
+            this.textBoxDebug.ReadOnly = true;
+            this.textBoxDebug.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBoxDebug.Size = new System.Drawing.Size(500, 89);
+            this.textBoxDebug.TabIndex = 16;
+            // 
+            // progressBar1
+            // 
+            this.progressBar1.Location = new System.Drawing.Point(486, 626);
+            this.progressBar1.Name = "progressBar1";
+            this.progressBar1.Size = new System.Drawing.Size(500, 23);
+            this.progressBar1.TabIndex = 17;
+            // 
             // SimChart
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1123, 545);
+            this.ClientSize = new System.Drawing.Size(1123, 651);
+            this.Controls.Add(this.progressBar1);
+            this.Controls.Add(this.textBoxDebug);
+            this.Controls.Add(this.textLog);
             this.Controls.Add(this.groupBox4);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
@@ -369,7 +405,7 @@
             this.Controls.Add(this.chart2);
             this.Controls.Add(this.chart1);
             this.Name = "SimChart";
-            this.Text = "Form1";
+            this.Text = "SimCar - An open source Smart Grid simulator";
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.chart2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.chart3)).EndInit();
@@ -414,6 +450,9 @@
         private System.Windows.Forms.GroupBox groupBox4;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.TextBox textBoxDays;
+        private System.Windows.Forms.TextBox textLog;
+        private System.Windows.Forms.TextBox textBoxDebug;
+        private System.Windows.Forms.ProgressBar progressBar1;
     }
 }
 

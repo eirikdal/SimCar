@@ -12,15 +12,14 @@ open Models
 open PostalService
 open MathNet.Numerics.Distributions
 open MathNet.Numerics.Statistics
-//open Node
-let rand = new System.Random()
-//let syncContext = SynchronizationContext.CaptureCurrent()
+
+let rand = MathNet.Numerics.Random.Xorshift(true)
 
 module Action = 
     let send_intention (phev_args : PhevArguments) ttl =
         let intention, wait = 
             if phev_args.intentions.Length = 0 then
-                Charge(phev_args.name, Energy.ofFloat (float (phev_args.capacity - phev_args.battery)), ttl, phev_args.rate), true
+                Charge(phev_args.name, Energy.ofFloat (float (phev_args.capacity - phev_args.battery)), ttl, phev_args.charge_rate), true
             else
                 match phev_args.intentions with
                 | h::t -> Charge_OK(phev_args.name, h, -1), false
@@ -29,7 +28,7 @@ module Action =
         postalService.send(phev_args.parent, intention)
         wait
 
-    let create_intention ({ battery=battery; capacity=capacity; rate=rate }) tick ttl : float<kWh> list = 
+    let create_intention ({ battery=battery; capacity=capacity; charge_rate=rate }) tick ttl : float<kWh> list = 
         let rec gen intentions remaining : int list =
             let r = rand.Next(tick,ttl)
             let exists = intentions |> List.exists (fun x -> r=x)
@@ -43,14 +42,14 @@ module Action =
         
         [for i in tick .. ttl do if List.exists (fun x -> x=i) intentions then yield rate else yield 0.0<kWh>]
 
-    let generate_intention ({ battery=battery; capacity=capacity; rate=rate }) probs : float<kWh> list = 
+    let generate_intention ({ battery=battery; capacity=capacity; charge_rate=rate }) probs : float<kWh> list = 
         let rec gen problist intentions rem = 
             let r = rand.NextDouble()
             match problist with 
-            | h::t -> if r <= h && rem > 0.0<kWh> then gen t (rate::intentions) (rem-rate) else gen t ((0.0<kWh>)::intentions) rem
+            | h::t -> if r <= h && rem >= rate then gen t (rate::intentions) (rem-rate) else if r <= h && rem > 0.0<kWh> then gen t ((rate-rem)::intentions) (rem-(rate-rem)) else gen t ((0.0<kWh>)::intentions) rem
             | _ -> intentions
 
-        gen probs [] (capacity-battery)
+        List.rev <| gen probs [] (capacity-battery)
 
     let charge (phev_args : PhevArguments) =
         // PHEV stayed home, charge battery if less than full
@@ -68,7 +67,6 @@ module Action =
         // if a distribution was found, let the PHEV leave with the corresponding duration of the distribution
         match dist with
         | Some d ->   
-            //syncContext.RaiseEvent jobDebug <| sprintf "PHEV %s left with chance %f and probability %f" name r (Seq.nth (tick%96) d.dist) 
             PHEV(phevArgs.leave(tick, d.duration))
         | None ->
             PHEV({ phevArgs with left=(-1);})
@@ -108,7 +106,7 @@ module Agent =
                     | RequestModel ->
                         if not waiting then
                             reply.Reply(Model(phev))
-                            return! loop phev false
+                            return! loop (PHEV({ phev_args with  failed=0.0<kWh>; })) false
                         else
                             queue.Enqueue(msg)
                             return! loop phev waiting
@@ -126,24 +124,23 @@ module Agent =
                     let ttl = Action.find_ttl histogram tick ttlwindow
                     let wait_for_reply = Action.send_intention phev_args ttl
             
-                    if phev_args.name = "phev_108" then
+                    if phev_args.name = "phev_7677" then
                         syncContext.RaiseDelegateEvent phevBattery phev_args.battery
-                        if phev_args.duration > 0 then
+
+                        if List.length phev_args.duration > 0 then
                             syncContext.RaiseDelegateEvent phevStatus 1.0
                         else 
                             syncContext.RaiseDelegateEvent phevStatus 0.0
 
-                    if phev_args.duration <= 0 then
+                    if List.length phev_args.duration <= 0 then
                         return! loop <| Action.leave name phev_args tick <| true
                     else
                         return! loop <| PHEV(phev_args.drive()) <| true
                 | Reset -> 
-                    return! loop <| PHEV({ phev_args with battery=phev_args.capacity; duration=(-1) }) <| false
+                    return! loop <| PHEV({ phev_args with battery=phev_args.capacity; duration=[] }) <| false
                 | Kill ->
-                    printfn "Agent %s: Exiting.." name
+                    syncContext.RaiseDelegateEvent jobProgress <| sprintf "Agent %s: Exiting.." name
                 | _ -> 
-                    syncContext.RaiseEvent error <| Exception("PHEV: Not implemented yet")
-
                     return! loop phev waiting }
             loop _p false)
     module Decentralized = 
@@ -164,10 +161,49 @@ module Agent =
                         | RequestModel ->
                             if not waiting then
                                 reply.Reply(Model(phev))
-                                return! loop phev false tick
+                                return! loop (PHEV({ phev_args with  failed=0.0<kWh>; })) false tick
                             else
                                 queue.Enqueue(msg)
                                 return! loop phev waiting tick
+                        | Mixed(baseline) ->
+                            let ttl = Action.find_ttl histogram tick ttlwindow
+
+                            let intentions = 
+                                if phev_args.intentions.Length <= 0 then
+                                    let max_baseline = List.max baseline
+                                    let min_baseline = List.min baseline
+
+                                    let probs = 
+                                        if max_baseline-min_baseline <> 0.0<kWh> then
+                                            List.map (fun x -> 1.0 - (x-min_baseline) / (max_baseline-min_baseline)) baseline
+                                        else
+                                            List.map (fun _ -> 0.5) baseline
+
+                                    Action.generate_intention phev_args probs
+                                else
+                                    phev_args.intentions
+
+                            reply.Reply(Strategy(intentions))
+
+                            let msg = 
+                                match intentions with
+                                | h::t -> Charge_OK(phev_args.name, h, ttl)
+                                | [] -> Charge_OK(phev_args.name, 0.0<kWh>, ttl)
+
+    //                        syncContext.RaiseDelegateEvent jobProgress <|  "PHEV %s: Sending charge_ok to %s" name parent
+                            postalService.send(phev_args.parent, msg)
+            
+                            if phev_args.name = "phev_7677" then
+                                syncContext.RaiseDelegateEvent phevBattery phev_args.battery
+                                if List.length phev_args.duration > 0 then
+                                    syncContext.RaiseDelegateEvent phevStatus 1.0
+                                else 
+                                    syncContext.RaiseDelegateEvent phevStatus 0.0
+
+                            if List.length phev_args.duration <= 0 then
+                                return! loop <| Action.leave name { phev_args with intentions=intentions } tick <| true <| tick
+                            else
+                                return! loop <| PHEV({ phev_args with intentions=intentions }.drive()) <| true <| tick
                     | Model(phev) ->
                         return! loop phev waiting tick
                     | Charge_OK(_,_,_) ->
@@ -176,48 +212,11 @@ module Agent =
                         let ttl = Action.find_ttl histogram tick ttlwindow
                         postalService.send("brp", RequestMixed(name, ttl))
                         return! loop phev waiting tick
-                    | Mixed(baseline) ->
-                        let max_baseline = List.max baseline
-                        let min_baseline = List.min baseline
-
-                        let probs = 
-                            if max_baseline-min_baseline <> 0.0<kWh> then
-                                List.map (fun x -> (x-min_baseline) / (max_baseline-min_baseline)) baseline
-                            else
-                                List.map (fun _ -> 0.5) baseline
-
-                        let intentions = 
-                            if phev_args.intentions.Length <= 0 then
-                                Action.generate_intention phev_args probs
-                            else
-                                phev_args.intentions
-
-                        let msg = 
-                            match intentions with
-                            | h::t -> Charge_OK(phev_args.name, h, List.length probs)
-                            | [] -> Charge_OK(phev_args.name, 0.0<kWh>, List.length probs)
-
-//                        printfn "PHEV %s: Sending charge_ok to %s" name parent
-                        postalService.send(phev_args.parent, msg)
-            
-                        if phev_args.name = "phev_108" then
-                            syncContext.RaiseDelegateEvent phevBattery phev_args.battery
-                            if phev_args.duration > 0 then
-                                syncContext.RaiseDelegateEvent phevStatus 1.0
-                            else 
-                                syncContext.RaiseDelegateEvent phevStatus 0.0
-
-                        if phev_args.duration <= 0 then
-                            return! loop <| Action.leave name { phev_args with intentions=intentions } tick <| true <| tick
-                        else
-                            return! loop <| PHEV({ phev_args with intentions=intentions }.drive()) <| true <| tick
                     | Reset -> 
-                        return! loop <| PHEV({ phev_args with battery=phev_args.capacity; duration=(-1) }) <| false <| tick
+                        return! loop <| PHEV({ phev_args with battery=phev_args.capacity; duration=[] }) <| false <| tick
                     | Kill ->
-                        printfn "Agent %s: Exiting.." name
+                        syncContext.RaiseDelegateEvent jobProgress <| sprintf "Agent %s: Exiting.." name
                     | _ -> 
-                        syncContext.RaiseEvent error <| Exception("PHEV: Not implemented yet")
-
                         return! loop phev waiting tick }
                 loop _p false 0)
         module Random = 
@@ -237,7 +236,7 @@ module Agent =
                         | RequestModel ->
                             if not waiting then
                                 reply.Reply(Model(phev))
-                                return! loop phev false
+                                return! loop (PHEV({ phev_args with  failed=0.0<kWh>; })) false
                             else
                                 queue.Enqueue(msg)
                                 return! loop phev waiting
@@ -256,23 +255,21 @@ module Agent =
 
                         postalService.send(phev_args.parent, msg)
             
-                        if phev_args.name = "phev_108" then
+                        if phev_args.name = "phev_7677" then
                             syncContext.RaiseDelegateEvent phevBattery phev_args.battery
-                            if phev_args.duration > 0 then
+                            if List.length phev_args.duration > 0 then
                                 syncContext.RaiseDelegateEvent phevStatus 1.0
                             else 
                                 syncContext.RaiseDelegateEvent phevStatus 0.0
 
-                        if phev_args.duration <= 0 then
+                        if List.length phev_args.duration <= 0 then
                             return! loop <| Action.leave name { phev_args with intentions=intentions } tick <| true
                         else
                             return! loop <| PHEV({ phev_args with intentions=intentions }.drive()) <| true
                     | Reset -> 
-                        return! loop <| PHEV({ phev_args with battery=phev_args.capacity; duration=(-1) }) <| false
+                        return! loop <| PHEV({ phev_args with battery=phev_args.capacity; duration=[] }) <| false
                     | Kill ->
-                        printfn "Agent %s: Exiting.." name
+                        syncContext.RaiseDelegateEvent jobProgress <| sprintf "Agent %s: Exiting.." name
                     | _ -> 
-                        syncContext.RaiseEvent error <| Exception("PHEV: Not implemented yet")
-
                         return! loop phev waiting }
                 loop _p false)

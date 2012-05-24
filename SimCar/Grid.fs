@@ -14,7 +14,7 @@ open PowerNode
 open MathNet.Numerics
 
 module Centralized = 
-    let make_agent name node schedule ttlwindow = 
+    let make_agent name node ttlwindow = 
         match node with
         | Transformer(_) ->
             let agent = Agent.Centralized.create_trf_agent node
@@ -29,21 +29,21 @@ module Centralized =
             postalService.add_agent(name, agent)
             agent
         | BRP(_) ->
-            let agent = Agent.Centralized.create_brp_agent node schedule
+            let agent = Agent.Centralized.create_brp_agent node
             postalService.add_agent(name, agent)
             agent
 
     // traverse a tree of models, creating a mirrored tree of agents as we go along
-    let rec make_tree node scheduler ttlwindow = 
+    let rec make_tree node ttlwindow = 
         match node with
         | Node(nodes, Some(Transformer({name=name}) as trf)) ->
-            Node(List.map (fun n -> make_tree n scheduler ttlwindow) nodes, Some <| make_agent name trf scheduler ttlwindow)
+            Node(List.map (fun n -> make_tree n ttlwindow) nodes, Some <| make_agent name trf ttlwindow)
         | Node(nodes, Some(PowerNode({name=name}) as pnode)) ->
-            Leaf(Some <| make_agent name pnode scheduler ttlwindow)
+            Leaf(Some <| make_agent name pnode ttlwindow)
         | Node(nodes, Some(PHEV({name=name}) as phev)) ->
-            Leaf(Some <| make_agent name phev scheduler ttlwindow)
+            Leaf(Some <| make_agent name phev ttlwindow)
         | Node(nodes, Some(BRP({name=name}) as brp)) ->
-            Node(List.map (fun n -> make_tree n scheduler ttlwindow) nodes, Some <| make_agent name brp scheduler ttlwindow)
+            Node(List.map (fun n -> make_tree n ttlwindow) nodes, Some <| make_agent name brp ttlwindow)
 
 module Decentralized = 
     module Random = 
@@ -135,7 +135,22 @@ module Util  =
         | PHEV(phev_args) -> ac + phev_args.current
         | _ -> ac
 
+    let fold_phevs_ux (_, Model(grid)) (ac : float<kWh>) = 
+        match grid with 
+        | PHEV(phev_args) -> ac + phev_args.failed
+        | _ -> ac
+
     let fold_pnodes (_, Model(grid)) (ac : float<kWh>) = 
         match grid with 
         | PowerNode(phev_args) -> ac + phev_args.current
+        | _ -> ac
+
+    let fold_trf_delta (_, Model(grid)) (ac : float<kWh>) = 
+        match grid with 
+        | Transformer(trf_args) -> if trf_args.current > trf_args.capacity then ac + (trf_args.current - trf_args.capacity) else ac
+        | _ -> ac
+
+    let fold_trf_filter (_, Model(grid)) (ac : float<kWh>) =
+        match grid with 
+        | Transformer(trf_args) -> ac + trf_args.filtered
         | _ -> ac

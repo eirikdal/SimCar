@@ -3,6 +3,7 @@
 #nowarn "25"
 
 open Models
+open SynchronizationContext
 open System
 open System.IO
 open System.Globalization
@@ -19,6 +20,7 @@ let screen_folder = "C:\\SimCar\\SimCar\\data\\img\\"
 
 module IO =
     let read_file (file : string) = 
+        syncContext.RaiseDelegateEvent jobDebug <| sprintf "[%s] Reading files..." (String.Format("{0:hh:mm}", DateTime.Now))
         if not <| File.Exists(file) then File.WriteAllText(file, "")
     //        use sr = new StreamReader(folder_of file)
         use sr = new StreamReader(file)
@@ -27,6 +29,7 @@ module IO =
             yield sr.ReadLine()]
 
     let write_doubles (file : string) (contents : float list) = 
+        syncContext.RaiseDelegateEvent jobDebug <| sprintf "[%s] Writing files..." (String.Format("{0:hh:mm}", DateTime.Now))
         use bw = new BinaryWriter(File.Open(file, FileMode.Append))
             
         contents |> List.iter (fun q -> bw.Write(q)) |> ignore
@@ -48,10 +51,12 @@ module IO =
             File.WriteAllLines(file, contents)
 
     let clear_dayahead_data () = 
+        syncContext.RaiseDelegateEvent jobDebug <| sprintf "[%s] Cleaning dayahead-files..." (String.Format("{0:hh:mm}", DateTime.Now))
         File.Delete (file_prediction)
         File.Delete (file_dayahead)
 
     let clear_screenshots () = 
+        syncContext.RaiseDelegateEvent jobDebug <| sprintf "[%s] Cleaning screenshot-folders..." (String.Format("{0:hh:mm}", DateTime.Now))
         let clear_subfolder folder =    
             for file in Directory.EnumerateFiles(folder) do
                 File.Delete(file)
@@ -71,6 +76,8 @@ module Regex =
         if System.Double.TryParse(str, &floatvalue) then Some(floatvalue)
         else None
 
+    let (|String|_|) (str: string) = Some str
+
     let (|ParseRegex|_|) regex str =
         let m = Regex(regex).Match(str)
         if m.Success
@@ -81,24 +88,27 @@ module Parsing =
     open Regex
     open IO 
 
-    let parse_dayahead (_dayahead : float<kWh> list) = List.map (fun f -> Energy.toFloat f) _dayahead
-
-    let parse_dist str = 
-        match str with 
+    let parse_dist = 
+        function
         | ParseRegex "mean=([0-9]+){1,2}:([0-9]+){1,2}" [Float h; Float m] ->
             h*4.0 + (m / 15.0)
         | ParseRegex "std=([0-9]+)" [Float std] ->
             (std / 15.0)
-        | ParseRegex "duration=([0-9]+){1,2}:([0-9]+){1,2}" [Float h; Float m] ->
-            h*4.0 + (m / 15.0)
+//        | ParseRegex "duration=([0-9]+){1,2}:([0-9]+){1,2}" [Float h; Float m] ->
+//            h*4.0 + (m / 15.0)
         | _ -> raise <| Exception "Parsing failed"
+
+    let parse_dur = 
+        function
+        | ParseRegex "duration=(.*)" [String str] ->
+            str.Split(';') |> Array.map Int32.Parse |> List.ofArray
 
     let rec parse_profile stream (dist : Distribution list) (rest : string list byref) = 
         match (stream : string list) with 
         | h::t ->
             match h.Split([|' ';','|], StringSplitOptions.RemoveEmptyEntries) with
             | [|dist_type;mean;std;duration|] ->
-                let temp = create_distribution dist_type (parse_dist mean) (parse_dist std) (int <| parse_dist duration)
+                let temp = create_distribution dist_type (parse_dist mean) (parse_dist std) (parse_dur duration)
                 parse_profile t (temp::dist) (&rest)
             | [|"}"|] -> 
                 rest <- t
@@ -154,7 +164,7 @@ module Parsing =
                 children <- name :: children
                 parse_powergrid rest (node::nodes) (&rest) (&children) parent
             | [|"phev";name;profile;capacity;current;battery;rate|] -> 
-                let node = create_phev name capacity current battery rate profile parent profiles
+                let node = create_phev name capacity current battery rate "2.0" profile parent profiles
                 children <- name :: children
                 parse_powergrid t (node::nodes) (&rest) (&children) parent
             | [|"pnode";name;realtime|] ->
@@ -178,10 +188,12 @@ let dayahead() = Parsing.parse_dayahead_file(file_dayahead) |> Array.get >> Ener
 
 let prediction() = Parsing.parse_dayahead_file(file_prediction) |> Array.get >> Energy.ofFloat
 
-let powergrid() = 
+let create_powergrid() = 
     let mutable rest = []
     let mutable children : string list = []
     let stream = IO.read_file file_brp
 
+    syncContext.RaiseDelegateEvent jobDebug <| sprintf "[%s] Initializing powergrid..." (String.Format("{0:hh:mm}", DateTime.Now))
     create_brp "brp" (Parsing.parse_powergrid stream [] (&rest) (&children) "brp") (fun n -> 0.0<kWh>) (children)
-
+//
+//let powergrid = create_powergrid()

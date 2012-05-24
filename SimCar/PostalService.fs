@@ -11,7 +11,7 @@ open Models
 open System.Collections.Generic
 
 type PostalService() = 
-    let agentdict = new Dictionary<string, Agent<Message>>()
+    let mutable agentdict = new Dictionary<string, Agent<Message>>()
     let mutable _agents = Node(List.empty, None) : Node<Agent<_>>
 
     let agent = Agent<Message>.Start(fun agent ->
@@ -25,15 +25,17 @@ type PostalService() =
             | Deregister(name, from_agent) ->
                 agentdict.Remove(name) |> ignore
                 return! loop()
-            | Kill -> printfn "PostalService: Exiting.."
+            | Kill -> syncContext.RaiseDelegateEvent jobProgress <|  "PostalService: Exiting.."
             | Error(message) ->
-                printfn "Error: %s" message
+                syncContext.RaiseDelegateEvent jobProgress <| sprintf "Error: %s" message
                 return! loop()
             | _ ->
-                syncContext.RaiseEvent error <| Exception("PostalService: Not implemented yet")
+                syncContext.RaiseDelegateEvent jobError "PostalService: Not implemented yet"
 
         }
         loop())
+
+    member self.Reset() = agentdict <- new Dictionary<string, Agent<Message>>()
 
     member self.Post(msg) = agent.Post(msg)
 

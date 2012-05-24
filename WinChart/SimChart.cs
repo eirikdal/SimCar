@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections;
+using System.Text.RegularExpressions;
+using System.ComponentModel;
 using System.Drawing;
 using System.Threading;
 using System.Windows.Forms;
@@ -10,6 +13,13 @@ namespace WinChart
     public partial class SimChart : Form
     {
         const int nTicks = 96;
+        Sim.SimCar tSim;
+
+        private String filePath = "";
+        private DateTime started = DateTime.Now;
+        private bool trf_updated = false;
+
+        private ArrayList profiles = new ArrayList();
 
         private const int nRealTime = 0;
         private const int nPowerNodes = 1;
@@ -32,12 +42,16 @@ namespace WinChart
         private const int nDayaheadSupervisor = 4;
         private const int nDayaheadAnts = 5;
 
-        private static string[] series = { "Total", "PowerNodes", "PHEVs", "Dayahead", "PHEVs left (not fully charged)" };
+        private static string[] series = { "Total", "PowerNodes", "PHEV (x)", "Dayahead", "PHEV (Ux)" };
         private static string[] _seriesPhev = { "PHEV status", "PHEV battery", "PHEV PDF" };
-        private static string[] _seriesTrf = {"Capacity", "Current", "Unfiltered"};
-        private static string[] _seriesDayahead = { "Original", "Dayahead previous", "Dayahead current", "Expected", "Supervisor", "Ants" };
+        private static string[] _seriesTrf = {"Capacity", "Current", "Filtered"};
+        private static string[] _seriesDayahead = { "Original", "Dayahead previous", "Dayahead current", "Expected"  };
 
-        private static int counter = 0;
+        private static int counter_trf = 0;
+        private static int counter_phev = 0;
+        private static int counter_power = 0;
+        private static int counter_day = 0;
+
         private static int nstep = 0;
 
         private delegate void saveImageDelegate(string fileName);
@@ -45,11 +59,14 @@ namespace WinChart
         private delegate void updateChartSaveImageDelegate(Chart chart, int i, Double[] points, bool saveImage, String path);
         private delegate void resetChartDelegate(Chart chart, int i, int j);
         private delegate void resetChartSaveImageDelegate(Chart chart, int i, int j, bool saveImage, String path);
-        private delegate void updatePDFDelegate(Double[] chart);
+        private delegate void updatePDFDelegate(String profile, Double[] chart);
         private delegate void addPointDelegate(Chart chart, int i, Double point);
         private delegate void incrementPointDelegate(Chart chart, int i, int point, Double val);
         private delegate void updatePointDelegate(Chart chart, int i, int point, Double val);
         private delegate void startDelegate();
+        private delegate void updateLogDelegate(String ev);
+        private delegate void updateProgressDelegate(String ev);
+        private delegate void setMaximumProgressDelegate(int max);
         
 
         void saveImageControl(string fileName)
@@ -69,7 +86,11 @@ namespace WinChart
                 updateChart(chart, series, points);
 
                 if (saveImage)
-                    chart.SaveImage(String.Format("C:\\SimCar\\SimCar\\data\\img\\{0}\\{1}.png", path, counter++), ChartImageFormat.Png);
+                {
+                    String file = String.Format(filePath + "\\{0}\\{1}.png", path, counter_power++);
+                    (new System.IO.FileInfo(file)).Directory.Create();
+                    chart.SaveImage(file, ChartImageFormat.Png);
+                }
                 
                 //for (int j = 0; j < chart.Series.Count; j++)
                 //    chart.Series[j].Points.Clear();
@@ -93,15 +114,17 @@ namespace WinChart
             }
         }
 
-        void updatePDF(Double[] prob)
+        void updatePDF(String profile, Double[] prob)
         {
             if (chart2.InvokeRequired)
             {
-                chart2.BeginInvoke(new updatePDFDelegate(updatePDF), new object[] { prob });
+                chart2.BeginInvoke(new updatePDFDelegate(updatePDF), new object[] { profile, prob });
             }
             else
             {
                 resetChart(chart2, 0, 2);
+                chart2.ChartAreas[0].AxisY.Maximum = 1.0;
+                chart2.ChartAreas[0].AxisY.Minimum = 0.0;
 
                 for (int i = 0; i < prob.Length; i++)
                 {
@@ -110,7 +133,14 @@ namespace WinChart
                     else if (prob[i] > chart2.Series[nPhevsPDF].Points[i].YValues[0])
                         chart2.Series[nPhevsPDF].Points[i].SetValueY(prob[i]);
                 }
-                chart2.SaveImage(String.Format("C:\\SimCar\\SimCar\\data\\img\\phev\\phev_pdf.png"), ChartImageFormat.Png);
+
+                String file = String.Format(filePath + "\\{0}\\{1}.png", "pdf", profile);
+                (new System.IO.FileInfo(file)).Directory.Create();
+                chart2.SaveImage(file, ChartImageFormat.Png);
+
+                chart2.ChartAreas[0].AxisY.Maximum = 20.0;
+                chart2.ChartAreas[0].AxisY.Minimum = 0.0;
+
                 resetChart(chart2, nPhevsPDF, nPhevsPDF + 1);
             }
         }
@@ -164,7 +194,7 @@ namespace WinChart
                     for (int j = 0; j < 96; j++)
                         chart.Series[i].Points.Add(0);
                 double temp = chart.Series[i].Points[point].YValues[0];
-                chart.Series[i].Points[point].SetValueY(temp + 10.0);
+                chart.Series[i].Points[point].SetValueY(temp + val);
             }
         }
 
@@ -177,8 +207,11 @@ namespace WinChart
             else
             {
                 if (saveImage)
-                    chart.SaveImage(String.Format("C:\\SimCar\\SimCar\\data\\img\\{0}\\{1}.png", path, counter++), ChartImageFormat.Png);
-
+                {
+                    String file = String.Format(filePath + "\\{0}\\{1}.png", path, counter_day++);
+                    (new System.IO.FileInfo(file)).Directory.Create();
+                    chart.SaveImage(file, ChartImageFormat.Png);
+                }
                 resetChart(chart, from, to);
             }
         }
@@ -219,6 +252,19 @@ namespace WinChart
             addPoint(chart3, nTrfFiltered, point);
         }
 
+        void trfUpdated_Changed(object sender, EventArgs e)
+        {
+            Tuple<Tuple<String, Double[]>, Tuple<Double[], Double[]>> chart = (Tuple<Tuple<String, Double[]>, Tuple<Double[], Double[]>>)sender;
+
+            Double[] capacity = chart.Item1.Item2;
+            Double[] filtered = chart.Item2.Item1;
+            Double[] current = chart.Item2.Item2;
+
+            updateChart(chart3, nTrfCapacity, capacity);
+            updateChart(chart3, nTrfFiltered, filtered);
+            updateChart(chart3, nTrfCurrent, current);
+        }
+
         void phevStatus_Changed(object sender, EventArgs e)
         {
             Double point = (Double) sender;
@@ -226,11 +272,11 @@ namespace WinChart
             addPoint(chart2, nPhevStatus, point);
         }
 
-        void phevFailed_Changed(object sender, EventArgs e)
+        void phevLeft_Changed(object sender, EventArgs e)
         {
-            int point = (int)sender;
+            Tuple<int, Double> chart = (Tuple<int, Double>)sender;
 
-            incrementPoint(chart1, nPhevsLeft, point, 1.0);
+            incrementPoint(chart1, nPhevsLeft, chart.Item1, chart.Item2);
         }
 
         void phevBattery_Changed(object sender, EventArgs e)
@@ -248,9 +294,13 @@ namespace WinChart
 
         void prob_Calc(object sender, EventArgs e)
         {
-            Double[] chart = (Double[]) sender;
+            Tuple<String, Double[]> chart = (Tuple<String, Double[]>)sender;
 
-            updatePDF(chart);
+            if (!profiles.Contains(chart.Item1))
+            {
+                updatePDF(chart.Item1, chart.Item2);
+                profiles.Add(chart.Item1);
+            }
         }
         
         void phev_Changed(object sender, EventArgs e)
@@ -285,7 +335,7 @@ namespace WinChart
         {
             Double[] chart = (Double[])sender;
 
-            this.chart1.Titles[0].Text = (String.Format("Iteration #{0} : Step # {0}", counter, nstep));
+            this.chart1.Titles[0].Text = (String.Format("Iteration #{0} : Step # {0}", counter_day, nstep));
 
             updateChart(chartDayahead, nDayaheadOriginal, chart);
         }
@@ -293,7 +343,7 @@ namespace WinChart
         {
             Double[] chart = (Double[])sender;
 
-            this.chart1.Titles[0].Text = (String.Format("Iteration #{0} : Step # {1}", counter, nstep++));
+            this.chart1.Titles[0].Text = (String.Format("Iteration #{0} : Step # {1}", counter_day, nstep++));
 
             updateChart(chart1, nDayAhead, chart);
         }
@@ -302,7 +352,7 @@ namespace WinChart
         {
             Double[] chart = (Double[])sender;
 
-            this.chartDayahead.Titles[0].Text = (String.Format("Iteration #{0} : Step # {1}", counter, nstep));
+            this.chartDayahead.Titles[0].Text = (String.Format("Iteration #{0} : Step # {1}", counter_day, nstep));
 
             updateChart(chartDayahead, nDayaheadCur, chart);
         }
@@ -334,6 +384,81 @@ namespace WinChart
             //updateChart(chartDayahead, nDayaheadSupervisor, chart);
         }
 
+        void updateLog(String ev)
+        {
+            if (textLog.InvokeRequired)
+            {
+                textLog.BeginInvoke(new updateLogDelegate(updateLog), new object[]{ ev });
+            }
+            else
+            {
+                textLog.AppendText(ev + "\n");
+            }
+        }
+
+        void updateDebug(String ev)
+        {
+            if (textBoxDebug.InvokeRequired)
+            {
+                textBoxDebug.BeginInvoke(new updateLogDelegate(updateDebug), new object[] { ev });
+            }
+            else
+            {
+                textBoxDebug.AppendText(ev + "\n");
+            }
+        }
+
+        void updateProgress(String ev)
+        {
+            if (progressBar1.InvokeRequired)
+            {
+                progressBar1.BeginInvoke(new updateProgressDelegate(updateProgress), new object[] { ev });
+            }
+            else
+            {
+                Match m = Regex.Match(ev, @"(\d+)");
+                int tick = Convert.ToInt32(m.Value);
+                progressBar1.Value = tick;
+            }
+        }
+
+        void setMaximumProgress(int max)
+        {
+            if (progressBar1.InvokeRequired)
+            {
+                progressBar1.BeginInvoke(new setMaximumProgressDelegate(setMaximumProgress), new object[] { max });
+            }
+            else
+            {
+                progressBar1.Maximum = max;
+            }
+        }
+
+        void progress_Changed(object sender, EventArgs e)
+        {
+            String ev = (String)sender;
+            updateLog(ev);
+        }
+
+        void debug_Changed(object sender, EventArgs e)
+        {
+            String ev = (String)sender;
+            if (ev.StartsWith("Tick"))
+            {
+                updateProgress(ev);
+            }
+            else
+            {
+                updateDebug(ev);
+            }
+        }
+
+        void error_Changed(object sender, EventArgs e)
+        {
+            String ev = (String)sender;
+            updateDebug(ev);
+        }
+
         void setChartLabels(Chart chart)
         {
             chart.ChartAreas[0].AxisX.CustomLabels.Add(23, 24, "06:00");
@@ -342,15 +467,23 @@ namespace WinChart
             chart.ChartAreas[0].AxisX.CustomLabels.Add(90, 95, "24:00");
         }
 
+        void setChartAxis(Chart chart)
+        {
+            chart.ChartAreas[0].AxisX.MajorGrid.LineColor = Color.Gainsboro;
+            chart.ChartAreas[0].AxisX.MajorGrid.LineDashStyle = ChartDashStyle.Dash;
+            chart.ChartAreas[0].AxisY.MajorGrid.LineColor = Color.Gainsboro;
+            chart.ChartAreas[0].AxisY.MajorGrid.LineDashStyle = ChartDashStyle.Dash;
+        }
+
         void RegisterEvents(Sim.SimCar tSim)
         {
-            tSim.RegisterEvents();
+            //tSim.RegisterEvents();
             tSim.RegisterPhevBattery(phevBattery_Changed);
             tSim.RegisterPhevStatus(phevStatus_Changed);
             tSim.RegisterProgressTotal(total_Changed);
             tSim.RegisterProgressPhev(phev_Changed);
             tSim.RegisterProgressPnode(pnode_Changed);
-            tSim.RegisterPhevFailed(phevFailed_Changed);
+            tSim.RegisterPhevLeft(phevLeft_Changed);
             tSim.RegisterProb(prob_Calc);
             tSim.RegisterProbReset(prob_Reset);
             tSim.RegisterDayaheadProgress(dayahead_Changed);
@@ -363,29 +496,11 @@ namespace WinChart
             tSim.RegisterTrfCapacity(trfCapacity_Changed);
             tSim.RegisterTrfCurrent(trfCurrent_Changed);
             tSim.RegisterTrfFiltered(trfFiltered_Changed);
+            //tSim.RegisterTrfUpdate(trfUpdated_Changed);
+            tSim.RegisterDebug(debug_Changed);
+            tSim.RegisterError(error_Changed);
+            tSim.RegisterProgress(progress_Changed);
         }
-
-        //void UnregisterEvents()
-        //{
-        //    tSim.UnregisterPhevBattery(phevBattery_Changed);
-        //    tSim.UnregisterPhevStatus(phevStatus_Changed);
-        //    tSim.UnregisterProgressTotal(total_Changed);
-        //    tSim.UnregisterProgressPhev(phev_Changed);
-        //    tSim.UnregisterProgressPnode(pnode_Changed);
-        //    tSim.UnregisterPhevFailed(phevFailed_Changed);
-        //    //tSim.RegisterProb(prob_Calc);
-        //    //tSim.RegisterProbReset(prob_Reset);
-        //    tSim.UnregisterDayaheadProgress(dayahead_Changed);
-        //    tSim.UnregisterDayaheadInit(dayahead_Init);
-        //    tSim.UnregisterDayaheadStep(dayahead_Step);
-        //    tSim.UnregisterDayaheadExpected(dayahead_Exp);
-        //    tSim.UnregisterDayaheadSupervisor(dayahead_Supervisor);
-        //    tSim.UnregisterDayaheadAnt(dayahead_Ant);
-        //    //tSim.TestDayahead(nSim);
-        //    tSim.UnregisterTrfCapacity(trfCapacity_Changed);
-        //    tSim.UnregisterTrfCurrent(trfCurrent_Changed);
-        //    tSim.UnregisterTrfFiltered(trfFiltered_Changed);
-        //}
 
         public SimChart()
         {
@@ -417,8 +532,13 @@ namespace WinChart
             chartDayahead.Series.Add(_seriesDayahead[nDayaheadPrev]);
             chartDayahead.Series.Add(_seriesDayahead[nDayaheadCur]);
             chartDayahead.Series.Add(_seriesDayahead[nDayaheadExp]);
-            chartDayahead.Series.Add(_seriesDayahead[nDayaheadSupervisor]);
-            chartDayahead.Series.Add(_seriesDayahead[nDayaheadAnts]);
+            //chartDayahead.Series.Add(_seriesDayahead[nDayaheadSupervisor]);
+            //chartDayahead.Series.Add(_seriesDayahead[nDayaheadAnts]);
+
+            setChartAxis(chart1);
+            setChartAxis(chart2);
+            setChartAxis(chart3);
+            setChartAxis(chartDayahead);
 
             setChartLabels(chart1);
             setChartLabels(chart2);
@@ -428,7 +548,7 @@ namespace WinChart
             Series[] seriesPhev = {chart2.Series[nPhevStatus], chart2.Series[nPhevBattery], chart2.Series[nPhevsPDF]};
             Series[] seriesArray = { chart1.Series[nRealTime], chart1.Series[nPowerNodes], chart1.Series[nPhev], chart1.Series[nDayAhead], chart1.Series[nPhevsLeft] };
             Series[] seriesTrf = {chart3.Series[nTrfCapacity], chart3.Series[nTrfCurrent], chart3.Series[nTrfFiltered] };
-            Series[] seriesDayahead = { chartDayahead.Series[nDayaheadOriginal], chartDayahead.Series[nDayaheadPrev], chartDayahead.Series[nDayaheadCur], chartDayahead.Series[nDayaheadExp], chartDayahead.Series[nDayaheadSupervisor], chartDayahead.Series[nDayaheadAnts] };
+            Series[] seriesDayahead = { chartDayahead.Series[nDayaheadOriginal], chartDayahead.Series[nDayaheadPrev], chartDayahead.Series[nDayaheadCur], chartDayahead.Series[nDayaheadExp] };
 
             // customize series
             seriesArray[nRealTime].ChartType = SeriesChartType.Line;
@@ -446,15 +566,15 @@ namespace WinChart
             seriesArray[nPhev].BorderWidth = 2;
             seriesArray[nPhev].BorderDashStyle = ChartDashStyle.Dot;
 
-            seriesArray[nPhevsLeft].ChartType = SeriesChartType.Point;
+            seriesArray[nPhevsLeft].ChartType = SeriesChartType.Line;
             seriesArray[nPhevsLeft].Color = Color.Black;
             seriesArray[nPhevsLeft].BorderWidth = 2;
             seriesArray[nPhevsLeft].BorderDashStyle = ChartDashStyle.Dash;
 
             seriesArray[nDayAhead].ChartType = SeriesChartType.Line;
             seriesArray[nDayAhead].Color = Color.Sienna;
-            seriesArray[nDayAhead].BorderWidth = 2;
-            seriesArray[nDayAhead].BorderDashStyle = ChartDashStyle.Solid;
+            seriesArray[nDayAhead].BorderWidth = 1;
+            seriesArray[nDayAhead].BorderDashStyle = ChartDashStyle.Dot;
 
             seriesPhev[nPhevStatus].ChartType = SeriesChartType.StepLine;
             seriesPhev[nPhevStatus].Color = Color.Red;
@@ -489,7 +609,7 @@ namespace WinChart
             seriesDayahead[nDayaheadOriginal].ChartType = SeriesChartType.Line;
             seriesDayahead[nDayaheadOriginal].Color = Color.Sienna;
             seriesDayahead[nDayaheadOriginal].BorderWidth = 2;
-            seriesDayahead[nDayaheadOriginal].BorderDashStyle = ChartDashStyle.Solid;
+            seriesDayahead[nDayaheadOriginal].BorderDashStyle = ChartDashStyle.Dash;
 
             seriesDayahead[nDayaheadPrev].ChartType = SeriesChartType.Line;
             seriesDayahead[nDayaheadPrev].Color = Color.Blue;
@@ -506,100 +626,169 @@ namespace WinChart
             seriesDayahead[nDayaheadExp].BorderWidth = 2;
             seriesDayahead[nDayaheadExp].BorderDashStyle = ChartDashStyle.Solid;
 
-            seriesDayahead[nDayaheadSupervisor].ChartType = SeriesChartType.Point;
-            seriesDayahead[nDayaheadSupervisor].Color = Color.Black;
-            seriesDayahead[nDayaheadSupervisor].BorderWidth = 2;
-            seriesDayahead[nDayaheadSupervisor].BorderDashStyle = ChartDashStyle.Solid;
+            //seriesDayahead[nDayaheadSupervisor].ChartType = SeriesChartType.Point;
+            //seriesDayahead[nDayaheadSupervisor].Color = Color.Black;
+            //seriesDayahead[nDayaheadSupervisor].BorderWidth = 2;
+            //seriesDayahead[nDayaheadSupervisor].BorderDashStyle = ChartDashStyle.Solid;
 
-            seriesDayahead[nDayaheadAnts].ChartType = SeriesChartType.Point;
-            seriesDayahead[nDayaheadAnts].Color = Color.Black;
-            seriesDayahead[nDayaheadAnts].BorderWidth = 2;
-            seriesDayahead[nDayaheadAnts].BorderDashStyle = ChartDashStyle.Solid;
+            //seriesDayahead[nDayaheadAnts].ChartType = SeriesChartType.Point;
+            //seriesDayahead[nDayaheadAnts].Color = Color.Black;
+            //seriesDayahead[nDayaheadAnts].BorderWidth = 2;
+            //seriesDayahead[nDayaheadAnts].BorderDashStyle = ChartDashStyle.Solid;
 
             comboBox1.SelectedItem = "Random";
             comboBox2.SelectedItem = "Mixed";
             comboBox3.SelectedItem = "Expected";
-        }
-
-        public void Start()
-        {
+            
             if (comboBox1.InvokeRequired)
             {
                 comboBox1.Invoke(new startDelegate(Start));
             }
             else
             {
-                FSharpOption<Sim.Method> method = null;
-                FSharpOption<Sim.Contribution> contr = null;
-                FSharpOption<Sim.Scheduler> scheduler = null;
-
-                switch (comboBox1.SelectedItem.ToString())
-                {
-                    case "Peak-shaving":
-                        method = new FSharpOption<Sim.Method>(Sim.Method.Shaving);
-                        break;
-                    case "Distance-rule":
-                        method = new FSharpOption<Sim.Method>(Sim.Method.Distance);
-                        break;
-                    case "Swarm":
-                        method = new FSharpOption<Sim.Method>(Sim.Method.Swarm);
-                        break;
-                    case "Random":
-                        method = new FSharpOption<Sim.Method>(Sim.Method.Random);
-                        break;
-                    case "Mixed":
-                        method = new FSharpOption<Sim.Method>(Sim.Method.Mixed);
-                        break;
-                }
-                switch (comboBox2.SelectedItem.ToString())
-                {
-                    case "Proactive":
-                        scheduler = new FSharpOption<Sim.Scheduler>(Sim.Scheduler.Proactive);
-                        break;
-                    case "Reactive":
-                        scheduler = new FSharpOption<Sim.Scheduler>(Sim.Scheduler.Reactive);
-                        break;
-                    case "Random":
-                        scheduler = new FSharpOption<Sim.Scheduler>(Sim.Scheduler.Random);
-                        break;
-                    case "Mixed":
-                        scheduler = new FSharpOption<Sim.Scheduler>(Sim.Scheduler.Mixed);
-                        break;
-                }
-                switch (comboBox3.SelectedItem.ToString())
-                {
-                    case "Expected":
-                        contr = new FSharpOption<Sim.Contribution>(Sim.Contribution.Expected);
-                        break;
-                    case "Simulated":
-                        contr = new FSharpOption<Sim.Contribution>(Sim.Contribution.Simulated);
-                        break;
-                }
-                Double distanceTheta = 1.0, shavingTheta = 0.99, shavingAlpha = 0.2;
-                int phevLearningWindow = 76, nDays = 10;
-
-                Int32.TryParse(textBoxPhevLearning.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out phevLearningWindow);
-                Int32.TryParse(textBoxDays.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out nDays);
-                Double.TryParse(textBoxDistanceTheta.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out distanceTheta);
-                Double.TryParse(textBoxShavingAlpha.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out shavingAlpha);
-                Double.TryParse(textBoxShavingTheta.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out shavingTheta);
-
-                Sim.SimCar tSim = new Sim.SimCar(nDays, nTicks, scheduler, new FSharpOption<int>(phevLearningWindow));
-                tSim.DistanceTheta = distanceTheta;
-                tSim.ShavingAlpha = shavingAlpha;
-                tSim.ShavingTheta = shavingTheta;
-                tSim.Init();
-
+                tSim = new Sim.SimCar(nTicks);
+                //tSim.Init();
                 RegisterEvents(tSim);
-                tSim.ComputeDayahead(new FSharpOption<int>(nDays + 1), method, contr);
-                resetChart(chart1, 0, chart1.Series.Count);
-                resetChart(chart2, 0, chart2.Series.Count);
-                tSim.Run(new FSharpOption<int>(nDays));
             }
+        }
+
+        public void Start()
+        {
+            Double distanceTheta = 1.0, shavingTheta = 0.99, shavingAlpha = 0.2;
+            int phevLearningWindow = 40, nDays = 10;
+
+            Int32.TryParse(textBoxPhevLearning.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out phevLearningWindow);
+            Int32.TryParse(textBoxDays.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out nDays);
+            Double.TryParse(textBoxDistanceTheta.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out distanceTheta);
+            Double.TryParse(textBoxShavingAlpha.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out shavingAlpha);
+            Double.TryParse(textBoxShavingTheta.Text, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out shavingTheta);
+
+            button1.Enabled = false;
+
+            FSharpOption<Sim.Method> method = null;
+            FSharpOption<Sim.Contribution> contr = null;
+            FSharpOption<Sim.Scheduler> scheduler = null;
+
+            started = DateTime.Now;
+            filePath = String.Format("C:\\SimCar\\SimCar\\data\\img\\{0:dd.MM.HH.mm}", started);
+
+            updateLog("-------------------------------------");
+            String dayah = "", mech = "", phev = "";
+            switch (comboBox1.SelectedItem.ToString())
+            {
+                case "Peak-shaving":
+                    dayah = String.Format("Centralized (peak-shaving): alpha={0}, theta={1}", shavingAlpha, shavingTheta);
+                    method = new FSharpOption<Sim.Method>(Sim.Method.Shaving);
+                    break;
+                case "Distance-rule":
+                    dayah = String.Format("Centralized (distance-rule): theta={0}", distanceTheta);
+                    method = new FSharpOption<Sim.Method>(Sim.Method.Distance);
+                    break;
+                case "Superposition":
+                    method = new FSharpOption<Sim.Method>(Sim.Method.Superposition);
+                    break;
+                case "Random":
+                    dayah = (String.Format("Decentralized (Random)"));
+                    method = new FSharpOption<Sim.Method>(Sim.Method.Random);
+                    break;
+                case "Mixed":
+                    dayah = (String.Format("Decentralized (Mixed)"));
+                    method = new FSharpOption<Sim.Method>(Sim.Method.Mixed);
+                    break;
+                case "None":
+                    method = FSharpOption<Sim.Method>.None;
+                    break;
+            }
+            updateLog(String.Format("Dayahead:\t {0}", dayah));
+            switch (comboBox2.SelectedItem.ToString())
+            {
+                case "Proactive":
+                    mech = "Proactive";
+                    scheduler = new FSharpOption<Sim.Scheduler>(Sim.Scheduler.Proactive);
+                    break;
+                case "Reactive":
+                    mech = "Reactive";
+                    scheduler = new FSharpOption<Sim.Scheduler>(Sim.Scheduler.Reactive);
+                    break;
+                case "Random":
+                    mech = "Random";
+                    scheduler = new FSharpOption<Sim.Scheduler>(Sim.Scheduler.Random);
+                    break;
+                case "Mixed":
+                    mech = "Mixed";
+                    scheduler = new FSharpOption<Sim.Scheduler>(Sim.Scheduler.Mixed);
+                    break;
+                case "None":
+                    mech = "None";
+                    scheduler = FSharpOption<Sim.Scheduler>.None;
+                    break;
+            }
+            updateLog(String.Format("Mechanism:\t {0}", mech));
+
+            switch (comboBox3.SelectedItem.ToString())
+            {
+                case "Expected":
+                    phev = "Expected";
+                    contr = new FSharpOption<Sim.Contribution>(Sim.Contribution.Expected);
+                    break;
+                case "Simulated":
+                    phev = "Simulated";
+                    contr = new FSharpOption<Sim.Contribution>(Sim.Contribution.Simulated);
+                    break;
+                case "None":
+                    phev = "None";
+                    contr = FSharpOption<Sim.Contribution>.None;
+                    break;
+            }
+            updateLog(String.Format("Contribution:\t {0}", phev));
+            updateLog(String.Format("Window (PHEV):\t {0}", phevLearningWindow));
+            updateLog(String.Format("Days:\t\t {0}", nDays));
+            updateLog("-------------------------------------");
+            tSim.PhevWindow = phevLearningWindow;
+            tSim.Scheduler = scheduler;
+            tSim.DistanceTheta = distanceTheta;
+            tSim.ShavingAlpha = shavingAlpha;
+            tSim.ShavingTheta = shavingTheta;
+            tSim.Method = method;
+            tSim.Contribution = contr;
+            tSim.Days = nDays;
+            progressBar1.Minimum = 0;
+            
+            BackgroundWorker bgWorker;
+            bgWorker = new BackgroundWorker();
+            bgWorker.DoWork += new DoWorkEventHandler(Simulation_Start);
+            bgWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(Simulation_Completed);
+            bgWorker.RunWorkerAsync(tSim);
+        }
+
+        private void Simulation_Start(object sender, DoWorkEventArgs args)
+        {
+            Sim.SimCar tSim = (Sim.SimCar)args.Argument;
+            setMaximumProgress((tSim.Days + 3) * 96);
+            tSim.ComputeDayahead();
+            setMaximumProgress(tSim.Days * 96);
+            resetChart(chart1, 0, chart1.Series.Count);
+            resetChart(chart2, 0, chart2.Series.Count);
+            tSim.Run(String.Format("{0:dd.MM.HH.mm}", started));
+        }
+
+        private void Simulation_Completed(object sender, RunWorkerCompletedEventArgs args)
+        {
+            button1.Enabled = true;
+
+            String fileName = String.Format("{0:dd.MM.HH.mm}", started);
+            String fileLog = String.Format("c:\\SimCar\\SimCar\\data\\log\\{0}.txt", fileName);
+            textBoxDebug.AppendText(String.Format("[{1}] Writing log to {0}", fileLog, String.Format("{0:hh:mm}", started)));
+            System.IO.StreamWriter file = new System.IO.StreamWriter(fileLog);
+            file.WriteLine(textLog.Text);
+
+            file.Close();
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
+            textBoxDebug.Clear();
+            textLog.Clear();
             //Thread oThread = new Thread(new ThreadStart(Start));
             //oThread.Start();
             Start();

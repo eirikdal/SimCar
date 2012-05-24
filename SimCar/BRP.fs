@@ -71,7 +71,7 @@ module Action =
 
 module Agent =
     module Centralized = 
-        let create_brp_agent brp schedule = Agent.Start(fun agent ->
+        let create_brp_agent brp = Agent.Start(fun agent ->
             let queue = new Queue<Message>() 
     
             let rec loop (BRP({ children=children; } as brp_args) as brp) (intentions : Message list) schedule (tick : int) waiting = async {
@@ -89,11 +89,10 @@ module Agent =
                             queue.Enqueue(msg)
                             return! loop brp intentions schedule tick waiting
                         else
-                            syncContext.RaiseEvent jobDebug <| "BRP responding to RequestModel"
                             reply.Reply(Model(brp))
                             return! loop brp [] schedule tick false
                     | RequestDayahead ->
-                        reply.Reply(Model(brp))
+                        reply.Reply(Dayahead(brp_args.dayahead))
                         return! loop brp [] schedule tick waiting
                 | Update(tick) -> 
                     return! loop brp [] schedule tick true
@@ -107,7 +106,6 @@ module Agent =
                     return! loop brp intentions schedule tick waiting
                 | Charge_Intentions(messages) -> 
                     if intentions.Length + 1 >= children.Length then
-                        syncContext.RaiseEvent jobDebug <| "BRP got charges"
                         let messages' = (msg :: intentions) |> Message.reduce_queue
                         schedule brp_args.dayahead brp_args.realtime messages' tick
 
@@ -118,11 +116,11 @@ module Agent =
                 | Charge_OK(_,_,_) ->
                     return! loop brp (msg :: intentions) schedule tick waiting
                 | Kill ->
-                    printfn "Agent %s: Exiting.." "BRP"
+                    syncContext.RaiseDelegateEvent jobProgress <| sprintf "Agent %s: Exiting.." "BRP"
                 | _ -> 
-                    syncContext.RaiseEvent error <| Exception("BRP: Not implemented yet") }    
+                    return! loop brp intentions schedule tick waiting }
 
-            loop brp [] schedule 0 false)
+            loop brp [] (Action.schedule_none) 0 false)
     module Decentralized = 
         module Random = 
             let create_brp_agent brp = Agent.Start(fun agent ->
@@ -133,11 +131,10 @@ module Agent =
                     | ReplyTo(replyToMsg, reply) ->
                         match replyToMsg with
                         | RequestModel ->
-                            syncContext.RaiseEvent jobDebug <| "BRP responding to RequestModel"
                             reply.Reply(Model(brp))
                             return! loop brp tick
                         | RequestDayahead ->
-                            reply.Reply(Model(brp))
+                            reply.Reply(Dayahead(brp_args.dayahead))
                             return! loop brp tick
                     | Update(tick) -> 
                         return! loop brp tick
@@ -152,46 +149,48 @@ module Agent =
                         return! loop brp tick
                     | Reset -> return! loop brp tick
                     | Kill ->
-                        printfn "Agent %s: Exiting.." "BRP"
+                        syncContext.RaiseDelegateEvent jobDebug <| sprintf "Agent %s: Exiting.." "BRP"
                     | _ ->
                         return! loop brp tick}    
 
                 loop brp 0)
         module Mixed = 
             let create_brp_agent brp = Agent.Start(fun agent ->
-                let rec loop (BRP({ children=children; realtime=realtime } as brp_args) as brp) (tick : int) = async {
+                let rec loop (BRP({ children=children; realtime=realtime } as brp_args) as brp) (tick : int) (predictions : energy array) = async {
                     let! (msg : Message) = agent.Receive()
 
                     match msg with
                     | ReplyTo(replyToMsg, reply) ->
                         match replyToMsg with
                         | RequestModel ->
-                            syncContext.RaiseEvent jobDebug <| "BRP responding to RequestModel"
                             reply.Reply(Model(brp))
-                            return! loop brp tick
+                            return! loop brp tick predictions
                         | RequestDayahead ->
-                            reply.Reply(Model(brp))
-                            return! loop brp tick
+                            reply.Reply(Dayahead(brp_args.dayahead))
+                            return! loop brp tick predictions
                     | RequestMixed(name, ttl) ->
 //                        reply.Reply(Mixed(problist))
-                        let window = [for i in tick .. ttl do yield realtime(i)]
-                        postalService.send(name, Mixed(window))
-                        return! loop brp tick
+                        let window = [for i in 0 .. (ttl-tick) do yield predictions.[i]]
+                        let (Strategy(strategy)) = postalService.send_reply(name, Mixed(window))
+                        for i in 0 .. (List.length strategy-1) do 
+                            predictions.[i] <- predictions.[i] + strategy.[i]
+                        return! loop brp tick predictions
                     | Update(tick) -> 
-                        return! loop brp tick
+                        [|for i in 0 .. 95 do yield predictions.[i] <- realtime(tick+i)|] |> ignore
+                        return! loop brp tick predictions
                     | Dayahead(dayahead) ->
-                        return! loop <| BRP({ brp_args with dayahead=dayahead }) <| tick
+                        return! loop <| BRP({ brp_args with dayahead=dayahead }) <| tick <| predictions
                     | Prediction(realtime) ->
-                        return! loop <| BRP({ brp_args with realtime=realtime }) <| tick
+                        return! loop <| BRP({ brp_args with realtime=realtime }) <| tick <| predictions
                     | Schedule(_) ->
     //                    raise <| Exception("Decentralized BRP agent does not support scheduling")
-                        return! loop brp tick
+                        return! loop brp tick predictions
                     | Model(brp) -> 
-                        return! loop brp tick
-                    | Reset -> return! loop brp tick
+                        return! loop brp tick predictions
+                    | Reset -> return! loop brp tick predictions
                     | Kill ->
-                        printfn "Agent %s: Exiting.." "BRP"
+                        syncContext.RaiseDelegateEvent jobDebug <| sprintf "Agent %s: Exiting.." "BRP"
                     | _ ->
-                        return! loop brp tick}    
+                        return! loop brp tick predictions}    
 
-                loop brp 0)
+                loop brp 0 (Array.zeroCreate(96)))

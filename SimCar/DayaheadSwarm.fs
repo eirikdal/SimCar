@@ -15,13 +15,12 @@ let interpol_folder = "C:\\SimCar\\SimCar\\data\\interpol\\"
 
 let profiles_interpol = Parsing.parse_powerprofiles(interpol_folder)
 
-let powergrid = 
-    FileManager.powergrid()
+let mutable powergrid = Node([],None)
 
 let collect_exp node = 
     match node with
     | Transformer(_) -> []
-    | PHEV(phev_args) as node -> phev_args.profile.to_exp_float(1.25<kWh>, 32.0<kWh>)
+    | PHEV(phev_args) as node -> phev_args.profile.to_exp_float(1.25<kWh>, 1.25<kWh>, 32.0<kWh>)
     | PowerNode(_) -> []
     | BRP(_) -> []
 
@@ -64,7 +63,7 @@ module Swarm =
                 yield Agent<Message>.Start(fun agent ->
                 let rec loop n pos = agent.Scan((function
                     | Init(pos, inertia) -> 
-//                        printfn "Agent %d initialized with position %d" n pos
+//                        syncContext.RaiseDelegateEvent jobProgress <|  "Agent %d initialized with position %d" n pos
                 
                         Some( async { return! moving n pos inertia } )
                     | _ -> None), 10000)
@@ -92,7 +91,7 @@ module Swarm =
                             supervisor.Post(Utility(id, distance*(1.0<kWh> / realtime.[pos])))
                             Some(async { return! filling id pos inertia })
                         | Fill(rate) ->
-//                            printfn "Updating realtime with %f at %d" rate pos
+//                            syncContext.RaiseDelegateEvent jobProgress <|  "Updating realtime with %f at %d" rate pos
                             realtime.[pos] <- realtime.[pos] + rate
                             syncContext.RaiseDelegateEvent dayaheadStep (realtime.Clone())
 
@@ -132,7 +131,7 @@ module Swarm =
                         let all_in_pos = agent_pos |> Array.forall (fun p -> p = (int infinity) || p >= 0)
 
                         if all_in_pos then 
-//                            printfn "All agents in position" 
+//                            syncContext.RaiseDelegateEvent jobProgress <|  "All agents in position" 
                             Some(async { return! filling agg_dist'.[0] 0 })
                         else
                             Some(async { return! loop() }) 
@@ -159,12 +158,12 @@ module Swarm =
                     if remaining > rate then
                         let rate' = if remaining > rate then rate else rate-remaining 
                         ants |> List.iter (fun ant -> ant.Post(FillQuery(rate', pos)))
-//                        printfn "Sending fillqueries for %d" pos
+//                        syncContext.RaiseDelegateEvent jobProgress <|  "Sending fillqueries for %d" pos
                         return! waiting remaining [] pos
                     else if (pos+1) < agg_dist'.Length then
                         return! filling (agg_dist'.[pos+1]) (pos+1)
                     else 
-//                        printfn "Dayahead complete"
+//                        syncContext.RaiseDelegateEvent jobProgress <|  "Dayahead complete"
                         ants |> List.iter (fun ant -> ant.Post(Exit))
                 
                         return! idle() }

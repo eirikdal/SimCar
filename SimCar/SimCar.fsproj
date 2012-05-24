@@ -9,9 +9,8 @@
     <OutputType>Library</OutputType>
     <RootNamespace>SimCar</RootNamespace>
     <AssemblyName>SimCar</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <TargetFrameworkProfile>
-    </TargetFrameworkProfile>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <Name>SimCar</Name>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\SimCar\</SolutionDir>
     <RestorePackages>true</RestorePackages>
@@ -19,7 +18,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
+    <Optimize>true</Optimize>
     <Tailcalls>true</Tailcalls>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
@@ -29,7 +28,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
+    <Optimize>false</Optimize>
     <Tailcalls>true</Tailcalls>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
@@ -48,12 +47,12 @@
     <Compile Include="Models.fs" />
     <Compile Include="Message.fs" />
     <Compile Include="FileManager.fs" />
+    <Compile Include="Tree.fs" />
     <Compile Include="PostalService.fs" />
     <Compile Include="Transformer.fs" />
     <Compile Include="PowerNode.fs" />
     <Compile Include="PHEV.fs" />
     <Compile Include="BRP.fs" />
-    <Compile Include="Tree.fs" />
     <Compile Include="Grid.fs" />
     <Compile Include="DayaheadExp.fs" />
     <Compile Include="DayaheadSwarm.fs" />
