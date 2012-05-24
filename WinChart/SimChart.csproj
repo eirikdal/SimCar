@@ -90,7 +90,6 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <None Include="app.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -102,9 +101,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SimCar\SimCar.fsproj">
-      <Project>{5B792483-5C16-4C17-9AF5-3D846DAA0054}</Project>
-      <Name>SimCar</Name>
+    <ProjectReference Include="..\SimCar\SimCar.fsproj.bak.fsproj">
+      <Project>{ABC76106-27DD-4CC9-81B6-EEC345D02614}</Project>
+      <Name>SimCar.fsproj.bak</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

@@ -49,7 +49,7 @@ module Agent =
                             else 
                                 rem) (trf_args.capacity)
             
-                    if name = "med_29" then
+                    if name = "med_1" then
                         syncContext.RaiseDelegateEvent trfFiltered (rem)
                         syncContext.RaiseDelegateEvent trfCurrent sum_of_charges
                         syncContext.RaiseDelegateEvent trfCapacity trf_args.capacity
@@ -112,7 +112,7 @@ module Agent =
                             else 
                                 rem) (trf_args.capacity)
             
-                    if name = "med_29" then
+                    if name = "med_1" then
                         syncContext.RaiseDelegateEvent trfFiltered (rem)
                         syncContext.RaiseDelegateEvent trfCurrent sum_of_charges
                         syncContext.RaiseDelegateEvent trfCapacity trf_args.capacity
