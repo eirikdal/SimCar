@@ -43,8 +43,8 @@ let min_per_tick : int<min/tick> = 15<min/tick>
 
 type power = float<kW>
 type energy = float<kWh>
-type dayahead = (int -> energy)
-type realtime = (int -> energy)
+type dayahead = (energy array)
+type realtime = (energy array)
 type capacity = energy
 type current = energy
 type battery = energy
@@ -321,7 +321,7 @@ let create_brp name nodes dayahead children =
         { name=name;
         dayahead=dayahead;
         current=0.0<kWh>;
-        realtime=Array.init (96) (fun _ -> 0.0<kWh>) |> Array.get;
+        realtime=Array.init (96) (fun _ -> 0.0<kWh>);
         children=children |> List.map (fun child -> (child, Waiting)); }
 
     Node(nodes, Some <| BRP(brp_arg)) 

@@ -167,7 +167,7 @@ module Swarm =
                         ants |> List.iter (fun ant -> ant.Post(Exit))
                 
                         return! idle() }
-                and waiting remaining (agent_responses : 'a list) pos = 
+                and waiting remaining (agent_responses : Message list) pos = 
                     if agent_responses.Length = ants.Length then 
                         let (Utility(id,_)) = agent_responses |> List.maxBy(function | Utility(_,v) -> v)
                         let rate' = if remaining > rate then rate else rate-remaining 

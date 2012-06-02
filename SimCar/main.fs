@@ -1,5 +1,7 @@
 ﻿module Sim
 
+#nowarn "25"
+
 open System
 //open System.Drawing
 open SimCar
@@ -22,7 +24,7 @@ type Method =
         match self with 
         | Shaving -> "Peak-shaving"
         | Distance -> "Distance"
-        | Method.Mixed -> "Mixed" 
+        | Method.Mixed -> "Predictions" 
         | Method.Random -> "Random"
         | Superposition -> "Superposition"
 
@@ -46,7 +48,7 @@ type Scheduler =
         | Proactive -> "Proactive"
         | Reactive -> "Reactive"
         | Random -> "Random"
-        | Mixed -> "Mixed"
+        | Mixed -> "Predictions"
     
 type SimCar(nTicksPerDay) =
     let mutable distanceTheta = 1.0
@@ -56,7 +58,7 @@ type SimCar(nTicksPerDay) =
     let mutable nDays = 10
     let mutable _method = Some Distance
     let mutable _contr = None
-    let mutable schedule = BRP.Action.schedule_none
+    let mutable schedule = BRP.Action.None.schedule
     let mutable _scheduler = None
     let mutable agents = None//Grid.Centralized.make_tree (powergrid) ttlWindow
     let mutable powergrid = None
@@ -76,18 +78,18 @@ type SimCar(nTicksPerDay) =
                                                 agents <- Some <|
                                                 match scheduler with
                                                 | Some Reactive -> 
-                                                    schedule <- BRP.Action.schedule_reactive
+                                                    schedule <- BRP.Action.Reactive.schedule
                                                     Grid.Centralized.make_tree <| powergrid.Value <| ttlWindow
                                                 | Some Proactive -> 
-                                                    schedule <- BRP.Action.schedule_proactive
+                                                    schedule <- BRP.Action.Proactive.schedule
                                                     Grid.Centralized.make_tree <| powergrid.Value <| ttlWindow
                                                 | Some Mixed -> 
-                                                    Grid.Decentralized.Mixed.make_tree <| powergrid.Value <| ttlWindow 
+                                                    Grid.Decentralized.Predictions.make_tree <| powergrid.Value <| ttlWindow 
                                                 | Some Random ->
                                                     Grid.Decentralized.Random.make_tree <| powergrid.Value <| ttlWindow
                                                 | None -> 
-                                                    schedule <- BRP.Action.schedule_none
-                                                    Grid.Decentralized.Random.make_tree <| powergrid.Value <| ttlWindow
+                                                    schedule <- BRP.Action.None.schedule
+                                                    Grid.Centralized.make_tree <| powergrid.Value <| ttlWindow
                                                 _scheduler <- scheduler
                                                     
     member self.PostalService = postalService
@@ -168,13 +170,17 @@ type SimCar(nTicksPerDay) =
 
     member self.ComputeDayahead() = 
         IO.clear_dayahead_data()
-        postalService.send("brp", Schedule(BRP.Action.schedule_none))
+        postalService.send("brp", Schedule(BRP.Action.None.schedule))
+
+        match _scheduler with 
+        | None -> self.Agents |> Tree.send(Filter(false)) |> ignore
+        | _ -> self.Agents |> Tree.send(Filter(true)) |> ignore
 
         let op i node = 
             match node with
             | Transformer(_) -> 0.0<kWh>
             | PHEV(_) -> 0.0<kWh>
-            | PowerNode({ realtime=realtime }) -> realtime(i)
+            | PowerNode({ realtime=realtime }) -> realtime.[i]
             | BRP(_) -> 0.0<kWh>
 
         let calc_power tick = 
@@ -184,7 +190,7 @@ type SimCar(nTicksPerDay) =
         let realtime = [for i in 0 .. (nDays+2)*96 do yield calc_power i] |> Array.ofList
 
         syncContext.RaiseDelegateEvent jobDebug <| sprintf "[%s] Computing dayahead" (String.Format("{0:hh:mm}", DateTime.Now))
-        
+
         let phev_contribution = 
             match _contr with
             | Some Expected -> 
@@ -192,22 +198,20 @@ type SimCar(nTicksPerDay) =
             | Some Simulated -> 
                 [for i in 0 .. (nDays+2) do compute_dayahead i agents.Value] |> ignore
                 agents.Value |> Tree.send (Reset) |> ignore
-                Array.init((nDays+2)*96) (fun i -> FileManager.dayahead()(i))
+                let dayahead = FileManager.IO.read_doubles (FileManager.file_dayahead)
+                Array.init((nDays+2)*96) (fun i -> dayahead.[i] |> Energy.ofFloat)
             | None ->
                 Array.init((nDays+2)*96) (fun _ -> 0.0<kWh>)
 
         let dayahead = 
             match _method with
             | Some Method.Shaving ->
-                postalService.send("brp", Dayahead((fun _ -> 0.0<kWh>)))
-                postalService.send("brp", Prediction((fun _ -> 0.0<kWh>)))
-                postalService.send("brp", Schedule(BRP.Action.schedule_none))
                 let window_size = 120
                 
                 let dayahead = Array.copy realtime
 
-                for i in 0 .. (nDays) do
-                    let _from,_to = (i*96),(i*96)+window_size
+                for i in 0 .. (nDays-1) do
+                    let _from,_to = (i*96),(i*96+window_size)//+window_size
                     let day = Array.sub realtime _from window_size
                     let phev = 
                         match _contr with 
@@ -219,10 +223,10 @@ type SimCar(nTicksPerDay) =
                         | None ->
                             day
                     
-                    let temp = Array.sum2 phev day |> DayAhead.Shifted.shave shavingAlpha shavingTheta phev
+                    let temp = DayAhead.Shifted.shave shavingAlpha shavingTheta phev
 
                     for j in _from .. _to-1 do 
-                        dayahead.[j] <- temp.[j-_from]
+                        dayahead.[_from + j%96] <- dayahead.[_from + j%96] + temp.[j-_from]
 
                 dayahead
             | Some Method.Superposition ->
@@ -244,15 +248,16 @@ type SimCar(nTicksPerDay) =
             | Some Method.Random ->
                 DayaheadExp.Algorithm.distribute_random phev_contribution realtime (nDays+1) |> Array.ofList
             | Some Method.Mixed ->
-                DayaheadExp.Algorithm.distribute_mixed phev_contribution realtime (nDays+1) |> Array.ofList
+                DayaheadExp.Algorithm.distribute_Predictions phev_contribution realtime (nDays+1) |> Array.ofList
             | None ->
                 Array.init ((nDays+1)*96) (fun _ -> 0.0<kWh>)
                 
 //        syncContext.RaiseDelegateEvent jobProgress <|  "sum of dayahead %f" <| Array.sum dayahead
-        postalService.send("brp", Dayahead(dayahead |> Array.get))
-        postalService.send("brp", Prediction(realtime |> Array.get))
+        postalService.send("brp", Dayahead(dayahead))
+        postalService.send("brp", Prediction(realtime))
 
-//        IO.write_doubles <| FileManager.file_prediction <| Parsing.parse_dayahead (List.ofArray pnodes)
+        IO.write_doubles <| FileManager.file_phev <| (List.ofArray (Array.map (fun x -> Energy.toFloat x) phev_contribution))
+//        IO.write_doubles <| FileManager.file_prediction <| (List.ofArray (Array.map (fun x -> Energy.toFloat x) realtime))
 //        IO.write_doubles <| FileManager.file_dayahead <| (dayahead |> List.ofArray |> List.map Energy.toFloat)
 
         syncContext.RaiseDelegateEvent jobDebug <| sprintf "[%s] Dayahead computed" (String.Format("{0:hh:mm}", DateTime.Now))
@@ -280,7 +285,6 @@ type SimCar(nTicksPerDay) =
                                                                                 x.total_avg::d, x.total_sum::e, x.par::f,
                                                                                 x.dayahead_sum::g, x.dif::h, x.ratio::i, x.trf_delta::j, x.trf_filtered::k)) ([],[],[],[],[],[],[],[],[],[],[],[])
                                     
-                    
         let phevs_stat, phevs_ux_stat, pnodes_stat, max_stat, avg_stat, sum_stat, 
             par_stat, dayahead_stat, dif_stat, ratio_stat, trf_stat, trf_fltr_stat = 
                 new DescriptiveStatistics(phevs_sum),
@@ -296,17 +300,42 @@ type SimCar(nTicksPerDay) =
                 new DescriptiveStatistics(trf_delta),
                 new DescriptiveStatistics(trf_filtered)
 
+        let append_centralized str = 
+            let str = 
+                str + 
+                    match _method with
+                    | Some Shaving -> "-peak"
+                    | Some Distance -> "-dist"
+
+            str + 
+                match _contr with
+                | Some Expected -> "-exp"
+                | Some Simulated -> "-sim"
+
+        let str = 
+            match _scheduler with 
+            | Some Proactive -> append_centralized "proactive" 
+            | Some Reactive -> append_centralized "reactive"
+            | Some Mixed -> "mixed"
+            | Some Random -> "random"
+            | None ->
+                "baseline" + 
+                    match _contr with
+                    | Some Expected -> "-exp"
+                    | Some Simulated -> "-sim"
+                    | _ -> ""
+
         let print_description meth contr scheduler = 
             let match_method scheduler meth = 
                 match meth with
                 | Some Shaving ->
                     match contr with 
-                    | Some Expected -> sprintf "After %i days of simulation using %s scheduling with peak-shaving on expected values for PHEV demand. (\(theta\)=%f, \(alpha\)=%f and PHEV learning window of %i)" nDays scheduler shavingTheta shavingAlpha ttlWindow
-                    | Some Simulated -> sprintf "After %i days of simulation using %s scheduling with peak-shaving on simulated values for PHEV demand (\(theta\)=%f, \(alpha\)=%f and PHEV learning window of %i)" nDays scheduler shavingTheta shavingAlpha ttlWindow
+                    | Some Expected -> sprintf "After %i days of simulation using %s scheduling with peak-shaving on expected values for PHEV demand. (\(theta\)=%.3f, \(alpha\)=%.3f and PHEV learning window of %i)" nDays scheduler shavingTheta shavingAlpha ttlWindow
+                    | Some Simulated -> sprintf "After %i days of simulation using %s scheduling with peak-shaving on simulated values for PHEV demand (\(theta\)=%.3f, \(alpha\)=%.3f and PHEV learning window of %i)" nDays scheduler shavingTheta shavingAlpha ttlWindow
                 | Some Distance ->
                     match contr with 
-                    | Some Expected -> sprintf "After %i days of simulation using %s scheduling with distance-rule on expected values for PHEV demand (\(theta\)=%f and PHEV learning window of %i)" nDays scheduler distanceTheta ttlWindow
-                    | Some Simulated -> sprintf "After %i days of simulation using %s scheduling with distance-rule on simulated values for PHEV demand (\(theta\)=%f and PHEV learning window of %i)" nDays scheduler distanceTheta ttlWindow
+                    | Some Expected -> sprintf "After %i days of simulation using %s scheduling with distance-rule on expected values for PHEV demand (\(theta\)=%.3f and PHEV learning window of %i)" nDays scheduler distanceTheta ttlWindow
+                    | Some Simulated -> sprintf "After %i days of simulation using %s scheduling with distance-rule on simulated values for PHEV demand (\(theta\)=%.3f and PHEV learning window of %i)" nDays scheduler distanceTheta ttlWindow
             match scheduler with 
             | Some Proactive ->
                 match_method "proactive" meth
@@ -315,9 +344,12 @@ type SimCar(nTicksPerDay) =
             | Some Random ->
                 sprintf "After %i days of simulation using random mechanism with learning window %i" nDays ttlWindow
             | Some Mixed ->
-                sprintf "After %i days of simulation using mixed mechanism with learning window %i" nDays ttlWindow
+                sprintf "After %i days of simulation using Predictions mechanism with learning window %i" nDays ttlWindow
             | None -> 
-                sprintf "Baseline after %i days of simulation" nDays
+                match _contr with
+                | Some Expected -> sprintf "Baseline with day-ahead profile calculated using expected values, after %i days of simulation" nDays
+                | Some Simulated -> sprintf "Baseline with day-ahead profile calculated using simulated values, after %i days of simulation" nDays
+                | None -> sprintf "Baseline after %i days of simulation" nDays
 
         let capt (opt : 'a option) = if opt.IsSome then opt.ToString() else "None"
 
@@ -328,22 +360,22 @@ type SimCar(nTicksPerDay) =
 %s & %s & %s & %s & %s\\\\
 \hline
 \hline
-%s & %.2f* & %.2f* & %.1f & %.2f \\\\
-%s & %.2f* & %.2f* & %.1f & %.2f  \\\\
-%s & %.2f* & %.2f* & %.1f & %.2f  \\\\
+%s & %.3f* & %.3f* & %.1f & %.2f \\\\
+%s & %.3f* & %.3f* & %.1f & %.2f  \\\\
+%s & %.3f* & %.3f* & %.1f & %.2f  \\\\
 %s & %.1f & %.1f & %.1f & %.2f  \\\\
 %s & %.1f & %.1f & %.1f & %.2f  \\\\
-%s & %.2f & %.2f & %.2f & %.2f  \\\\
-%s & %.2f* & %.2f* & %.2f* & %.2f  \\\\
-%s & %.2f* & %.2f* & %.2f* & %.2f  \\\\
+%s & %.3f & %.3f & %.3f & %.2f  \\\\
+%s & %.3f* & %.3f* & %.3f* & %.2f  \\\\
+%s & %.3f* & %.3f* & %.3f* & %.2f  \\\\
 \cline{2-4}
-%s & %.2f* & %.2f* & %.2f* & %.2f  \\\\
+%s & %.3f* & %.3f* & %.3f* & %.2f  \\\\
 \cline{2-4}
-%s & %.2f* & %.2f* & %.2f & %.2f  \\\\
+%s & %.3f* & %.3f* & %.2f & %.2f  \\\\
 \end{tabular}
 \\end{center}
 \\caption{%s}
-\\label{tab:experiment-%s}
+\\label{tab:exp-%s}
 \\end{table}"
                     "Desc." "\(\mu\)" "Max" "\(\sigma\)" "\(\gamma\)"
 //                    "PHEVs" phevs_stat.Mean phevs_stat.Maximum phevs_stat.StandardDeviation
@@ -359,9 +391,27 @@ type SimCar(nTicksPerDay) =
                     "Total" (sum_stat.Mean / 1000.0) (sum_stat.Maximum / 1000.0) (sum_stat.StandardDeviation / 1000.0) sum_stat.Skewness
                     "DDx/Tot." ratio_stat.Mean ratio_stat.Maximum ratio_stat.StandardDeviation ratio_stat.Skewness
                     (print_description _method _contr _scheduler)
-                    (String.Format("{0:hhmm}", DateTime.Now))
+                    str
 
-        let fileLog = String.Format("c:\\SimCar\\SimCar\\data\\log\\latex\\{0}.tex", started);
+//        let (phevs_sum, phevs_ux, pnodes_sum, total_max, total_avg, total_sum,
+//             par, dayahead_sum, dif, ratio, trf_delta, trf_filtered)
+        
+        let fileResults = String.Format("c:\\SimCar\\SimCar\\data\\log\\experiments\\{1}-{0}\\", started, str);        
+        IO.write_doubles (fileResults + "phevs_sum.dat") phevs_sum
+        IO.write_doubles (fileResults + "phevs_ux.dat") phevs_ux
+        IO.write_doubles (fileResults + "pnodes_sum.dat") pnodes_sum
+        IO.write_doubles (fileResults + "total_max.dat") total_max
+        IO.write_doubles (fileResults + "total_avg.dat") total_avg
+        IO.write_doubles (fileResults + "total_sum.dat") total_sum
+        IO.write_doubles (fileResults + "par.dat") par
+        IO.write_doubles (fileResults + "dayahead_sum.dat") dayahead_sum
+        IO.write_doubles (fileResults + "dif.dat") dif
+        IO.write_doubles (fileResults + "ratio.dat") ratio
+        IO.write_doubles (fileResults + "trf_delta.dat") trf_delta
+        IO.write_doubles (fileResults + "trf_filtered.dat") trf_filtered
+
+        let fileLog = String.Format("c:\\SimCar\\SimCar\\data\\log\\latex\\{1}-{0}.tex", started, str);
+        
         let file = new System.IO.StreamWriter(fileLog);
         file.WriteLine(latex);
         file.Close()

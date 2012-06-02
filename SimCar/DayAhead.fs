@@ -85,15 +85,15 @@ module Shifted =
     //let theta = 0.95
 
     // BEST: alpha = 0.3, theta = 0.5-0-9?
-    let shave alpha theta phev (_D : float<kWh>[]) = 
+    let shave alpha theta (_D : float<kWh>[]) = 
         let D = Array.copy _D
         
         S <- 0.0<kWh>
         let x = Array.average D
 //        let w = Array.fold2 (fun ac x y -> if x > ac && y > 0.0<kWh> then x else ac) 0.0<kWh> D phev
-        let w = Array.max phev
+        let w = Array.max D
 //        let i = Array.findIndex (fun w' -> w = w') D
-        let i = Array.findIndex (fun w' -> w = w') phev
+        let i = Array.findIndex (fun w' -> w = w') D
 
         let disc idx = theta ** (dist (float idx) (float i))
         let delta w' idx (target : float<kWh>) : float<kWh> = (disc idx) * alpha * (target - w')

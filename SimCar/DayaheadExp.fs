@@ -15,7 +15,7 @@ let rate = 1.25<kWh>
 module Algorithm = 
     let rand = MathNet.Numerics.Random.Xorshift(true)
 
-    let distribute_mixed phev_expected realtime days =
+    let distribute_Predictions phev_expected realtime days =
         let generate_problist tick window realtime = 
             let baseline = [for i in tick .. (tick+window) do yield realtime(i)]
             let max_baseline = List.max baseline
@@ -67,7 +67,7 @@ module Algorithm =
 //        syncContext.RaiseDelegateEvent jobProgress <|  "sum of PHEV expected %f" (Array.sum phev_expected)
         let util pos' (day:float<kWh> array) (pos,x) = 
             let distance = theta ** (float <| abs(pos-pos'))
-            distance*(1.0<kWh> / day.[pos])
+            distance*(1.0<kWh> / x)
         let dist (day : float<kWh> array) (phev_expected : float<kWh> array) : float<kWh> array = 
             let rec fill idx left =
                 if left > rate then 
@@ -78,12 +78,12 @@ module Algorithm =
                     day.[i] <- day.[i] + rate
                     fill idx (left-rate)
                 else
-                    let (idx,v) = 
+                    let (i,v) = 
                         day
                         |> Array.mapi (fun i x -> (i,x))
-                        |> Array.minBy (util idx day) 
-                    day.[idx] <- day.[idx] + (rate - (rate-left))
-                    day.[idx]
+                        |> Array.maxBy (util idx day) 
+                    day.[i] <- day.[i] + (rate - (rate-left))
+                    day.[i]
                   
             phev_expected |> Array.mapi fill
 

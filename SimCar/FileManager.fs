@@ -14,6 +14,7 @@ let file_powerprofiles = "c:\\simcar\simcar\\data\\powerprofiles.txt"
 let file_phevprofiles = "C:\\SimCar\\SimCar\\data\\profiles.txt"
 let file_brp = "C:\\SimCar\\SimCar\\data\\brp2.txt"
 let file_dayahead = "c:\\simcar\simcar\\data\\dayahead.txt"
+let file_phev = "c:\\simcar\simcar\\data\\phev.txt"
 let file_prediction = "c:\\simcar\simcar\\data\\prediction.txt"
 let data_folder = "C:\\SimCar\\SimCar\\data\\interpol\\"
 let screen_folder = "C:\\SimCar\\SimCar\\data\\img\\"
@@ -30,7 +31,13 @@ module IO =
 
     let write_doubles (file : string) (contents : float list) = 
         syncContext.RaiseDelegateEvent jobDebug <| sprintf "[%s] Writing files..." (String.Format("{0:hh:mm}", DateTime.Now))
-        use bw = new BinaryWriter(File.Open(file, FileMode.Append))
+        
+        let fileInfo = new System.IO.FileInfo(file)
+        
+        if not <| fileInfo.Directory.Exists then
+            fileInfo.Directory.Create()
+
+        use bw = new BinaryWriter(File.OpenWrite(file))
             
         contents |> List.iter (fun q -> bw.Write(q)) |> ignore
 
@@ -172,7 +179,7 @@ module Parsing =
                 match realtime with
                 | None -> raise <| IOException(sprintf "Could not find powernode with name %s in powerprofiles.txt" name)
                 | Some realtime ->
-                    let nth = (snd realtime) |> Array.get >> Energy.ofFloat
+                    let nth = (snd realtime) |> Array.map (fun x -> Energy.ofFloat x)
                     let node = create_powernode name nth parent
                     children <- name :: children
                     parse_powergrid t (node::nodes) (&rest) (&children) parent
@@ -184,16 +191,12 @@ module Parsing =
 
     let parse_dayahead_file (file) = read_doubles(file)
 
-let dayahead() = Parsing.parse_dayahead_file(file_dayahead) |> Array.get >> Energy.ofFloat
-
-let prediction() = Parsing.parse_dayahead_file(file_prediction) |> Array.get >> Energy.ofFloat
-
 let create_powergrid() = 
     let mutable rest = []
     let mutable children : string list = []
     let stream = IO.read_file file_brp
 
     syncContext.RaiseDelegateEvent jobDebug <| sprintf "[%s] Initializing powergrid..." (String.Format("{0:hh:mm}", DateTime.Now))
-    create_brp "brp" (Parsing.parse_powergrid stream [] (&rest) (&children) "brp") (fun n -> 0.0<kWh>) (children)
+    create_brp "brp" (Parsing.parse_powergrid stream [] (&rest) (&children) "brp") (Array.zeroCreate (96)) (children)
 //
 //let powergrid = create_powergrid()
