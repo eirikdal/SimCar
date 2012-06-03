@@ -52,9 +52,9 @@ type Scheduler =
     
 type SimCar(nTicksPerDay) =
     let mutable distanceTheta = 1.0
-    let mutable shavingTheta = 0.99
-    let mutable shavingAlpha = 0.2
-    let mutable ttlWindow = 30
+    let mutable shavingTheta = 0.95
+    let mutable shavingAlpha = 0.5
+    let mutable ttlWindow = 40
     let mutable nDays = 10
     let mutable _method = Some Distance
     let mutable _contr = None
@@ -62,6 +62,12 @@ type SimCar(nTicksPerDay) =
     let mutable _scheduler = None
     let mutable agents = None//Grid.Centralized.make_tree (powergrid) ttlWindow
     let mutable powergrid = None
+    let mutable phevBatteryList = []
+
+    let phevChanged ev = 
+        phevBatteryList <- ev::phevBatteryList
+
+    do phevBatteryLeft.Publish.Add phevChanged
 
     member self.Agents with get() = agents.Value
     member self.DistanceTheta with set(theta) = distanceTheta <- theta
@@ -157,6 +163,9 @@ type SimCar(nTicksPerDay) =
     member self.RegisterProgress (handler) = 
         jobProgress.Publish.AddHandler handler
 
+    member self.RegisterStarted (handler) = 
+        jobStarted.Publish.AddHandler handler
+
 //    member self.RegisterComputeDayahead () = 
 //        updateEvent.Publish.Add(fun dayahead -> IO.write_to_file <| FileManager.file_dayahead <| Parsing.parse_dayahead (List.ofArray dayahead))
 //    
@@ -206,7 +215,7 @@ type SimCar(nTicksPerDay) =
         let dayahead = 
             match _method with
             | Some Method.Shaving ->
-                let window_size = 120
+                let window_size = 96
                 
                 let dayahead = Array.copy realtime
 
@@ -223,10 +232,10 @@ type SimCar(nTicksPerDay) =
                         | None ->
                             day
                     
-                    let temp = DayAhead.Shifted.shave shavingAlpha shavingTheta phev
+                    let temp = DayAhead.Shifted.shave shavingAlpha shavingTheta (Array.sum2 phev day) phev
 
                     for j in _from .. _to-1 do 
-                        dayahead.[_from + j%96] <- dayahead.[_from + j%96] + temp.[j-_from]
+                        dayahead.[j] <- temp.[j-_from]
 
                 dayahead
             | Some Method.Superposition ->
@@ -272,34 +281,6 @@ type SimCar(nTicksPerDay) =
         | None -> self.Agents |> Tree.send(Filter(false)) |> ignore
         | _ -> self.Agents |> Tree.send(Filter(true)) |> ignore
             
-
-        syncContext.RaiseDelegateEvent jobDebug <|  sprintf "[%s] Running simulations" (String.Format("{0:hh:mm}", DateTime.Now))
-        let results = [for i in 0 .. (nDays-1) do yield run i agents.Value] 
-        syncContext.RaiseDelegateEvent jobProgress <| "------------------------------------"
-        syncContext.RaiseDelegateEvent jobDebug <| sprintf "[%s] Finished simulations" (String.Format("{0:hh:mm}", DateTime.Now))
-        syncContext.RaiseDelegateEvent jobProgress <| sprintf "\t\tAverage\t\tMax\t\tstd\t\tskewness\n"
-
-        let (phevs_sum, phevs_ux, pnodes_sum, total_max, total_avg, total_sum,
-             par, dayahead_sum, dif, ratio, trf_delta, trf_filtered) = 
-            results |> List.fold (fun (a,l,b,c,d,e,f,g,h,i,j,k) (x:Results) -> (x.phevs_sum::a, x.phevs_ux::l, x.pnodes_sum::b, x.total_max::c,
-                                                                                x.total_avg::d, x.total_sum::e, x.par::f,
-                                                                                x.dayahead_sum::g, x.dif::h, x.ratio::i, x.trf_delta::j, x.trf_filtered::k)) ([],[],[],[],[],[],[],[],[],[],[],[])
-                                    
-        let phevs_stat, phevs_ux_stat, pnodes_stat, max_stat, avg_stat, sum_stat, 
-            par_stat, dayahead_stat, dif_stat, ratio_stat, trf_stat, trf_fltr_stat = 
-                new DescriptiveStatistics(phevs_sum),
-                new DescriptiveStatistics(phevs_ux),
-                new DescriptiveStatistics(pnodes_sum),
-                new DescriptiveStatistics(total_max),
-                new DescriptiveStatistics(total_avg),
-                new DescriptiveStatistics(total_sum),
-                new DescriptiveStatistics(par),
-                new DescriptiveStatistics(dayahead_sum),
-                new DescriptiveStatistics(dif),
-                new DescriptiveStatistics(ratio),
-                new DescriptiveStatistics(trf_delta),
-                new DescriptiveStatistics(trf_filtered)
-
         let append_centralized str = 
             let str = 
                 str + 
@@ -324,6 +305,37 @@ type SimCar(nTicksPerDay) =
                     | Some Expected -> "-exp"
                     | Some Simulated -> "-sim"
                     | _ -> ""
+
+        syncContext.RaiseDelegateEvent jobStarted str
+
+        syncContext.RaiseDelegateEvent jobDebug <|  sprintf "[%s] Running simulations" (String.Format("{0:hh:mm}", DateTime.Now))
+        let results = [for i in 0 .. (nDays-1) do yield run i agents.Value] 
+        syncContext.RaiseDelegateEvent jobProgress <| "------------------------------------"
+        syncContext.RaiseDelegateEvent jobDebug <| sprintf "[%s] Finished simulations" (String.Format("{0:hh:mm}", DateTime.Now))
+        syncContext.RaiseDelegateEvent jobProgress <| sprintf "\t\tAverage\t\tMax\t\tstd\t\tskewness\n"
+
+        let (phevs_sum, phevs_ux, pnodes_sum, total_max, total_avg, total_sum,
+             par, dayahead_sum, dif, ratio, trf_delta, trf_filtered) = 
+            results |> List.fold (fun (a,l,b,c,d,e,f,g,h,i,j,k) (x:Results) -> (x.phevs_sum::a, x.phevs_ux::l, x.pnodes_sum::b, x.total_max::c,
+                                                                                x.total_avg::d, x.total_sum::e, x.par::f,
+                                                                                x.dayahead_sum::g, x.dif::h, x.ratio::i, x.trf_delta::j, x.trf_filtered::k)) ([],[],[],[],[],[],[],[],[],[],[],[])
+        let avg_battery = [for (i,q) in phevBatteryList do yield q]
+                               
+        let phevs_stat, phevs_ux_stat, pnodes_stat, max_stat, avg_stat, sum_stat, 
+            par_stat, dayahead_stat, dif_stat, ratio_stat, trf_stat, trf_fltr_stat, phevs_avg_bat = 
+                new DescriptiveStatistics(phevs_sum),
+                new DescriptiveStatistics(phevs_ux),
+                new DescriptiveStatistics(pnodes_sum),
+                new DescriptiveStatistics(total_max),
+                new DescriptiveStatistics(total_avg),
+                new DescriptiveStatistics(total_sum),
+                new DescriptiveStatistics(par),
+                new DescriptiveStatistics(dayahead_sum),
+                new DescriptiveStatistics(dif),
+                new DescriptiveStatistics(ratio),
+                new DescriptiveStatistics(trf_delta),
+                new DescriptiveStatistics(trf_filtered),
+                new DescriptiveStatistics(avg_battery)
 
         let print_description meth contr scheduler = 
             let match_method scheduler meth = 
@@ -352,7 +364,7 @@ type SimCar(nTicksPerDay) =
                 | None -> sprintf "Baseline after %i days of simulation" nDays
 
         let capt (opt : 'a option) = if opt.IsSome then opt.ToString() else "None"
-
+        
         let latex = 
             sprintf "\\begin{table}
 \\begin{center}
@@ -361,6 +373,7 @@ type SimCar(nTicksPerDay) =
 \hline
 \hline
 %s & %.3f* & %.3f* & %.1f & %.2f \\\\
+%s & %.3f* & %.3f* & %.1f & %.2f  \\\\
 %s & %.3f* & %.3f* & %.1f & %.2f  \\\\
 %s & %.3f* & %.3f* & %.1f & %.2f  \\\\
 %s & %.1f & %.1f & %.1f & %.2f  \\\\
@@ -383,6 +396,7 @@ type SimCar(nTicksPerDay) =
                     "Peak" (max_stat.Mean / 1000.0) (max_stat.Maximum / 1000.0) max_stat.StandardDeviation max_stat.Skewness
                     "Daily.Avg" (avg_stat.Mean / 1000.0) (avg_stat.Maximum / 1000.0) avg_stat.StandardDeviation avg_stat.Skewness
                     "PHEV(Ux)" (phevs_ux_stat.Mean / 1000.0) (phevs_ux_stat.Maximum / 1000.0) phevs_ux_stat.StandardDeviation phevs_ux_stat.Skewness
+                    "PHEV(Avg)" (phevs_avg_bat.Mean / 1000.0) (phevs_avg_bat.Maximum / 1000.0) phevs_avg_bat.StandardDeviation phevs_avg_bat.Skewness
                     "Trf(Exc)" trf_stat.Mean trf_stat.Maximum trf_stat.StandardDeviation trf_stat.Skewness
                     "Trf(Flt)" trf_fltr_stat.Mean trf_fltr_stat.Maximum trf_fltr_stat.StandardDeviation trf_fltr_stat.Skewness
                     "PAR" par_stat.Mean par_stat.Maximum par_stat.StandardDeviation par_stat.Skewness
@@ -396,7 +410,7 @@ type SimCar(nTicksPerDay) =
 //        let (phevs_sum, phevs_ux, pnodes_sum, total_max, total_avg, total_sum,
 //             par, dayahead_sum, dif, ratio, trf_delta, trf_filtered)
         
-        let fileResults = String.Format("c:\\SimCar\\SimCar\\data\\log\\experiments\\{1}-{0}\\", started, str);        
+        let fileResults = String.Format("c:\\SimCar\\SimCar\\data\\log\\experiments\\{0}-{1}\\", started, str);        
         IO.write_doubles (fileResults + "phevs_sum.dat") phevs_sum
         IO.write_doubles (fileResults + "phevs_ux.dat") phevs_ux
         IO.write_doubles (fileResults + "pnodes_sum.dat") pnodes_sum
@@ -410,7 +424,10 @@ type SimCar(nTicksPerDay) =
         IO.write_doubles (fileResults + "trf_delta.dat") trf_delta
         IO.write_doubles (fileResults + "trf_filtered.dat") trf_filtered
 
-        let fileLog = String.Format("c:\\SimCar\\SimCar\\data\\log\\latex\\{1}-{0}.tex", started, str);
+        let temp = [for (i,q) in phevBatteryList do yield float i; yield q]
+        IO.write_doubles (fileResults + "phev_battery.dat") temp
+
+        let fileLog = String.Format("c:\\SimCar\\SimCar\\data\\log\\latex\\{0}-{1}.tex", started, str);
         
         let file = new System.IO.StreamWriter(fileLog);
         file.WriteLine(latex);
@@ -418,6 +435,7 @@ type SimCar(nTicksPerDay) =
 
         syncContext.RaiseDelegateEvent jobProgress <| sprintf "PHEVs\t\t%.2f\t\t%.2f\t\t%.2f\t\t%.2f" phevs_stat.Mean phevs_stat.Maximum phevs_stat.StandardDeviation phevs_stat.Skewness
         syncContext.RaiseDelegateEvent jobProgress <| sprintf "PHEVs (Ux)\t\t%.2f\t\t%.2f\t\t%.2f\t\t%.2f" phevs_ux_stat.Mean phevs_ux_stat.Maximum phevs_ux_stat.StandardDeviation phevs_ux_stat.Skewness
+        syncContext.RaiseDelegateEvent jobProgress <| sprintf "PHEVs (Avg)\t\t%.2f\t\t%.2f\t\t%.2f\t\t%.2f" phevs_avg_bat.Mean phevs_avg_bat.Maximum phevs_avg_bat.StandardDeviation phevs_avg_bat.Skewness
         syncContext.RaiseDelegateEvent jobProgress <| sprintf "PowerNodes\t%.2f\t%.2f\t%.2f\t\t%.2f" pnodes_stat.Mean pnodes_stat.Maximum pnodes_stat.StandardDeviation pnodes_stat.Skewness
         syncContext.RaiseDelegateEvent jobProgress <| sprintf "Peak\t\t%.2f\t\t%.2f\t\t%.2f\t\t%.2f" max_stat.Mean max_stat.Maximum max_stat.StandardDeviation max_stat.Skewness
         syncContext.RaiseDelegateEvent jobProgress <| sprintf "Daily Avg\t\t%.2f\t\t%.2f\t\t%.2f\t\t%.2f" avg_stat.Mean avg_stat.Maximum avg_stat.StandardDeviation avg_stat.StandardDeviation

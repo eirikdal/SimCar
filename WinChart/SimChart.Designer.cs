@@ -278,7 +278,7 @@
             this.textBoxShavingTheta.Name = "textBoxShavingTheta";
             this.textBoxShavingTheta.Size = new System.Drawing.Size(35, 20);
             this.textBoxShavingTheta.TabIndex = 2;
-            this.textBoxShavingTheta.Text = "1.0";
+            this.textBoxShavingTheta.Text = "0.95";
             // 
             // label5
             // 
@@ -295,7 +295,7 @@
             this.textBoxShavingAlpha.Name = "textBoxShavingAlpha";
             this.textBoxShavingAlpha.Size = new System.Drawing.Size(32, 20);
             this.textBoxShavingAlpha.TabIndex = 0;
-            this.textBoxShavingAlpha.Text = "0.2";
+            this.textBoxShavingAlpha.Text = "0.5";
             this.textBoxShavingAlpha.TextChanged += new System.EventHandler(this.textBox2_TextChanged);
             // 
             // groupBox3

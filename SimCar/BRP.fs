@@ -98,7 +98,7 @@ module Agent =
                 | ReplyTo(replyToMsg, reply) ->
                     match replyToMsg with
                     | RequestModel ->
-                        if waiting then
+                        if waiting && phevs <> 0 then
                             queue.Enqueue(msg)
                             return! loop brp intentions schedule tick phevs waiting
                         else

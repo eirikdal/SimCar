@@ -41,19 +41,21 @@ let create_chart _from _to (data : float<kWh>[]) (title : string) =
     |> FSharpChart.WithLegend
         (InsideArea=false, Font=new Font("Arial", 8.0f),
         Alignment = StringAlignment.Center, Docking=Docking.Top)
-
-let phev_simulated = FileManager.IO.read_doubles (FileManager.file_phev) |> Array.map (fun x -> Energy.ofFloat x)
+//
+//let phev_simulated = FileManager.IO.read_doubles (FileManager.file_phev) |> Array.map (fun x -> Energy.ofFloat x)
 let phev_expected = Tree.phev_expected <| create_powergrid()
-let powernodes = take 1280 0 profiles_interpol |> Array.map Models.Energy.ofFloat
+let powernodes = take 1280 90 profiles_interpol |> Array.map Models.Energy.ofFloat
 let total = Array.sum2 phev_expected powernodes
-//let shaved = DayAhead.Shifted.shave 0.3 1.05 total phev_expected
+let shaved = DayAhead.Shifted.shave 0.5 0.95 total phev_expected
+
 //let test4 = DayaheadExp.Algorithm.distribute test test2 0.993 1 |> Array.ofList
 
 
 create_chart 0.0 4000.0 phev_expected "Expected PHEV"
-create_chart 2000.0 8000.0 powernodes "powernodes"
+create_chart 0000.0 4000.0 powernodes "powernodes"
+create_chart 2000.0 8000.0 shaved "shaved"
 create_chart 2000.0 8000.0 total "total"
-//create_chart 2000.0 8000.0 shaved "shaved"
-create_chart 0.0 4000.0 (Array.sub phev_simulated 288 96) "Simulated PHEV"
+
+//create_chart 0.0 4000.0 (Array.sub phev_simulated 288 96) "Simulated PHEV"
 
 //test2.SaveChartAs(img, System.Windows.Forms.DataVisualization.Charting.ChartImageFormat.Png)

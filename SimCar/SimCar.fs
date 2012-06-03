@@ -37,7 +37,7 @@ let test_dayahead iter agents =
     let rec shave n rt = 
         syncContext.RaiseDelegateEvent dayaheadProgress rt
         if n > 0 then 
-            shave (n-1) (rt |> DayAhead.Shifted.shave 0.3 0.95)
+            shave (n-1) (rt |> DayAhead.Shifted.shave 0.3 0.95 [||])
 
     shave iter updated_realtime
 

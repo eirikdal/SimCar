@@ -21,7 +21,7 @@ let screen_folder = "C:\\SimCar\\SimCar\\data\\img\\"
 
 module IO =
     let read_file (file : string) = 
-        syncContext.RaiseDelegateEvent jobDebug <| sprintf "[%s] Reading files..." (String.Format("{0:hh:mm}", DateTime.Now))
+        syncContext.RaiseDelegateEvent jobDebug <| sprintf "[%s] Reading from file %s..." (String.Format("{0:hh:mm}", DateTime.Now)) file
         if not <| File.Exists(file) then File.WriteAllText(file, "")
     //        use sr = new StreamReader(folder_of file)
         use sr = new StreamReader(file)
@@ -30,14 +30,14 @@ module IO =
             yield sr.ReadLine()]
 
     let write_doubles (file : string) (contents : float list) = 
-        syncContext.RaiseDelegateEvent jobDebug <| sprintf "[%s] Writing files..." (String.Format("{0:hh:mm}", DateTime.Now))
+        syncContext.RaiseDelegateEvent jobDebug <| sprintf "[%s] Writing to file %s..." (String.Format("{0:hh:mm}", DateTime.Now)) file
         
         let fileInfo = new System.IO.FileInfo(file)
         
         if not <| fileInfo.Directory.Exists then
             fileInfo.Directory.Create()
 
-        use bw = new BinaryWriter(File.OpenWrite(file))
+        use bw = new BinaryWriter(fileInfo.AppendText().BaseStream)
             
         contents |> List.iter (fun q -> bw.Write(q)) |> ignore
 

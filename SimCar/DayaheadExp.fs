@@ -89,32 +89,32 @@ module Algorithm =
 
         let window_size = 120
                 
-        let dayahead = Array.init ((days+1)*96) (fun _ -> 0.0<kWh>)
+//        let dayahead = Array.init ((days+1)*96) (fun _ -> 0.0<kWh>)
+////
+//        for i in 0 .. (days-1) do
+//            let _from,_to = (i*96),(i*96)+window_size
+//            let day = Array.sub realtime _from window_size
 //
-        for i in 0 .. (days-1) do
-            let _from,_to = (i*96),(i*96)+window_size
-            let day = Array.sub realtime _from window_size
-
-            let phev_expected = 
-                if phev_expected.Length > window_size then
-                    Array.sub phev_expected _from window_size
-                else
-                    Array.init (window_size) (fun x -> phev_expected.[x%96])
-                    
-            dist day phev_expected |> ignore
-
-            for j in _from .. _to-1 do 
-                dayahead.[j] <- day.[j-_from]
-
-        dayahead |> List.ofArray
-//        [for i in 0 .. (days-1) do
-//            let _from,_to = (i*96),(i*96)+96
-//            let mutable day = Array.sub realtime _from 96
 //            let phev_expected = 
-//                if phev_expected.Length > 96 then
-//                    Array.sub phev_expected _from 96
+//                if phev_expected.Length > window_size then
+//                    Array.sub phev_expected _from window_size
 //                else
-//                    phev_expected
-//            let realtime_updated = dist day phev_expected
-//            yield! (List.ofArray day)]
+//                    Array.init (window_size) (fun x -> phev_expected.[x%96])
+//                    
+//            dist day phev_expected |> ignore
+//
+//            for j in _from .. _to-1 do 
+//                dayahead.[j] <- day.[j-_from]
+//
+//        dayahead |> List.ofArray
+        [for i in 0 .. (days-1) do
+            let _from,_to = (i*96),(i*96)+96
+            let mutable day = Array.sub realtime _from 96
+            let phev_expected = 
+                if phev_expected.Length > 96 then
+                    Array.sub phev_expected _from 96
+                else
+                    phev_expected
+            let realtime_updated = dist day phev_expected
+            yield! (List.ofArray day)]
 

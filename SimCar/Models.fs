@@ -232,7 +232,8 @@ type PhevArguments =
         member self.leave(tick : int, duration : int list) : PhevArguments =  
             self.histogram.[(tick%96)] <- self.histogram.[(tick%96)] + 1
 
-            syncContext.RaiseDelegateEvent phevLeft (tick%96, Math.Round(Energy.toFloat <| self.capacity-self.battery))
+            syncContext.RaiseDelegateEvent phevLeft (tick%96, self.capacity-self.battery)
+            syncContext.RaiseEvent phevBatteryLeft (tick%96, Energy.toFloat self.battery / Energy.toFloat self.capacity)
         
             { self with left=(tick%96); duration=duration; failed=self.failed+(self.capacity-self.battery); intentions=[]}
         member self.charge() = 
