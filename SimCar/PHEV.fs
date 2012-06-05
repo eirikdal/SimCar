@@ -93,7 +93,6 @@ module Action =
             |> snd
             |> (+) tick
 
-
 module Agent = 
     module Centralized = 
         let create_phev_agent _p name ttlwindow = Agent<Message>.Start(fun agent ->
@@ -106,13 +105,14 @@ module Agent =
                         async { return queue.Dequeue() }
                     else
                         agent.Receive()
+
                 match msg with
                 | ReplyTo(replyToMsg, reply) ->
                     match replyToMsg with
                     | RequestModel ->
                         if not waiting then
                             reply.Reply(Model(phev))
-                            return! loop (PHEV({ phev_args with  failed=0.0<kWh>; })) false
+                            return! loop (PHEV({ phev_args with failed=0.0<kWh>; })) false
                         else
                             queue.Enqueue(msg)
                             return! loop phev waiting
@@ -150,6 +150,7 @@ module Agent =
                 | _ -> 
                     return! loop phev waiting }
             loop _p false)
+
     module Decentralized = 
         module Predictions = 
             let create_phev_agent _p ttlwindow = Agent<Message>.Start(fun agent ->
@@ -227,6 +228,7 @@ module Agent =
                     | _ -> 
                         return! loop phev waiting tick }
                 loop _p false 0)
+
         module Random = 
             let create_phev_agent _p ttlwindow = Agent<Message>.Start(fun agent ->
                 let queue = new Queue<Message>() 
@@ -280,4 +282,5 @@ module Agent =
                         syncContext.RaiseDelegateEvent jobProgress <| sprintf "Agent %s: Exiting.." name
                     | _ -> 
                         return! loop phev waiting }
+
                 loop _p false)
