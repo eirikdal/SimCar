@@ -1,18 +1,18 @@
 ﻿suburban {
   weibull, mean=07:15, std=210, duration=1;1;1;1;1;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1
-  lognormal, mean=18:30, std=30, duration=1;0;0;0;1
-  gauss, mean=20:15, std=60, duration=1;1;0;0;1;1
+  lognormal, mean=19:30, std=30, duration=1;0;0;0;1
+  gauss, mean=21:45, std=60, duration=1;1;0;0;1;1
 }
 homeworker {
   gauss, mean=12:15, std=60, duration=1;1;1;0;0;0;0;0;1;1;1
-  gauss, mean=17:15, std=60, duration=1;1;1;0;0;0;0;1;1;1
-  gauss, mean=21:15, std=60, duration=1;1;1;0;0;0;0;1;1;1
+  gauss, mean=18:15, std=60, duration=1;1;1;0;0;0;0;1;1;1
+  gauss, mean=22:15, std=60, duration=1;1;1;0;0;0;0;1;1;1
 }
 city {
   weibull, mean=07:45, std=210, duration=1;1;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1
-  lognormal, mean=17:15, std=22.5, duration=1;1;0;0;1;1
+  lognormal, mean=20:15, std=22.5, duration=1;1;0;0;1;1
 }
 commuter {
   weibull, mean=07:15, std=210, duration=1;1;1;1;1;1;1;1;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1
-  lognormal, mean=19:15, std=15, duration=1;1;0;0;0;0;0;0;0;0;1;1
+  lognormal, mean=20:15, std=15, duration=1;1;0;0;0;0;0;0;0;0;1;1
 }
