@@ -29,7 +29,7 @@ module Centralized =
             postalService.add_agent(name, agent)
             agent
         | BRP(_) ->
-            let agent = Agent.Centralized.create_brp_agent node
+            let agent = Agent.Centralized.create_brp_agent node 616
             postalService.add_agent(name, agent)
             agent
 
@@ -77,7 +77,7 @@ module Decentralized =
                 Leaf(Some <| make_agent name phev ttlwindow)
             | Node(nodes, Some(BRP({name=name}) as brp)) ->
                 Node(List.map (fun n -> make_tree n ttlwindow) nodes, Some <| make_agent name brp ttlwindow)
-    module Mixed = 
+    module Predictions = 
         let make_agent name node ttlwindow =    
             match node with
             | Transformer(_) ->
@@ -85,7 +85,7 @@ module Decentralized =
                 postalService.add_agent(name, agent)
                 agent
             | PHEV(_) ->
-                let agent = Agent.Decentralized.Mixed.create_phev_agent node ttlwindow
+                let agent = Agent.Decentralized.Predictions.create_phev_agent node ttlwindow
                 postalService.add_agent(name, agent)
                 agent
             | PowerNode(_) ->
@@ -93,7 +93,7 @@ module Decentralized =
                 postalService.add_agent(name, agent)
                 agent
             | BRP(_) ->
-                let agent = Agent.Decentralized.Mixed.create_brp_agent node
+                let agent = Agent.Decentralized.Predictions.create_brp_agent node
                 postalService.add_agent(name, agent)
                 agent
 

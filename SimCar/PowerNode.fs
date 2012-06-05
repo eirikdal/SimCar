@@ -32,15 +32,15 @@ module Agent =
                             reply.Reply(Model(pnode))
                             return! loop pnode false
                 | Update(tick) -> 
-                    let current = pnode_args.realtime tick
-                    postalService.send(parent, Charge_OK(name, current, -1))
-        //            syncContext.RaiseDelegateEvent jobProgress <|  "PowerNode %s: Sending charge_ok to %s" name parent
+                    let current = pnode_args.realtime.[tick]
+                    postalService.send(parent, Demand(name, current, -1))
+        //            syncContext.RaiseDelegateEvent jobProgress <|  "PowerNode %s: Sending Demand to %s" name parent
                     return! loop <| pnode <| true
                 | Model(pnode) -> 
                     return! loop pnode waiting
                 | Reset ->
                     return! loop <| PowerNode({ pnode_args with current=0.0<kWh>}) <| false
-                | Charge_OK(_,current,_) -> 
+                | Demand(_,current,_) -> 
                     return! loop <| PowerNode({ pnode_args with current=current }) <| false
                 | Kill ->
                     syncContext.RaiseDelegateEvent jobProgress <| sprintf "Agent %s: Exiting.." name
@@ -70,15 +70,15 @@ module Agent =
                             reply.Reply(Model(pnode))
                             return! loop pnode false
                 | Update(tick) -> 
-                    let current = pnode_args.realtime tick
-                    postalService.send(parent, Charge_OK(name, current, -1))
-//                    syncContext.RaiseDelegateEvent jobProgress <|  "PowerNode %s: Sending charge_ok to %s" name parent
+                    let current = pnode_args.realtime.[tick]
+                    postalService.send(parent, Demand(name, current, -1))
+//                    syncContext.RaiseDelegateEvent jobProgress <|  "PowerNode %s: Sending Demand to %s" name parent
                     return! loop <| pnode <| true
                 | Model(pnode) -> 
                     return! loop pnode waiting
                 | Reset ->
                     return! loop <| PowerNode({ pnode_args with current=0.0<kWh>}) <| false
-                | Charge_OK(_,current,_) -> 
+                | Demand(_,current,_) -> 
                     return! loop <| PowerNode({ pnode_args with current=current }) <| false
                 | Kill ->
                     syncContext.RaiseDelegateEvent jobProgress <| sprintf "Agent %s: Exiting.." name

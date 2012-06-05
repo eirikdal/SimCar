@@ -17,15 +17,21 @@ let rand = MathNet.Numerics.Random.Xorshift(true)
 
 module Action = 
     let send_intention (phev_args : PhevArguments) ttl =
-        let intention, wait = 
+        let wait = 
             if phev_args.intentions.Length = 0 then
-                Charge(phev_args.name, Energy.ofFloat (float (phev_args.capacity - phev_args.battery)), ttl, phev_args.charge_rate), true
+                let intention = Charge(phev_args.name, Energy.ofFloat (float (phev_args.capacity - phev_args.battery)), ttl, phev_args.charge_rate)
+                postalService.send("brp", intention)
+                true
             else
-                match phev_args.intentions with
-                | h::t -> Charge_OK(phev_args.name, h, -1), false
-                | [] -> Charge_OK(phev_args.name, 0.0<kWh>,-1), false
+                let intention = 
+                    match phev_args.intentions with
+                    | h::t -> Demand(phev_args.name, h, -1)
+                    | [] -> Demand(phev_args.name, 0.0<kWh>,-1)
 
-        postalService.send(phev_args.parent, intention)
+                postalService.send("brp", intention)
+                postalService.send(phev_args.parent, intention)
+                true
+
         wait
 
     let create_intention ({ battery=battery; capacity=capacity; charge_rate=rate }) tick ttl : float<kWh> list = 
@@ -112,19 +118,20 @@ module Agent =
                             return! loop phev waiting
                 | Model(phev) ->
                     return! loop phev waiting
-                | Charge_Accepted(accepted) ->
+                | Strategy(accepted) ->
                     let phevArgs = { phev_args with intentions=accepted }
             
-                    let wait_for_reply = Action.send_intention phevArgs (-1)
-            
-                    return! loop (PHEV(phevArgs)) wait_for_reply
-                | Charge_OK(_,_,_) ->
+//                    let wait_for_reply = Action.send_intention phevArgs (-1)
+                    postalService.send(phev_args.parent, Demand(phev_args.name, accepted.Head, -1))
+
+                    return! loop (PHEV(phevArgs)) true
+                | Demand(_,_,_) ->
                     return! loop (Action.charge phev_args) false
                 | Update(tick) ->
                     let ttl = Action.find_ttl histogram tick ttlwindow
                     let wait_for_reply = Action.send_intention phev_args ttl
             
-                    if phev_args.name = "phev_7677" then
+                    if phev_args.name = "phev_3169" then
                         syncContext.RaiseDelegateEvent phevBattery phev_args.battery
 
                         if List.length phev_args.duration > 0 then
@@ -145,7 +152,7 @@ module Agent =
             loop _p false)
 
     module Decentralized = 
-        module Mixed = 
+        module Predictions = 
             let create_phev_agent _p ttlwindow = Agent<Message>.Start(fun agent ->
                 let queue = new Queue<Message>() 
                 let test = new MathNet.Numerics.Statistics.Histogram()
@@ -166,7 +173,7 @@ module Agent =
                             else
                                 queue.Enqueue(msg)
                                 return! loop phev waiting tick
-                        | Mixed(baseline) ->
+                        | Predictions(baseline) ->
                             let ttl = Action.find_ttl histogram tick ttlwindow
 
                             let intentions = 
@@ -188,13 +195,13 @@ module Agent =
 
                             let msg = 
                                 match intentions with
-                                | h::t -> Charge_OK(phev_args.name, h, ttl)
-                                | [] -> Charge_OK(phev_args.name, 0.0<kWh>, ttl)
+                                | h::t -> Demand(phev_args.name, h, ttl)
+                                | [] -> Demand(phev_args.name, 0.0<kWh>, ttl)
 
-    //                        syncContext.RaiseDelegateEvent jobProgress <|  "PHEV %s: Sending charge_ok to %s" name parent
+    //                        syncContext.RaiseDelegateEvent jobProgress <|  "PHEV %s: Sending Demand to %s" name parent
                             postalService.send(phev_args.parent, msg)
             
-                            if phev_args.name = "phev_7677" then
+                            if phev_args.name = "phev_3169" then
                                 syncContext.RaiseDelegateEvent phevBattery phev_args.battery
                                 if List.length phev_args.duration > 0 then
                                     syncContext.RaiseDelegateEvent phevStatus 1.0
@@ -207,11 +214,12 @@ module Agent =
                                 return! loop <| PHEV({ phev_args with intentions=intentions }.drive()) <| true <| tick
                     | Model(phev) ->
                         return! loop phev waiting tick
-                    | Charge_OK(_,_,_) ->
+                    | Demand(_,_,_) ->
                         return! loop (Action.charge phev_args) false tick
                     | Update(tick) ->
                         let ttl = Action.find_ttl histogram tick ttlwindow
-                        postalService.send("brp", RequestMixed(name, ttl))
+                        postalService.send("brp", RequestPredictions(name, ttl))
+                        
                         return! loop phev waiting tick
                     | Reset -> 
                         return! loop <| PHEV({ phev_args with battery=phev_args.capacity; duration=[] }) <| false <| tick
@@ -244,7 +252,7 @@ module Agent =
                                 return! loop phev waiting
                     | Model(phev) ->
                         return! loop phev waiting
-                    | Charge_OK(_,_,_) ->
+                    | Demand(_,_,_) ->
                         return! loop (Action.charge phev_args) false
                     | Update(tick) ->
                         let ttl = Action.find_ttl histogram tick ttlwindow
@@ -252,12 +260,12 @@ module Agent =
 
                         let msg = 
                             match intentions with
-                            | h::t -> Charge_OK(phev_args.name, h, ttl)
-                            | [] -> Charge_OK(phev_args.name, 0.0<kWh>,ttl)
+                            | h::t -> Demand(phev_args.name, h, ttl)
+                            | [] -> Demand(phev_args.name, 0.0<kWh>,ttl)
 
                         postalService.send(phev_args.parent, msg)
             
-                        if phev_args.name = "phev_7677" then
+                        if phev_args.name = "phev_3169" then
                             syncContext.RaiseDelegateEvent phevBattery phev_args.battery
                             if List.length phev_args.duration > 0 then
                                 syncContext.RaiseDelegateEvent phevStatus 1.0

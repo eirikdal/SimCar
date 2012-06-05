@@ -43,8 +43,8 @@ let min_per_tick : int<min/tick> = 15<min/tick>
 
 type power = float<kW>
 type energy = float<kWh>
-type dayahead = (int -> energy)
-type realtime = (int -> energy)
+type dayahead = (energy array)
+type realtime = (energy array)
 type capacity = energy
 type current = energy
 type battery = energy
@@ -232,7 +232,8 @@ type PhevArguments =
         member self.leave(tick : int, duration : int list) : PhevArguments =  
             self.histogram.[(tick%96)] <- self.histogram.[(tick%96)] + 1
 
-            syncContext.RaiseDelegateEvent phevLeft (tick%96, Math.Round(Energy.toFloat <| self.capacity-self.battery))
+            syncContext.RaiseDelegateEvent phevLeft (tick%96, self.capacity-self.battery)
+            syncContext.RaiseEvent phevBatteryLeft (tick%96, Energy.toFloat self.battery / Energy.toFloat self.capacity)
         
             { self with left=(tick%96); duration=duration; failed=self.failed+(self.capacity-self.battery); intentions=[]}
         member self.charge() = 
@@ -321,7 +322,7 @@ let create_brp name nodes dayahead children =
         { name=name;
         dayahead=dayahead;
         current=0.0<kWh>;
-        realtime=Array.init (96) (fun _ -> 0.0<kWh>) |> Array.get;
+        realtime=Array.init (96) (fun _ -> 0.0<kWh>);
         children=children |> List.map (fun child -> (child, Waiting)); }
 
     Node(nodes, Some <| BRP(brp_arg)) 

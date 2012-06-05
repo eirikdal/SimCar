@@ -16,16 +16,17 @@ namespace WinChart
         Sim.SimCar tSim;
 
         private String filePath = "";
+        private String simId = "";
+
         private DateTime started = DateTime.Now;
-        private bool trf_updated = false;
 
         private ArrayList profiles = new ArrayList();
 
-        private const int nRealTime = 0;
-        private const int nPowerNodes = 1;
-        private const int nPhev = 2;
-        private const int nDayAhead = 3;
-        private const int nPhevsLeft = 4;
+        private const int nDayAhead = 0;
+        private const int nRealTime = 1;
+        private const int nPowerNodes = 2;
+        //private const int nPhev = 3;
+        //private const int nPhevsLeft = 4;
 
         private const int nPhevStatus = 0;
         private const int nPhevBattery = 1;
@@ -42,13 +43,11 @@ namespace WinChart
         private const int nDayaheadSupervisor = 4;
         private const int nDayaheadAnts = 5;
 
-        private static string[] series = { "Total", "PowerNodes", "PHEV (x)", "Dayahead", "PHEV (Ux)" };
+        private static string[] series = { "Dayahead", "Total", "PowerNodes" };
         private static string[] _seriesPhev = { "PHEV status", "PHEV battery", "PHEV PDF" };
         private static string[] _seriesTrf = {"Capacity", "Current", "Filtered"};
         private static string[] _seriesDayahead = { "Original", "Dayahead previous", "Dayahead current", "Expected"  };
 
-        private static int counter_trf = 0;
-        private static int counter_phev = 0;
         private static int counter_power = 0;
         private static int counter_day = 0;
 
@@ -272,12 +271,12 @@ namespace WinChart
             addPoint(chart2, nPhevStatus, point);
         }
 
-        void phevLeft_Changed(object sender, EventArgs e)
-        {
-            Tuple<int, Double> chart = (Tuple<int, Double>)sender;
+        //void phevLeft_Changed(object sender, EventArgs e)
+        //{
+        //    Tuple<int, Double> chart = (Tuple<int, Double>)sender;
 
-            incrementPoint(chart1, nPhevsLeft, chart.Item1, chart.Item2);
-        }
+        //    incrementPoint(chart1, nPhevsLeft, chart.Item1, chart.Item2);
+        //}
 
         void phevBattery_Changed(object sender, EventArgs e)
         {
@@ -303,10 +302,10 @@ namespace WinChart
             }
         }
         
-        void phev_Changed(object sender, EventArgs e)
-        {
-            updateChart(chart1, nPhev, (Double[])sender);
-        }
+        //void phev_Changed(object sender, EventArgs e)
+        //{
+        //    updateChart(chart1, nPhev, (Double[])sender);
+        //}
 
         void pnode_Changed(object sender, EventArgs e)
         {
@@ -318,7 +317,7 @@ namespace WinChart
             updateChart(chart1, nRealTime, (Double[])sender, true, "power");
             resetChart(chart2, 0, 2, true, "phev");
             resetChart(chart3, 0, 3, true, "trf");
-            resetChart(chart1, nPhevsLeft, nPhevsLeft+1);
+            //resetChart(chart1, nPhevsLeft, nPhevsLeft+1);
         }
 
         void chart_moving_average_comparison_Changed(object sender, EventArgs e)
@@ -335,7 +334,8 @@ namespace WinChart
         {
             Double[] chart = (Double[])sender;
 
-            this.chart1.Titles[0].Text = (String.Format("Iteration #{0} : Step # {0}", counter_day, nstep));
+            //this.chart1.Titles[0].Text = (String.Format("Iteration #{0} : Step # {0}", counter_day, nstep));
+            this.chartDayahead.Titles[0].Text = (String.Format("Powergraph : Day # {0}", nstep));
 
             updateChart(chartDayahead, nDayaheadOriginal, chart);
         }
@@ -343,7 +343,8 @@ namespace WinChart
         {
             Double[] chart = (Double[])sender;
 
-            this.chart1.Titles[0].Text = (String.Format("Iteration #{0} : Step # {1}", counter_day, nstep++));
+            //this.chart1.Titles[0].Text = (String.Format("Iteration #{0} : Step # {1}", counter_day, nstep++));
+            this.chartDayahead.Titles[0].Text = (String.Format("Powergraph : Day # {0}", nstep));
 
             updateChart(chart1, nDayAhead, chart);
         }
@@ -352,7 +353,8 @@ namespace WinChart
         {
             Double[] chart = (Double[])sender;
 
-            this.chartDayahead.Titles[0].Text = (String.Format("Iteration #{0} : Step # {1}", counter_day, nstep));
+            //this.chartDayahead.Titles[0].Text = (String.Format("Powergraph : Day # {1}", nstep));
+            this.chartDayahead.Titles[0].Text = (String.Format("Powergraph : Day # {0}", nstep));
 
             updateChart(chartDayahead, nDayaheadCur, chart);
         }
@@ -459,12 +461,23 @@ namespace WinChart
             updateDebug(ev);
         }
 
+        void start_Changed(object sender, EventArgs e)
+        {
+            String ev = (String)sender;
+
+            filePath = String.Format("C:\\SimCar\\SimCar\\data\\img\\{0:dd.MM.HH.mm}-{1}", started, ev);
+            simId = ev;
+        }
+
         void setChartLabels(Chart chart)
         {
             chart.ChartAreas[0].AxisX.CustomLabels.Add(23, 24, "06:00");
             chart.ChartAreas[0].AxisX.CustomLabels.Add(47, 48, "12:00");
             chart.ChartAreas[0].AxisX.CustomLabels.Add(71, 73, "18:00");
             chart.ChartAreas[0].AxisX.CustomLabels.Add(90, 95, "24:00");
+
+            chart.ChartAreas[0].AxisX.Title = "time";
+            chart.ChartAreas[0].AxisY.Title = "kWh";
         }
 
         void setChartAxis(Chart chart)
@@ -481,9 +494,9 @@ namespace WinChart
             tSim.RegisterPhevBattery(phevBattery_Changed);
             tSim.RegisterPhevStatus(phevStatus_Changed);
             tSim.RegisterProgressTotal(total_Changed);
-            tSim.RegisterProgressPhev(phev_Changed);
+            //tSim.RegisterProgressPhev(phev_Changed);
             tSim.RegisterProgressPnode(pnode_Changed);
-            tSim.RegisterPhevLeft(phevLeft_Changed);
+            //tSim.RegisterPhevLeft(phevLeft_Changed);
             tSim.RegisterProb(prob_Calc);
             tSim.RegisterProbReset(prob_Reset);
             tSim.RegisterDayaheadProgress(dayahead_Changed);
@@ -500,6 +513,7 @@ namespace WinChart
             tSim.RegisterDebug(debug_Changed);
             tSim.RegisterError(error_Changed);
             tSim.RegisterProgress(progress_Changed);
+            tSim.RegisterStarted(start_Changed);
         }
 
         public SimChart()
@@ -509,14 +523,17 @@ namespace WinChart
             chartDayahead.Titles.Add("Dayahead");
             chart3.Titles.Add("Transformer");
             chart2.Titles.Add("PHEV");
-            chart1.Titles.Add("Iteration # 0 : Step # 0");
+            chart1.Titles.Add("Total Consumption");
             //chart1.Titles.Add("alpha = 0.3, theta = 0.9");
 
-            chart1.Series[0].LegendText = series[nRealTime];
+            chart1.Series[0].LegendText = series[nDayAhead];
+            chart1.Series.Add(series[nRealTime]);
+            //chart1.Series.Add(series[nPhev]);
             chart1.Series.Add(series[nPowerNodes]);
-            chart1.Series.Add(series[nPhev]);
-            chart1.Series.Add(series[nDayAhead]);
-            chart1.Series.Add(series[nPhevsLeft]);
+            //chart1.Series.Add(series[nPhevsLeft]);
+            chart1.ChartAreas[0].AxisY.Minimum = 1500;
+            //chart1.ChartAreas[0].AxisY.Minimum = 3500;
+            
 
             //chart1.ChartAreas.Add("ChartArea1");
 
@@ -544,47 +561,49 @@ namespace WinChart
             setChartLabels(chart2);
             setChartLabels(chart3);
             setChartLabels(chartDayahead);
-            
-            Series[] seriesPhev = {chart2.Series[nPhevStatus], chart2.Series[nPhevBattery], chart2.Series[nPhevsPDF]};
-            Series[] seriesArray = { chart1.Series[nRealTime], chart1.Series[nPowerNodes], chart1.Series[nPhev], chart1.Series[nDayAhead], chart1.Series[nPhevsLeft] };
+
+            Series[] seriesPhev = { chart2.Series[nPhevStatus], chart2.Series[nPhevBattery], chart2.Series[nPhevsPDF] };
+            Series[] seriesArray = { chart1.Series[nDayAhead], chart1.Series[nRealTime], chart1.Series[nPowerNodes] };
             Series[] seriesTrf = {chart3.Series[nTrfCapacity], chart3.Series[nTrfCurrent], chart3.Series[nTrfFiltered] };
             Series[] seriesDayahead = { chartDayahead.Series[nDayaheadOriginal], chartDayahead.Series[nDayaheadPrev], chartDayahead.Series[nDayaheadCur], chartDayahead.Series[nDayaheadExp] };
 
             // customize series
-            seriesArray[nRealTime].ChartType = SeriesChartType.Line;
-            seriesArray[nRealTime].Color = Color.Red;
+            seriesArray[nDayAhead].ChartType = SeriesChartType.Area;
+            seriesArray[nDayAhead].Color = Color.FromArgb(207,207,207);
+            seriesArray[nDayAhead].BorderWidth = 2;
+            seriesArray[nDayAhead].BorderDashStyle = ChartDashStyle.Solid;
+
+            seriesArray[nRealTime].ChartType = SeriesChartType.Area;
+            seriesArray[nRealTime].Color = Color.FromArgb(156,156,156);
             seriesArray[nRealTime].BorderWidth = 2;
             seriesArray[nRealTime].BorderDashStyle = ChartDashStyle.Solid;
 
-            seriesArray[nPowerNodes].ChartType = SeriesChartType.Line;
-            seriesArray[nPowerNodes].Color = Color.Blue;
+            seriesArray[nPowerNodes].ChartType = SeriesChartType.Area;
+            seriesArray[nPowerNodes].Color = Color.FromArgb(99,99,99);
             seriesArray[nPowerNodes].BorderWidth = 2;
-            seriesArray[nPowerNodes].BorderDashStyle = ChartDashStyle.Dot;
+            seriesArray[nPowerNodes].BorderDashStyle = ChartDashStyle.Solid;
 
-            seriesArray[nPhev].ChartType = SeriesChartType.Line;
-            seriesArray[nPhev].Color = Color.Crimson;
-            seriesArray[nPhev].BorderWidth = 2;
-            seriesArray[nPhev].BorderDashStyle = ChartDashStyle.Dot;
+            //seriesArray[nPhev].ChartType = SeriesChartType.Line;
+            //seriesArray[nPhev].Color = Color.Crimson;
+            //seriesArray[nPhev].BorderWidth = 2;
+            //seriesArray[nPhev].BorderDashStyle = ChartDashStyle.Dot;
 
-            seriesArray[nPhevsLeft].ChartType = SeriesChartType.Line;
-            seriesArray[nPhevsLeft].Color = Color.Black;
-            seriesArray[nPhevsLeft].BorderWidth = 2;
-            seriesArray[nPhevsLeft].BorderDashStyle = ChartDashStyle.Dash;
+            //seriesArray[nPhevsLeft].ChartType = SeriesChartType.Line;
+            //seriesArray[nPhevsLeft].Color = Color.Black;
+            //seriesArray[nPhevsLeft].BorderWidth = 2;
+            //seriesArray[nPhevsLeft].BorderDashStyle = ChartDashStyle.Dash;
 
-            seriesArray[nDayAhead].ChartType = SeriesChartType.Line;
-            seriesArray[nDayAhead].Color = Color.Sienna;
-            seriesArray[nDayAhead].BorderWidth = 1;
-            seriesArray[nDayAhead].BorderDashStyle = ChartDashStyle.Dot;
+
 
             seriesPhev[nPhevStatus].ChartType = SeriesChartType.StepLine;
-            seriesPhev[nPhevStatus].Color = Color.Red;
+            seriesPhev[nPhevStatus].Color = Color.FromArgb(156, 156, 156);
             seriesPhev[nPhevStatus].BorderWidth = 2;
-            seriesPhev[nPhevStatus].BorderDashStyle = ChartDashStyle.Dash;
+            seriesPhev[nPhevStatus].BorderDashStyle = ChartDashStyle.Solid;
 
             seriesPhev[nPhevBattery].ChartType = SeriesChartType.StepLine;
-            seriesPhev[nPhevBattery].Color = Color.Blue;
+            seriesPhev[nPhevBattery].Color = Color.FromArgb(99, 99, 99);
             seriesPhev[nPhevBattery].BorderWidth = 2;
-            seriesPhev[nPhevBattery].BorderDashStyle = ChartDashStyle.Dash;
+            seriesPhev[nPhevBattery].BorderDashStyle = ChartDashStyle.Solid;
 
             seriesPhev[nPhevsPDF].ChartType = SeriesChartType.StepLine;
             seriesPhev[nPhevsPDF].Color = Color.Green;
@@ -594,15 +613,15 @@ namespace WinChart
             seriesTrf[nTrfCapacity].ChartType = SeriesChartType.StepLine;
             seriesTrf[nTrfCapacity].Color = Color.Red;
             seriesTrf[nTrfCapacity].BorderWidth = 2;
-            seriesTrf[nTrfCapacity].BorderDashStyle = ChartDashStyle.Dash;
+            seriesTrf[nTrfCapacity].BorderDashStyle = ChartDashStyle.Solid;
 
-            seriesTrf[nTrfCurrent].ChartType = SeriesChartType.Line;
-            seriesTrf[nTrfCurrent].Color = Color.Blue;
+            seriesTrf[nTrfCurrent].ChartType = SeriesChartType.Area;
+            seriesTrf[nTrfCurrent].Color = Color.FromArgb(99,99,99);
             seriesTrf[nTrfCurrent].BorderWidth = 2;
-            seriesTrf[nTrfCurrent].BorderDashStyle = ChartDashStyle.Dash;
+            seriesTrf[nTrfCurrent].BorderDashStyle = ChartDashStyle.Solid;
 
-            seriesTrf[nTrfFiltered].ChartType = SeriesChartType.Line;
-            seriesTrf[nTrfFiltered].Color = Color.Sienna;
+            seriesTrf[nTrfFiltered].ChartType = SeriesChartType.Area;
+            seriesTrf[nTrfFiltered].Color = Color.FromArgb(156,156,156);
             seriesTrf[nTrfFiltered].BorderWidth = 2;
             seriesTrf[nTrfFiltered].BorderDashStyle = ChartDashStyle.Solid;
 
@@ -636,9 +655,9 @@ namespace WinChart
             //seriesDayahead[nDayaheadAnts].BorderWidth = 2;
             //seriesDayahead[nDayaheadAnts].BorderDashStyle = ChartDashStyle.Solid;
 
-            comboBox1.SelectedItem = "Random";
+            comboBox1.SelectedItem = "None";
             comboBox2.SelectedItem = "Mixed";
-            comboBox3.SelectedItem = "Expected";
+            comboBox3.SelectedItem = "None";
             
             if (comboBox1.InvokeRequired)
             {
@@ -670,7 +689,6 @@ namespace WinChart
             FSharpOption<Sim.Scheduler> scheduler = null;
 
             started = DateTime.Now;
-            filePath = String.Format("C:\\SimCar\\SimCar\\data\\img\\{0:dd.MM.HH.mm}", started);
 
             updateLog("-------------------------------------");
             String dayah = "", mech = "", phev = "";
@@ -777,7 +795,7 @@ namespace WinChart
             button1.Enabled = true;
 
             String fileName = String.Format("{0:dd.MM.HH.mm}", started);
-            String fileLog = String.Format("c:\\SimCar\\SimCar\\data\\log\\{0}.txt", fileName);
+            String fileLog = String.Format("c:\\SimCar\\SimCar\\data\\log\\{0}-{1}.txt", fileName, simId);
             textBoxDebug.AppendText(String.Format("[{1}] Writing log to {0}", fileLog, String.Format("{0:hh:mm}", started)));
             System.IO.StreamWriter file = new System.IO.StreamWriter(fileLog);
             file.WriteLine(textLog.Text);

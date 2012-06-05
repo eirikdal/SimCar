@@ -20,7 +20,7 @@ open Grid
 
 #nowarn "25"
 
-let mutable schedule : dayahead -> realtime -> (MailboxProcessor<Message> * Message) list -> int -> unit = BRP.Action.schedule_greedy
+let mutable schedule : dayahead -> realtime -> Message list -> int -> unit = BRP.Action.None.schedule
 
 let test_dayahead iter agents = 
     let tick n = 
@@ -37,7 +37,7 @@ let test_dayahead iter agents =
     let rec shave n rt = 
         syncContext.RaiseDelegateEvent dayaheadProgress rt
         if n > 0 then 
-            shave (n-1) (rt |> DayAhead.Shifted.shave 0.3 0.95 Array.empty)
+            shave (n-1) (rt |> DayAhead.Shifted.shave 0.3 0.95 [||])
 
     shave iter updated_realtime
 
@@ -117,7 +117,7 @@ let run day agents =
 
     let (Dayahead(dayahead)) = postalService.send_reply("brp", RequestDayahead)
 
-    let dayahead = Array.init(96) (fun i -> Energy.toFloat <| dayahead ((day*96) + i))
+    let dayahead = Array.init(96) (fun i -> Energy.toFloat <| dayahead.[(day*96) + i])
     let dayahead_sum = Math.Round(Array.sum dayahead,3)
     let dif = Math.Round(dayahead |> Array.map2 (fun x y -> abs(Energy.toFloat(x) - y)) total |> Array.sum,3)
     let ratio = Math.Round(dif / total_sum,3)

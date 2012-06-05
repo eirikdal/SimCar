@@ -29,10 +29,13 @@ let trfEvent      = new Event<string>()
 let pnodeEvent    = new Event<string>()
 let updateEvent   = new Event<float[]>()
 
+let phevBatteryLeft      = new Event<int*float>()
+
 // Delegate Events for cross-language communication
 let jobDebug        = new DelegateEvent<System.EventHandler>()
 let jobProgress     = new DelegateEvent<System.EventHandler>()
 let jobError         = new DelegateEvent<System.EventHandler>()
+let jobStarted      = new DelegateEvent<System.EventHandler>()
 
 // EventHandlers for tracking progress
 let progressTotal       = new DelegateEvent<System.EventHandler>()
