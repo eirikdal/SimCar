@@ -1,6 +1,0 @@
-﻿worker {
-  gauss, mean=08:15, std=15, duration=07:00
-}
-housewife {
-  gauss, mean=08:15, std=15, duration=07:00
-}
