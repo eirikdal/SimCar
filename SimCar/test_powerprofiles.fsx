@@ -42,7 +42,7 @@ let create_chart _from _to (data : float<kWh>[]) (title : string) =
         (InsideArea=false, Font=new Font("Arial", 8.0f),
         Alignment = StringAlignment.Center, Docking=Docking.Top)
 //
-//let phev_simulated = FileManager.IO.read_doubles (FileManager.file_phev) |> Array.map (fun x -> Energy.ofFloat x)
+let phev_simulated = FileManager.IO.read_doubles (FileManager.file_phev) |> Array.map (fun x -> Energy.ofFloat x)
 let phev_expected = Tree.phev_expected <| create_powergrid()
 let powernodes = take 1280 90 profiles_interpol |> Array.map Models.Energy.ofFloat
 let total = Array.sum2 phev_expected powernodes

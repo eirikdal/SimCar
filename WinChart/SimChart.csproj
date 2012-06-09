@@ -100,7 +100,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SimCar\SimCar.fsproj.bak.fsproj">
+    <ProjectReference Include="..\SimCar\SimCar.fsproj">
       <Project>{ABC76106-27DD-4CC9-81B6-EEC345D02614}</Project>
       <Name>SimCar.fsproj.bak</Name>
     </ProjectReference>

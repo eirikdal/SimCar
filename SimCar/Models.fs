@@ -171,7 +171,7 @@ type Profile =
             let calc_for_dist (dist : Distribution) = 
                 let dist' = dist.dist |> Array.ofSeq
                 let duration = dist.duration
-
+                
                 let expected = Array.init(96) (fun _ -> 0.0<kWh>)
 
                 let duration' = List.sortBy (fun x -> -x) duration

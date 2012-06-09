@@ -78,4 +78,4 @@ let powerprofiles =
     let mutable rest = []
     let stream = List.ofSeq read_file
     
-    parse_powerprofiles stream [] 60 150 "0"
+    parse_powerprofiles stream [] 60 100 "0"

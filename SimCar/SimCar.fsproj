@@ -63,10 +63,11 @@
     <None Include="parse_realtime_data.fsx" />
     <None Include="make_tree.fsx" />
     <None Include="counter.fsx" />
-    <None Include="test_powerprofiles.fsx" />
     <None Include="parse_results.fsx" />
+    <None Include="test_powerprofiles.fsx" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="ChartFX.WinForms, Version=7.0.4259.29043, Culture=neutral, PublicKeyToken=a1878e2052c08dce" />
     <Reference Include="FSharp.Core, Version=4.3.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="FSharp.PowerPack">
       <HintPath>..\packages\FSPowerPack.Community.2.1.1.1\Lib\Net40\FSharp.PowerPack.dll</HintPath>

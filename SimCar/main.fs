@@ -375,7 +375,7 @@ type SimCar(nTicksPerDay) =
 %s & %.3f* & %.3f* & %.1f & %.2f \\\\
 %s & %.3f* & %.3f* & %.1f & %.2f  \\\\
 %s & %.3f* & %.3f* & %.1f & %.2f  \\\\
-%s & %.3f* & %.3f* & %.1f & %.2f  \\\\
+%s & %.3f & %.3f & %.1f & %.2f  \\\\
 %s & %.1f & %.1f & %.1f & %.2f  \\\\
 %s & %.1f & %.1f & %.1f & %.2f  \\\\
 %s & %.3f & %.3f & %.3f & %.2f  \\\\
@@ -396,7 +396,7 @@ type SimCar(nTicksPerDay) =
                     "Peak" (max_stat.Mean / 1000.0) (max_stat.Maximum / 1000.0) max_stat.StandardDeviation max_stat.Skewness
                     "Daily.Avg" (avg_stat.Mean / 1000.0) (avg_stat.Maximum / 1000.0) avg_stat.StandardDeviation avg_stat.Skewness
                     "PHEV(Ux)" (phevs_ux_stat.Mean / 1000.0) (phevs_ux_stat.Maximum / 1000.0) phevs_ux_stat.StandardDeviation phevs_ux_stat.Skewness
-                    "PHEV(Avg)" (phevs_avg_bat.Mean / 1000.0) (phevs_avg_bat.Maximum / 1000.0) phevs_avg_bat.StandardDeviation phevs_avg_bat.Skewness
+                    "PHEV(Avg)" phevs_avg_bat.Mean phevs_avg_bat.Maximum phevs_avg_bat.StandardDeviation phevs_avg_bat.Skewness
                     "Trf(Exc)" trf_stat.Mean trf_stat.Maximum trf_stat.StandardDeviation trf_stat.Skewness
                     "Trf(Flt)" trf_fltr_stat.Mean trf_fltr_stat.Maximum trf_fltr_stat.StandardDeviation trf_fltr_stat.Skewness
                     "PAR" par_stat.Mean par_stat.Maximum par_stat.StandardDeviation par_stat.Skewness
