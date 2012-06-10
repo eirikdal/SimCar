@@ -21,17 +21,47 @@ module Action =
             postalService.send(phev, Strategy([0.0<kWh>]))
             ac
 
-    let rec create_plan remaining avail (plan : energy array) rate = 
+    let rec create_plan_reactive remaining avail (plan : energy array) rate = 
         if remaining > 0.0<kWh> then 
             match avail with 
             | (i,en)::t -> 
                 let rate' = if remaining >= rate && en > 0.0<kWh> then rate else if remaining > 0.0<kWh> && en > 0.0<kWh> then remaining else 0.0<kWh>
                 plan.[i] <- rate'
-                create_plan (remaining-rate') t plan rate
+                create_plan_reactive (remaining-rate') t plan rate
             | _ -> 
-                List.ofArray plan
+                remaining, plan
         else    
-            List.ofArray plan
+            remaining, plan
+
+    let rec create_plan_proactive remaining avail (plan : energy array) rate = 
+        if remaining > 0.0<kWh> then 
+            match avail with 
+            | (i,en)::t -> 
+                let rate' = if remaining >= rate then rate else if remaining > 0.0<kWh> then remaining else 0.0<kWh>
+                plan.[i] <- rate'
+                create_plan_proactive (remaining-rate') t plan rate
+            | _ -> 
+                plan
+        else    
+            plan
+
+    module Reactive = 
+        let schedule (dayahead : dayahead) (prediction : realtime) queue tick = 
+            queue
+            |> List.iter 
+                (fun (Charge(from,energy,ttl,rate)) ->
+                    let avail, plan = [for i in tick .. ttl do yield ((i-tick),dayahead.[i] - prediction.[i]), 0.0<kWh>] |> List.unzip
+
+                    let mutable rem, plan = create_plan_reactive energy avail (Array.ofList plan) rate
+
+//                    if rem > 0.0<kWh> then
+//                        for i in (plan.Length-1) .. -1 .. 0 do 
+//                            if rem > 0.0<kWh> && plan.[i] = 0.0<kWh> then 
+//                                plan.[i] <- rate
+//                                rem <- rem - rate
+
+                    Array.iteri (fun i x -> prediction.[tick+i] <- prediction.[tick+i] + x) plan
+                    postalService.send(from, Strategy(List.ofArray plan)))
 
     module Proactive =
         let schedule (dayahead : dayahead) (prediction : realtime) queue tick = 
@@ -41,9 +71,9 @@ module Action =
     //                let avail = [for i in tick .. ttl do yield i,((dayahead'.[i] |> Energy.ofFloat) - (prediction'.[i] |> Energy.ofFloat))]
                     let avail, plan = [for i in tick .. ttl do yield ((i-tick),dayahead.[i] - prediction.[i]), 0.0<kWh>] |> List.unzip
 
-                    let plan = create_plan energy (List.sortBy (fun (i,energy) -> -energy) avail) (Array.ofList plan) rate
-                    List.iteri (fun i x -> prediction.[tick+i] <- prediction.[tick+i] + x) plan
-                    postalService.send(from, Strategy(plan)))
+                    let rem, plan = create_plan_reactive energy (List.sortBy (fun (i,energy) -> -energy) avail) (Array.ofList plan) rate
+                    Array.iteri (fun i x -> prediction.[tick+i] <- prediction.[tick+i] + x) plan
+                    postalService.send(from, Strategy(List.ofArray plan)))
 
     module Average = 
         let schedule (dayahead : dayahead) (prediction : realtime) queue tick = 
@@ -59,23 +89,6 @@ module Action =
             |> List.sortBy (fun (Charge(_,_,ttl,_)) -> ttl)
             |> List.fold (fun ac (Charge(from,energy,_,rate)) -> reserve ac energy rate from) (accepted)
             |> ignore
-
-    module Reactive = 
-        let schedule (dayahead : dayahead) (prediction : realtime) queue tick = 
-            queue
-            |> List.iter 
-                (fun (Charge(from,energy,ttl,rate)) ->
-                    let avail, plan = [for i in tick .. ttl do yield ((i-tick),dayahead.[i] - prediction.[i]), 0.0<kWh>] |> List.unzip
-
-                    let plan = create_plan energy avail (Array.ofList plan) rate
-                    List.iteri (fun i x -> prediction.[tick+i] <- prediction.[tick+i] + x) plan
-                    postalService.send(from, Strategy(plan)))
-
-//        let schedule (dayahead : dayahead) (prediction : realtime) queue tick = 
-//            queue
-//            |> List.sortBy (fun (Charge(_,_,ttl,_)) -> -ttl)
-//            |> List.fold (fun ac (Charge(from,energy,_,rate)) -> reserve ac energy rate from) (dayahead (tick) - prediction (tick))
-//            |> ignore
 
     module None = 
         let schedule dayahead prediction queue tick =
