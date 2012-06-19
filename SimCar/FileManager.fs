@@ -22,6 +22,8 @@ let screen_folder = "C:\\SimCar\\SimCar\\data\\img\\"
 module IO =
     let read_file (file : string) = 
         syncContext.RaiseDelegateEvent jobDebug <| sprintf "[%s] Reading from file %s..." (String.Format("{0:hh:mm}", DateTime.Now)) file
+        syncContext.RaiseEvent debugEvent <| sprintf "[%s] Reading from file %s..." (String.Format("{0:hh:mm}", DateTime.Now)) file
+
         if not <| File.Exists(file) then File.WriteAllText(file, "")
     //        use sr = new StreamReader(folder_of file)
         use sr = new StreamReader(file)
@@ -31,6 +33,7 @@ module IO =
 
     let write_doubles (file : string) (contents : float list) = 
         syncContext.RaiseDelegateEvent jobDebug <| sprintf "[%s] Writing to file %s..." (String.Format("{0:hh:mm}", DateTime.Now)) file
+        syncContext.RaiseEvent debugEvent <| sprintf "[%s] Writing to file %s..." (String.Format("{0:hh:mm}", DateTime.Now)) file
         
         let fileInfo = new System.IO.FileInfo(file)
         
@@ -59,11 +62,15 @@ module IO =
 
     let clear_dayahead_data () = 
         syncContext.RaiseDelegateEvent jobDebug <| sprintf "[%s] Cleaning dayahead-files..." (String.Format("{0:hh:mm}", DateTime.Now))
+        syncContext.RaiseEvent debugEvent <| sprintf "[%s] Cleaning dayahead-files..." (String.Format("{0:hh:mm}", DateTime.Now))
+
         File.Delete (file_prediction)
         File.Delete (file_dayahead)
 
     let clear_screenshots () = 
         syncContext.RaiseDelegateEvent jobDebug <| sprintf "[%s] Cleaning screenshot-folders..." (String.Format("{0:hh:mm}", DateTime.Now))
+        syncContext.RaiseEvent debugEvent <| sprintf "[%s] Cleaning screenshot-folders..." (String.Format("{0:hh:mm}", DateTime.Now))
+
         let clear_subfolder folder =    
             for file in Directory.EnumerateFiles(folder) do
                 File.Delete(file)
@@ -142,16 +149,13 @@ module Parsing =
         parse_profiles stream [] (&rest)
 
     let parse_powerprofiles (folder) =
-        let files = Directory.EnumerateFiles(folder)
+        syncContext.RaiseEvent debugEvent <| sprintf "Reading from folder %s" folder
 
-        files 
-        |> List.ofSeq
-        |> List.map (fun file -> 
+        [for file in Directory.EnumerateFiles(folder, "*.dat") do 
             match file with
             | Regex.ParseRegex "([0-9]+).dat" [Integer i] ->
                 let name = sprintf "%i" i
-                (name, read_doubles(file)))
-//            |> List.filter (fun (_,p) -> p.Length = 2976)
+                yield (name, read_doubles(file))]
 
     let powerprofiles = parse_powerprofiles (data_folder)
     // 
@@ -175,14 +179,14 @@ module Parsing =
                 children <- name :: children
                 parse_powergrid t (node::nodes) (&rest) (&children) parent
             | [|"pnode";name;realtime|] ->
-                let realtime = (List.tryFind (fun (n, _) -> n = realtime) (List.ofSeq powerprofiles))
-                match realtime with
-                | None -> raise <| IOException(sprintf "Could not find powernode with name %s in powerprofiles.txt" name)
-                | Some realtime ->
-                    let nth = (snd realtime) |> Array.map (fun x -> Energy.ofFloat x)
-                    let node = create_powernode name nth parent
-                    children <- name :: children
-                    parse_powergrid t (node::nodes) (&rest) (&children) parent
+                let realtime = (List.find (fun (n, _) -> n = realtime) (List.ofSeq powerprofiles))
+//                match realtime with
+//                | None -> raise <| IOException(sprintf "Could not find powernode with name %s in powerprofiles.txt" name)
+//                | Some realtime ->
+                let nth = (snd realtime) |> Array.map (fun x -> Energy.ofFloat x)
+                let node = create_powernode name nth parent
+                children <- name :: children
+                parse_powergrid t (node::nodes) (&rest) (&children) parent
             | [|"}"|] -> 
                 rest <- t
                 nodes
@@ -197,6 +201,8 @@ let create_powergrid() =
     let stream = IO.read_file file_brp
 
     syncContext.RaiseDelegateEvent jobDebug <| sprintf "[%s] Initializing powergrid..." (String.Format("{0:hh:mm}", DateTime.Now))
+    syncContext.RaiseEvent debugEvent <| sprintf "[%s] Initializing powergrid..." (String.Format("{0:hh:mm}", DateTime.Now))
+
     create_brp "brp" (Parsing.parse_powergrid stream [] (&rest) (&children) "brp") (Array.zeroCreate (96)) (children)
 //
 //let powergrid = create_powergrid()

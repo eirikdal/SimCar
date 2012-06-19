@@ -166,6 +166,12 @@ type SimCar(nTicksPerDay) =
     member self.RegisterStarted (handler) = 
         jobStarted.Publish.AddHandler handler
 
+    member self.RegisterProgressEvent (handler) = 
+        progressEvent.Publish.Add (handler)
+
+    member self.RegisterDebugEvent (handler) = 
+        debugEvent.Publish.Add (handler)
+
 //    member self.RegisterComputeDayahead () = 
 //        updateEvent.Publish.Add(fun dayahead -> IO.write_to_file <| FileManager.file_dayahead <| Parsing.parse_dayahead (List.ofArray dayahead))
 //    

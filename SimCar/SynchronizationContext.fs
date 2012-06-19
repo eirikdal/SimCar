@@ -28,6 +28,8 @@ let brpEvent      = new Event<string>()
 let trfEvent      = new Event<string>()
 let pnodeEvent    = new Event<string>()
 let updateEvent   = new Event<float[]>()
+let progressEvent = new Event<string>()
+let debugEvent    = new Event<string>()
 
 let phevBatteryLeft      = new Event<int*float>()
 

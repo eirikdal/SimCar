@@ -15,7 +15,6 @@ open PowerNode
 open PostalService
 open FileManager
 open Transformer
-open System.Windows
 open Grid
 
 #nowarn "25"
@@ -106,7 +105,7 @@ let run day agents =
     let trf_filtered = Math.Round(Energy.toFloat <| Array.sum trf_filtered,3)
     let par = Math.Round(total_max / total_avg,3)
     
-    // Raise events
+    // C# compatability events
     syncContext.RaiseDelegateEvent jobProgress <| sprintf "PHEVs\t\t %.2f" phevs_sum
     syncContext.RaiseDelegateEvent jobProgress <| sprintf "PHEVs (Ux)\t\t %.2f" phevs_ux
     syncContext.RaiseDelegateEvent jobProgress <| sprintf "PowerNodes\t %.2f" pnodes_sum 
@@ -115,16 +114,31 @@ let run day agents =
     syncContext.RaiseDelegateEvent jobProgress <| sprintf "Total\t\t %.2f" total_sum
     syncContext.RaiseDelegateEvent jobProgress <| sprintf "PAR\t\t %.2f" par
 
+    // F# events
+    syncContext.RaiseEvent progressEvent <| sprintf "PHEVs\t\t %.2f" phevs_sum
+    syncContext.RaiseEvent progressEvent <| sprintf "PHEVs (Ux)\t\t %.2f" phevs_ux
+    syncContext.RaiseEvent progressEvent <| sprintf "PowerNodes\t %.2f" pnodes_sum 
+    syncContext.RaiseEvent progressEvent <| sprintf "TrfDelta\t\t %.2f" trf_delta
+    syncContext.RaiseEvent progressEvent <| sprintf "TrfFiltered\t\t %.2f" trf_filtered
+    syncContext.RaiseEvent progressEvent <| sprintf "Total\t\t %.2f" total_sum
+    syncContext.RaiseEvent progressEvent <| sprintf "PAR\t\t %.2f" par
+
     let (Dayahead(dayahead)) = postalService.send_reply("brp", RequestDayahead)
 
     let dayahead = Array.init(96) (fun i -> Energy.toFloat <| dayahead.[(day*96) + i])
     let dayahead_sum = Math.Round(Array.sum dayahead,3)
     let dif = Math.Round(dayahead |> Array.map2 (fun x y -> abs(Energy.toFloat(x) - y)) total |> Array.sum,3)
     let ratio = Math.Round(dif / total_sum,3)
-
+    
+    // C# compatability events
     syncContext.RaiseDelegateEvent jobProgress <| sprintf "Dayahead\t %.2f" dayahead_sum
     syncContext.RaiseDelegateEvent jobProgress <| sprintf "Diff\t\t %.2f" dif
     syncContext.RaiseDelegateEvent jobProgress <| sprintf "Ratio\t\t %.2f" ratio
+
+    // F# events
+    syncContext.RaiseEvent progressEvent <| sprintf "Dayahead\t %.2f" dayahead_sum
+    syncContext.RaiseEvent progressEvent <| sprintf "Diff\t\t %.2f" dif
+    syncContext.RaiseEvent progressEvent <| sprintf "Ratio\t\t %.2f" ratio
 
     syncContext.RaiseDelegateEvent dayaheadProgress dayahead
     syncContext.RaiseDelegateEvent progressPhev phevs

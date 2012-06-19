@@ -1,6 +1,5 @@
 ﻿module DayaheadExp
 
-
 open System.Collections.Generic
 open Models
 open SynchronizationContext

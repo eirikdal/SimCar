@@ -148,7 +148,6 @@ module Agent =
                 | Kill ->
                     syncContext.RaiseDelegateEvent jobProgress <| sprintf "Agent %s: Exiting.." "BRP"
                 | _ -> 
-                    printfn "ffs"
                     return! loop brp intentions schedule tick phevs waiting }
 
             loop brp [] (Action.None.schedule) 0 phevs false)
@@ -225,3 +224,48 @@ module Agent =
                         return! loop brp tick predictions}    
 
                 loop brp 0 (Array.zeroCreate(96)))
+        module Nash = 
+            let create_brp_agent brp = Agent.Start(fun agent ->
+                let queue = new Queue<Message>()
+                let rec loop (BRP({ children=children; realtime=realtime } as brp_args) as brp) (tick : int) (predictions : energy array) waiting = async {
+                    let! (msg : Message) = 
+                        if (not waiting && queue.Count > 0) then
+                            async { return queue.Dequeue() }
+                        else
+                            agent.Receive()
+                    match msg with
+                    | ReplyTo(replyToMsg, reply) ->
+                        match replyToMsg with
+                        | RequestModel ->
+                            reply.Reply(Model(brp))
+                            return! loop brp tick predictions waiting
+                        | RequestDayahead ->
+                            reply.Reply(Dayahead(brp_args.dayahead))
+                            return! loop brp tick predictions waiting
+                    | RequestPredictions(name, ttl) ->
+//                        reply.Reply(Predictions(problist))
+                        let window = [for i in 0 .. (ttl-tick) do yield predictions.[i]]
+                        let (Strategy(strategy)) = postalService.send_reply(name, Predictions(window))
+                        // TODO: Start finding Nash equilibrium
+                        for i in 0 .. (List.length strategy-1) do 
+                            predictions.[i] <- predictions.[i] + strategy.[i]
+                        return! loop brp tick predictions waiting
+                    | Update(tick) -> 
+                        [|for i in 0 .. 95 do yield predictions.[i] <- realtime.[tick+i]|] |> ignore
+                        return! loop brp tick predictions waiting
+                    | Dayahead(dayahead) ->
+                        return! loop <| BRP({ brp_args with dayahead=dayahead }) <| tick <| predictions <| waiting
+                    | Prediction(realtime) ->
+                        return! loop <| BRP({ brp_args with realtime=realtime }) <| tick <| predictions <| waiting
+                    | Schedule(_) ->
+    //                    raise <| Exception("Decentralized BRP agent does not support scheduling")
+                        return! loop brp tick predictions waiting
+                    | Model(brp) -> 
+                        return! loop brp tick predictions waiting
+                    | Reset -> return! loop brp tick predictions waiting
+                    | Kill ->
+                        syncContext.RaiseDelegateEvent jobDebug <| sprintf "Agent %s: Exiting.." "BRP"
+                    | _ ->
+                        return! loop brp tick predictions waiting}    
+
+                loop brp 0 (Array.zeroCreate(96)) false)
