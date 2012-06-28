@@ -12,8 +12,8 @@ open System.Windows.Forms.DataVisualization.Charting
 
 
 let fileResults = "c:\\SimCar\\SimCar\\data\\log\\experiments\\"
-let experiments = ["baseline"; "nullhyp"; "mixed";"random";"proactive-peak-exp";"reactive-peak-exp";"proactive-dist-exp";"reactive-dist-exp"]
-let experiment_ys = ["Baseline"; "Min.Extreme"; "Mixed";"Uniform";"Proactive (peak)";"Reactive (peak)";"Proactive (dist)";"Reactive (dist)"]
+let experiments = ["baseline"; "nullhyp"; "proactive-peak-exp";"reactive-peak-exp";"proactive-dist-exp";"reactive-dist-exp"; "mixed";"random"]
+let experiment_ys = ["Baseline"; "PHEV-free"; "Proactive (peak)";"Reactive (peak)";"Proactive (dist)";"Reactive (dist)"; "Mixed";"Uniform";]
 //let experiments = ["baseline"; "mixed";"random";"proactive-peak-exp";"reactive-peak-exp";"proactive-dist-exp";"reactive-dist-exp"]
 //let experiment_ys = ["Baseline"; "Mixed";"Uniform";"Proactive (peak)";"Reactive (peak)";"Proactive (dist)";"Reactive (dist)"]
 let dashGrid = 
@@ -108,7 +108,7 @@ let rec reduce ac =
 let collect_results file = 
     List.map (fun folder -> FileManager.IO.read_doubles (fileResults + folder + "\\" + file) |> List.ofArray)
 
-//let collect_bat_hist = collect_results "phev_battery.dat" experiments |> List.map (reduce [])
+let collect_bat_hist = collect_results "phev_battery.dat" experiments |> List.map (reduce [])
 //let collect_bat_avg = collect_bat_hist |> List.map hist
 let collect_stat = List.map (fun (x : float list) -> new DescriptiveStatistics(x))
 let collect_mean = List.map (fun (x : DescriptiveStatistics) -> x.Mean)
@@ -125,14 +125,14 @@ let trf_filtered = List.zip experiment_ys <| from_file_to_mean "trf_filtered.dat
 let total_avg = List.zip experiment_ys <| from_file_to_mean "total_avg.dat" experiments
 let total_max = List.zip experiment_ys <| from_file_to_mean "total_max.dat" experiments
 
-//let phevs_battery = (collect_bat_hist |> List.map (hist)) |> from_list |> List.zip experiment_ys
-//let avg_battery = collect_bat_hist |> List.map (fun x -> List.map (fun (_,v) -> v) x) |> List.map (fun x -> new DescriptiveStatistics(x))
+let phevs_battery = (collect_bat_hist |> List.map (hist)) |> from_list |> List.zip experiment_ys
+let avg_battery = collect_bat_hist |> List.map (fun x -> List.map (fun (_,v) -> v) x) |> List.map (fun x -> if x.Length > 0 then new DescriptiveStatistics(x) else new DescriptiveStatistics([0.0]))
 
 create_comparison_chart trf_delta "Trf(Delta)" None None
 create_comparison_chart trf_filtered "Trf(Filtered)" None None
 create_boxplot_chart (List.map (fun (title, vs) -> title, Array.ofList vs) par) "PAR" <| Some 1.1 <| Some 1.25
 create_comparison_chart phevs_ux "PHEVs (Ux)" None None
-//create_comparison_chart (List.zip experiment_ys (List.map (fun (x:DescriptiveStatistics) -> x.Mean) avg_battery)) "Avg. Battery" None None
+create_comparison_chart (List.zip experiment_ys (List.map (fun (x:DescriptiveStatistics) -> x.Mean) avg_battery)) "Avg. Battery" None None
 //create_comparison_chart total_avg "Avg. Daily Consumption" <| Some 2700.0 <| Some 3000.0
 create_comparison_chart total_max "Avg. Daily Peak" <| Some 3200.0 <| Some 3500.0
 //create_boxplot_chart (List.map (fun (title, vs) -> title, Array.ofList vs) total_max) "Daily peak" <| Some 2000.0 <| Some 5000.0
